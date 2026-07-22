@@ -54,6 +54,21 @@ $$\text{Full Candidate Mask (all digits 1..9)} = \sum_{v=1}^{9} 2^v = 0\text{b}1
   }
   ```
 
+### 3.4 Progressive Clue Floor Formula Across 10 Levels
+For each difficulty category $d \in \{\text{easy}, \text{medium}, \text{hard}, \text{expert}\}$ and level $L \in \{1, 2, \dots, 10\}$, the minimum clue count (hole digging floor) $C_{\text{floor}}(d, L)$ is calculated by:
+
+$$\text{step}(L) = \min(9, \max(0, L - 1))$$
+
+$$C_{\text{floor}}(\text{easy}, L) = \max\left(34, 42 - \lfloor 0.8 \cdot \text{step}(L) \rfloor\right)$$
+
+$$C_{\text{floor}}(\text{medium}, L) = \max\left(28, 35 - \lfloor 0.8 \cdot \text{step}(L) \rfloor\right)$$
+
+$$C_{\text{floor}}(\text{hard}, L) = \max\left(22, 28 - \lfloor 0.7 \cdot \text{step}(L) \rfloor\right)$$
+
+$$C_{\text{floor}}(\text{expert}, L) = \max\left(17, 23 - \lfloor 0.6 \cdot \text{step}(L) \rfloor\right)$$
+
+Where Level 10 on `expert` targets $17$ clues — the theoretical mathematical minimum for any valid $9 \times 9$ Sudoku grid with a unique solution.
+
 ---
 
 ## 3. Solver Algorithm & Uniqueness Mathematics
