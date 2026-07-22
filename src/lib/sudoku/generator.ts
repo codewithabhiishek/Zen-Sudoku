@@ -61,7 +61,7 @@ function fill(g: Grid, rand: () => number): boolean {
 export function generatePuzzle(difficulty: Difficulty, seed?: string, levelNumber?: number): Puzzle {
   const seedNum = seed ? hashSeed(seed) : Math.floor(Math.random() * 0xffffffff);
   const rand = rng(seedNum);
-  const targetClues = clueTargetFor(difficulty);
+  const targetClues = clueTargetFor(difficulty, levelNumber);
 
   // Try up to N times to hit desired difficulty.
   const MAX_ATTEMPTS = 12;
@@ -92,8 +92,19 @@ function rankOf(d: Difficulty): number {
   return { easy: 1, medium: 2, hard: 3, expert: 4 }[d];
 }
 
-function clueTargetFor(d: Difficulty): { floor: number } {
-  return { easy: { floor: 38 }, medium: { floor: 32 }, hard: { floor: 28 }, expert: { floor: 24 } }[d];
+function clueTargetFor(d: Difficulty, level: number = 1): { floor: number } {
+  // Progressive difficulty scaling across Levels 1 through 10
+  const step = Math.min(9, Math.max(0, level - 1));
+  switch (d) {
+    case "easy":
+      return { floor: Math.max(34, 42 - Math.floor(step * 0.8)) };
+    case "medium":
+      return { floor: Math.max(28, 35 - Math.floor(step * 0.8)) };
+    case "hard":
+      return { floor: Math.max(22, 28 - Math.floor(step * 0.7)) };
+    case "expert":
+      return { floor: Math.max(17, 23 - Math.floor(step * 0.6)) };
+  }
 }
 
 /**

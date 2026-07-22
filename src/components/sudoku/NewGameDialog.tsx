@@ -1,7 +1,7 @@
 import type { Difficulty } from "@/lib/sudoku/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Layers, Sparkles, ChevronRight, Zap } from "lucide-react";
+import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert } from "lucide-react";
 
 const DIFFICULTIES: { id: Difficulty; label: string; desc: string; color: string }[] = [
   { id: "easy", label: "Easy", desc: "Naked & Hidden Singles", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
@@ -10,7 +10,20 @@ const DIFFICULTIES: { id: Difficulty; label: string; desc: string; color: string
   { id: "expert", label: "Expert", desc: "X-Wing & Advanced Trial", color: "text-rose-400 border-rose-500/30 bg-rose-500/10" },
 ];
 
-const LEVELS_PER_DIFFICULTY = [1, 2, 3, 4, 5];
+const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+const LEVEL_TAGS: Record<number, { name: string; tagColor: string }> = {
+  1: { name: "Starter", tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  2: { name: "Rookie", tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  3: { name: "Novice", tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  4: { name: "Skilled", tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  5: { name: "Pro", tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  6: { name: "Advanced", tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  7: { name: "Hardcore", tagColor: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
+  8: { name: "Extreme", tagColor: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
+  9: { name: "Master", tagColor: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
+  10: { name: "Grandmaster", tagColor: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
+};
 
 export function NewGameDialog({
   open,
@@ -49,7 +62,7 @@ export function NewGameDialog({
           <div>
             <h2 className="display text-2xl font-bold tracking-tight text-foreground">Select Game Level</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Choose difficulty category and level (1 - 5)
+              10 Levels for each difficulty (Level 1 to Level 10)
             </p>
           </div>
           <div className="grid size-10 place-items-center rounded-2xl bg-primary/10 text-primary">
@@ -81,28 +94,29 @@ export function NewGameDialog({
         {/* Selected Difficulty Sub-header */}
         <div className="mt-4 flex items-center justify-between rounded-xl border bg-muted/20 px-3.5 py-2 text-xs">
           <span className="font-semibold text-foreground flex items-center gap-1.5">
-            <Sparkles className="size-3.5 text-primary" /> {activeDiff.label} Strategy
+            <Sparkles className="size-3.5 text-primary" /> {activeDiff.label} Tier
           </span>
           <span className="text-muted-foreground">{activeDiff.desc}</span>
         </div>
 
-        {/* 5 Levels List */}
-        <div className="mt-4 space-y-2">
-          {LEVELS_PER_DIFFICULTY.map((lvl) => {
+        {/* 10 Levels Scrollable List */}
+        <div className="mt-4 max-h-[340px] overflow-y-auto pr-1 space-y-2">
+          {LEVELS.map((lvl) => {
             const key = `${selectedDifficulty}-${lvl}`;
             const isLoadingThis = loading === key;
+            const tag = LEVEL_TAGS[lvl];
 
             return (
               <button
                 key={lvl}
                 onClick={() => pick(selectedDifficulty, lvl)}
                 disabled={loading !== null}
-                className="group flex w-full items-center justify-between rounded-2xl border bg-surface-2 p-3.5 text-left transition-all hover:border-primary/50 hover:bg-highlight/50 disabled:opacity-50 active:scale-[0.99]"
+                className="group flex w-full items-center justify-between rounded-2xl border bg-surface-2 p-3 text-left transition-all hover:border-primary/50 hover:bg-highlight/50 disabled:opacity-50 active:scale-[0.99]"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={cn(
-                      "grid size-9 place-items-center rounded-xl font-mono font-bold text-xs border",
+                      "grid size-9 place-items-center rounded-xl font-mono font-bold text-xs border shrink-0",
                       activeDiff.color,
                     )}
                   >
@@ -111,14 +125,13 @@ export function NewGameDialog({
                   <div>
                     <div className="font-bold text-sm text-foreground flex items-center gap-2">
                       Level {lvl}
-                      {lvl === 5 && (
-                        <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/20 flex items-center gap-1">
-                          <Zap className="size-2.5" /> Challenge
-                        </span>
-                      )}
+                      <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1", tag.tagColor)}>
+                        {lvl >= 9 ? <Flame className="size-2.5" /> : lvl >= 7 ? <ShieldAlert className="size-2.5" /> : <Zap className="size-2.5" />}
+                        {tag.name}
+                      </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {activeDiff.label} Puzzle • {38 - lvl * 2} Givens
+                      {activeDiff.label} • {Math.max(17, 40 - Math.floor((lvl - 1) * 2.2))} Clues
                     </div>
                   </div>
                 </div>
