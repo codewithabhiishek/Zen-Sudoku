@@ -117,7 +117,7 @@ function SudokuPage() {
       {/* Abhishek Copyright Footer Credit */}
       <div className="mx-auto mt-4 flex w-full max-w-[min(92vw,560px)] items-center justify-center">
         <a
-          href="https://github.com/codewithabhiishek"
+          href="https://github.com/codewithabhiishek/Zen-Sudoku"
           target="_blank"
           rel="noopener noreferrer"
           className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-foreground backdrop-blur-sm transition-all hover:scale-105 hover:border-primary/50 hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10"
@@ -127,7 +127,7 @@ function SudokuPage() {
             Abhishek
           </span>
           <span className="text-muted-foreground">•</span>
-          <span className="font-semibold text-foreground">Zen Sudoku</span>
+          <span className="font-semibold text-foreground">Open Source</span>
         </a>
       </div>
 
