@@ -58,6 +58,7 @@ export function SettingsSheet() {
             </Section>
 
             <Section title="Gameplay">
+              <Toggle label="Auto-check mistakes" checked={s.highlightErrors} onChange={() => s.toggle("highlightErrors")} />
               <Toggle label="Highlight same number" checked={s.highlightSame} onChange={() => s.toggle("highlightSame")} />
               <Toggle label="Highlight row / col / box" checked={s.highlightPeers} onChange={() => s.toggle("highlightPeers")} />
               <Toggle label="Smart notes (auto-remove)" checked={smartNotes} onChange={toggleSmart} />

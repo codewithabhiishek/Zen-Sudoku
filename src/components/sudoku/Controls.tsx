@@ -1,5 +1,5 @@
 import { useGameStore } from "@/store/gameStore";
-import { Lightbulb, Pause, Play, Redo2, RotateCcw, Search, Undo2 } from "lucide-react";
+import { HelpCircle, Home, Lightbulb, Pause, Play, Redo2, RotateCcw, Search, Send, Undo2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -38,9 +38,13 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
   return (
     <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-3 py-2">
       <div className="flex items-center gap-2">
-        <span className="rounded-md border bg-surface px-2 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {puzzle?.difficulty ?? "—"}
-        </span>
+        <button
+          onClick={onNewGame}
+          className="flex items-center gap-1 rounded-md border bg-surface px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-muted transition"
+          title="Change Level / Difficulty"
+        >
+          <Home className="size-3.5 text-primary" /> {puzzle?.difficulty ?? "—"}{puzzle?.levelNumber ? ` • LVL ${puzzle.levelNumber}` : ""}
+        </button>
         <span className="text-xs text-muted-foreground">
           Mistakes: <span className="text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
         </span>
@@ -64,6 +68,7 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
         <button
           onClick={onNewGame}
           className="grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted"
+          title="Restart / Level Select"
           aria-label="New game"
         >
           <RotateCcw className="size-4" />
@@ -78,10 +83,16 @@ export function Controls() {
   const redo = useGameStore((s) => s.redo);
   const hint = useGameStore((s) => s.hint);
   const check = useGameStore((s) => s.check);
+  const selected = useGameStore((s) => s.selected);
+  const cells = useGameStore((s) => s.cells);
+  const explainCurrent = useGameStore((s) => s.explainCurrent);
+  const submitGame = useGameStore((s) => s.submitGame);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
   const historyLen = useGameStore((s) => s.history.length);
   const futureLen = useGameStore((s) => s.future.length);
   const [msg, setMsg] = useState<string | null>(null);
+
+  const selectedHasValue = selected != null && cells[selected]?.value !== 0;
 
   useEffect(() => {
     if (!msg) return;
@@ -90,24 +101,33 @@ export function Controls() {
   }, [msg]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-2">
+    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1.5">
       <button onClick={undo} disabled={!historyLen} className={btn}>
-        <Undo2 className="size-4" /> Undo
+        <Undo2 className="size-3.5" /> Undo
       </button>
       <button onClick={redo} disabled={!futureLen} className={btn}>
-        <Redo2 className="size-4" /> Redo
+        <Redo2 className="size-3.5" /> Redo
       </button>
-      <button
-        onClick={() => {
-          const wrong = check();
-          setMsg(wrong === 0 ? "Looking good so far" : `${wrong} wrong so far`);
-        }}
-        className={btn}
-      >
-        <Search className="size-4" /> Check
-      </button>
+      {selectedHasValue ? (
+        <button onClick={explainCurrent} className={cn(btn, "border-primary/50 text-primary bg-primary/5")}>
+          <HelpCircle className="size-3.5" /> Explain
+        </button>
+      ) : (
+        <button
+          onClick={() => {
+            const wrong = check();
+            setMsg(wrong === 0 ? "Looking good so far" : `${wrong} wrong so far`);
+          }}
+          className={btn}
+        >
+          <Search className="size-3.5" /> Check
+        </button>
+      )}
       <button onClick={hint} className={btn}>
-        <Lightbulb className="size-4" /> Hint <span className="text-muted-foreground">({hintsUsed})</span>
+        <Lightbulb className="size-3.5" /> Hint <span className="text-muted-foreground">({hintsUsed})</span>
+      </button>
+      <button onClick={submitGame} className={cn(btn, "bg-primary text-primary-foreground border-primary hover:opacity-90 font-semibold")}>
+        <Send className="size-3.5" /> Submit
       </button>
       {msg && (
         <div

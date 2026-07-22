@@ -4,6 +4,7 @@ import type { CellState, Difficulty, Grid, Puzzle } from "@/lib/sudoku/types";
 import { findConflicts, PEERS } from "@/lib/sudoku/solver";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { pickHintCell } from "@/lib/sudoku/techniques";
+import { explainMove } from "@/lib/sudoku/explainer";
 
 export interface Move {
   idx: number;
@@ -31,10 +32,19 @@ export interface Stats {
   lastPlayedDate: string | null;
 }
 
+export interface SubmitResult {
+  isWin: boolean;
+  totalFilled: number;
+  emptyCount: number;
+  wrongCount: number;
+}
+
 interface GameState {
   puzzle: Puzzle | null;
   cells: CellState[];
   selected: number | null;
+  explanation: import("@/lib/sudoku/explainer").MoveExplanation | null;
+  submitResult: SubmitResult | null;
   notesMode: boolean;
   smartNotes: boolean;
   mistakeLimit: number | null; // null = no limit
@@ -51,8 +61,12 @@ interface GameState {
   stats: Stats;
 
   // actions
-  newGame: (difficulty: Difficulty) => void;
+  newGame: (difficulty: Difficulty, level?: number) => void;
   select: (idx: number | null) => void;
+  clearExplanation: () => void;
+  explainCurrent: () => void;
+  submitGame: () => void;
+  clearSubmitResult: () => void;
   move: (dr: number, dc: number) => void;
   input: (value: number) => void;
   clear: () => void;
@@ -138,8 +152,9 @@ export const useGameStore = create<GameState>()(
       score: null,
       stats: emptyStats(),
 
-      newGame: (difficulty) => {
-        const puzzle = generatePuzzle(difficulty);
+      newGame: (difficulty, level) => {
+        const seedStr = level ? `zen-${difficulty}-lvl-${level}` : undefined;
+        const puzzle = generatePuzzle(difficulty, seedStr, level);
         set({
           puzzle,
           cells: initCells(puzzle.puzzle),
@@ -156,16 +171,29 @@ export const useGameStore = create<GameState>()(
         });
       },
 
-      select: (idx) => set({ selected: idx }),
+      explanation: null,
+      clearExplanation: () => set({ explanation: null }),
+
+      explainCurrent: () => {
+        const s = get();
+        if (!s.puzzle || s.selected == null) return;
+        const idx = s.selected;
+        const cell = s.cells[idx];
+        if (cell.value === 0) return;
+        const explanation = explainMove(s.cells, s.puzzle.solution, idx, cell.value);
+        set({ explanation });
+      },
+
+      select: (idx) => set({ selected: idx, explanation: null }),
 
       move: (dr, dc) => {
         const { selected } = get();
-        if (selected == null) { set({ selected: 40 }); return; }
+        if (selected == null) { set({ selected: 40, explanation: null }); return; }
         let r = Math.floor(selected / 9);
         let c = selected % 9;
         r = Math.max(0, Math.min(8, r + dr));
         c = Math.max(0, Math.min(8, c + dc));
-        set({ selected: r * 9 + c });
+        set({ selected: r * 9 + c, explanation: null });
       },
 
       input: (value) => {
@@ -189,6 +217,7 @@ export const useGameStore = create<GameState>()(
           cells[idx] = { ...cell, value: 0, notes: [] };
         } else {
           cells[idx] = { ...cell, value, notes: [] };
+
           // track mistake if wrong
           if (s.puzzle.solution[idx] !== value) {
             const mistakes = s.mistakes + 1;
@@ -247,30 +276,84 @@ export const useGameStore = create<GameState>()(
         const s = get();
         if (!s.puzzle || s.won || s.paused) return;
         const current: Grid = s.cells.map((c) => c.value);
-        const idx = pickHintCell(current, s.puzzle.solution);
+
+        let idx = -1;
+        // Prioritize currently selected cell if empty or wrong
+        if (s.selected != null && (!s.cells[s.selected].given && (s.cells[s.selected].value === 0 || s.cells[s.selected].value !== s.puzzle.solution[s.selected]))) {
+          idx = s.selected;
+        } else {
+          idx = pickHintCell(current, s.puzzle.solution);
+        }
+
         if (idx < 0) return;
         const v = s.puzzle.solution[idx];
         const cells = s.cells.slice();
         const prev = { ...cells[idx], notes: [...cells[idx].notes] };
         cells[idx] = { value: v, given: cells[idx].given, notes: [] };
+
+        // Generate explanation for the hint
+        const explanation = explainMove(cells, s.puzzle.solution, idx, v);
+
         set({
           cells,
           hintsUsed: s.hintsUsed + 1,
           selected: idx,
+          explanation,
           history: [...s.history, { idx, prev, next: cells[idx] }],
           future: [],
         });
       },
 
-      check: () => {
+      submitResult: null,
+      clearSubmitResult: () => set({ submitResult: null }),
+
+      submitGame: () => {
         const s = get();
-        if (!s.puzzle) return 0;
-        let wrong = 0;
+        if (!s.puzzle || s.won) return;
+        const puzzle = s.puzzle;
+        let emptyCount = 0;
+        let wrongCount = 0;
+        let totalFilled = 0;
+
         for (let i = 0; i < 81; i++) {
           const c = s.cells[i];
-          if (!c.given && c.value !== 0 && c.value !== s.puzzle.solution[i]) wrong++;
+          if (c.value === 0) {
+            emptyCount++;
+          } else {
+            totalFilled++;
+            if (!c.given && c.value !== puzzle.solution[i]) {
+              wrongCount++;
+            }
+          }
         }
-        return wrong;
+
+        const isWin = emptyCount === 0 && wrongCount === 0;
+
+        if (isWin) {
+          const timeSec = Math.floor(get().elapsedMs / 1000);
+          const score = computeScore(puzzle, timeSec, get().mistakes, get().hintsUsed);
+          const stats = { ...get().stats };
+          stats.gamesPlayed += 1;
+          stats.gamesWon += 1;
+          stats.totalPoints += score.total;
+          const best = stats.bestTimeByDifficulty[puzzle.difficulty];
+          if (best == null || timeSec < best) stats.bestTimeByDifficulty[puzzle.difficulty] = timeSec;
+          const today = todayKey();
+          if (stats.lastPlayedDate === yesterdayKey()) stats.currentStreakDays += 1;
+          else if (stats.lastPlayedDate !== today) stats.currentStreakDays = 1;
+          stats.longestStreakDays = Math.max(stats.longestStreakDays, stats.currentStreakDays);
+          stats.lastPlayedDate = today;
+          set({ won: true, running: false, score, stats, submitResult: null });
+        } else {
+          set({
+            submitResult: {
+              isWin: false,
+              totalFilled,
+              emptyCount,
+              wrongCount,
+            },
+          });
+        }
       },
 
       undo: () => {

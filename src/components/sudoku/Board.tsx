@@ -15,8 +15,10 @@ export function Board() {
   const redo = useGameStore((s) => s.redo);
   const paused = useGameStore((s) => s.paused);
   const won = useGameStore((s) => s.won);
+  const puzzle = useGameStore((s) => s.puzzle);
   const highlightSame = useSettingsStore((s) => s.highlightSame);
   const highlightPeers = useSettingsStore((s) => s.highlightPeers);
+  const highlightErrors = useSettingsStore((s) => s.highlightErrors);
   const fontScale = useSettingsStore((s) => s.fontScale);
 
   const conflicts = useMemo(() => findGridConflicts(cells), [cells]);

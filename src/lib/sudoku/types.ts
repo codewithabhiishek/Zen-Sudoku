@@ -8,6 +8,7 @@ export interface Puzzle {
   difficulty: Difficulty;
   seed: string;
   clueCount: number;
+  levelNumber?: number;
 }
 
 export interface CellState {

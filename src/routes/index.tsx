@@ -6,6 +6,9 @@ import { Controls, GameHeader } from "@/components/sudoku/Controls";
 import { NewGameDialog } from "@/components/sudoku/NewGameDialog";
 import { WinDialog } from "@/components/sudoku/WinDialog";
 import { SettingsSheet } from "@/components/sudoku/SettingsSheet";
+import { MoveExplanationModal } from "@/components/sudoku/MoveExplanationModal";
+import { SubmitModal } from "@/components/sudoku/SubmitModal";
+import { ZoomControls } from "@/components/sudoku/ZoomControls";
 import { useGameStore } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import type { Difficulty } from "@/lib/sudoku/types";
@@ -58,8 +61,8 @@ function SudokuPage() {
     if (!puzzle) setDialogOpen(true);
   }, [hydrated, puzzle]);
 
-  const handleNewGame = (d: Difficulty) => {
-    newGame(d);
+  const handleNewGame = (d: Difficulty, level?: number) => {
+    newGame(d, level);
     setDialogOpen(false);
   };
 
@@ -72,7 +75,10 @@ function SudokuPage() {
     <main className="min-h-dvh px-3 py-4 sm:py-6">
       <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between pb-2">
         <h1 className="display text-2xl">Zen Sudoku</h1>
-        <SettingsSheet />
+        <div className="flex items-center gap-2">
+          <ZoomControls />
+          <SettingsSheet />
+        </div>
       </div>
 
       <GameHeader onNewGame={handleOpenNew} />
@@ -95,6 +101,8 @@ function SudokuPage() {
         hasInProgress={!!puzzle && !won}
       />
       <WinDialog onNewGame={handleOpenNew} />
+      <MoveExplanationModal />
+      <SubmitModal />
     </main>
   );
 }

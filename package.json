@@ -69,7 +69,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@lovable.dev/vite-tanstack-config": "^2.7.7",
     "@tanstack/start-plugin": "^1.111.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.16.5",

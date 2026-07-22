@@ -58,7 +58,7 @@ function fill(g: Grid, rand: () => number): boolean {
  * Guarantees a UNIQUE solution — never returns a puzzle with 0 or 2+ solutions.
  * Rates by the hardest logical technique required; re-tries on mismatch.
  */
-export function generatePuzzle(difficulty: Difficulty, seed?: string): Puzzle {
+export function generatePuzzle(difficulty: Difficulty, seed?: string, levelNumber?: number): Puzzle {
   const seedNum = seed ? hashSeed(seed) : Math.floor(Math.random() * 0xffffffff);
   const rand = rng(seedNum);
   const targetClues = clueTargetFor(difficulty);
@@ -79,6 +79,7 @@ export function generatePuzzle(difficulty: Difficulty, seed?: string): Puzzle {
       difficulty: rating.difficulty,
       seed: `${seedNum}-${attempt}`,
       clueCount,
+      levelNumber,
     };
     if (rating.difficulty === difficulty) return p;
     const delta = Math.abs(rankOf(rating.difficulty) - rankOf(difficulty));

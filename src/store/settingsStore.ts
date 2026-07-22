@@ -8,10 +8,15 @@ interface SettingsState {
   sound: boolean;
   highlightSame: boolean;
   highlightPeers: boolean;
+  highlightErrors: boolean;
   fontScale: number; // 0.85 - 1.3
+  zoomLevel: number; // 0.8 - 1.6
   setTheme: (t: ThemeId) => void;
-  toggle: (key: "sound" | "highlightSame" | "highlightPeers") => void;
+  toggle: (key: "sound" | "highlightSame" | "highlightPeers" | "highlightErrors") => void;
   setFontScale: (v: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
 }
 
 export const THEMES: { id: ThemeId; label: string; swatch: string[] }[] = [
@@ -32,10 +37,15 @@ export const useSettingsStore = create<SettingsState>()(
       sound: false,
       highlightSame: true,
       highlightPeers: true,
+      highlightErrors: true,
       fontScale: 1,
+      zoomLevel: 1,
       setTheme: (theme) => set({ theme }),
       toggle: (key) => set((s) => ({ [key]: !s[key] }) as Partial<SettingsState>),
       setFontScale: (fontScale) => set({ fontScale }),
+      zoomIn: () => set((s) => ({ zoomLevel: Math.min(1.6, Number((s.zoomLevel + 0.1).toFixed(2))) })),
+      zoomOut: () => set((s) => ({ zoomLevel: Math.max(0.8, Number((s.zoomLevel - 0.1).toFixed(2))) })),
+      resetZoom: () => set({ zoomLevel: 1 }),
     }),
     { name: "sudoku-settings-v1" },
   ),
