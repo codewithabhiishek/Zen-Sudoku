@@ -290,6 +290,18 @@
   animation: textShimmer 5s ease-in-out infinite;
 }
 
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.25); }
+  40% { transform: scale(1); }
+  60% { transform: scale(1.2); }
+}
+
+.animate-heart-beat {
+  display: inline-block;
+  animation: heartBeat 1.8s infinite ease-in-out;
+}
+
 /* Responsive: controls wrap on very small screens */
 @media (max-width: 360px) {
   /* Stack controls 2 rows on tiny phones */

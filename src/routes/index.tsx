@@ -110,9 +110,26 @@ function SudokuPage() {
         <Keypad />
       </div>
 
-      <p className="mx-auto mt-6 max-w-[min(92vw,560px)] text-center text-xs text-muted-foreground">
+      <p className="mx-auto mt-5 max-w-[min(92vw,560px)] text-center text-xs text-muted-foreground">
         Every puzzle is verified to have exactly one solution. Progress saves automatically.
       </p>
+
+      {/* Abhishek Copyright Footer Credit */}
+      <div className="mx-auto mt-4 flex w-full max-w-[min(92vw,560px)] items-center justify-center">
+        <a
+          href="https://github.com/codewithabhiishek"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-foreground backdrop-blur-sm transition-all hover:scale-105 hover:border-primary/50 hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10"
+        >
+          <span className="text-muted-foreground">© 2026</span>
+          <span className="display font-bold text-primary underline decoration-primary/40 underline-offset-2 transition-colors group-hover:text-primary">
+            Abhishek
+          </span>
+          <span className="text-muted-foreground">•</span>
+          <span className="font-semibold text-foreground">Zen Sudoku</span>
+        </a>
+      </div>
 
       <NewGameDialog
         open={dialogOpen}
