@@ -14,23 +14,6 @@ import { useSettingsStore } from "@/store/settingsStore";
 import type { Difficulty } from "@/lib/sudoku/types";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Zen Sudoku" },
-      {
-        name: "description",
-        content:
-          "A polished Sudoku with logic-rated difficulty, notes, hints, five themes, and offline play. Every puzzle is verified to have exactly one solution.",
-      },
-      { property: "og:title", content: "Zen Sudoku" },
-      {
-        property: "og:description",
-        content: "Logic-rated difficulty, notes, hints, and five themes. Offline-ready.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
   component: SudokuPage,
 });
 
@@ -41,6 +24,7 @@ function SudokuPage() {
   const won = useGameStore((s) => s.won);
   const newGame = useGameStore((s) => s.newGame);
   const resume = useGameStore((s) => s.resume);
+  const pause = useGameStore((s) => s.pause);
 
   const [hydrated, setHydrated] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -55,11 +39,31 @@ function SudokuPage() {
     if (theme !== "light") root.classList.add(`theme-${theme}`);
   }, [theme]);
 
+  // Set page title
+  useEffect(() => {
+    document.title = "Zen Sudoku";
+  }, []);
+
   // Open dialog on first visit
   useEffect(() => {
     if (!hydrated) return;
     if (!puzzle) setDialogOpen(true);
   }, [hydrated, puzzle]);
+
+  // BUG FIX: Auto-pause timer when tab is hidden, resume when visible
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        pause();
+      } else {
+        // Only resume if the game was actually running (not manually paused)
+        const s = useGameStore.getState();
+        if (s.running && !s.won) resume();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [pause, resume]);
 
   const handleNewGame = (d: Difficulty, level?: number) => {
     newGame(d, level);
@@ -72,7 +76,10 @@ function SudokuPage() {
   };
 
   return (
-    <main className="min-h-dvh px-3 py-4 sm:py-6">
+    <main
+      className="min-h-dvh px-3 py-4 sm:py-6"
+      style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+    >
       <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between pb-2">
         <h1 className="display text-2xl">Zen Sudoku</h1>
         <div className="flex items-center gap-2">

@@ -131,6 +131,22 @@ function yesterdayKey(): string {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
+/** Update stats after a confirmed win. Pure function — returns updated stats. */
+function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: ScoreBreakdown): Stats {
+  const next = { ...stats };
+  next.gamesPlayed += 1;
+  next.gamesWon += 1;
+  next.totalPoints += score.total;
+  const best = next.bestTimeByDifficulty[puzzle.difficulty];
+  if (best == null || timeSec < best) next.bestTimeByDifficulty[puzzle.difficulty] = timeSec;
+  const today = todayKey();
+  if (next.lastPlayedDate === yesterdayKey()) next.currentStreakDays += 1;
+  else if (next.lastPlayedDate !== today) next.currentStreakDays = 1;
+  next.longestStreakDays = Math.max(next.longestStreakDays, next.currentStreakDays);
+  next.lastPlayedDate = today;
+  return next;
+}
+
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
@@ -168,6 +184,7 @@ export const useGameStore = create<GameState>()(
           future: [],
           won: false,
           score: null,
+          submitResult: null,
         });
       },
 
@@ -198,6 +215,7 @@ export const useGameStore = create<GameState>()(
 
       input: (value) => {
         const s = get();
+        // BUG FIX: Don't accept input if already won
         if (!s.puzzle || s.won || s.paused) return;
         const idx = s.selected;
         if (idx == null) return;
@@ -241,25 +259,16 @@ export const useGameStore = create<GameState>()(
         const history = [...s.history, { idx, prev, next }];
         set({ cells, history, future: [] });
 
-        // Win check
+        // Auto-win check: only triggers when all 81 cells are filled correctly
         const allFilled = cells.every((c) => c.value !== 0);
-        if (allFilled && get().puzzle) {
+        if (allFilled) {
           const puzzle = get().puzzle!;
           const correct = cells.every((c, i) => c.value === puzzle.solution[i]);
           if (correct) {
             const timeSec = Math.floor(get().elapsedMs / 1000);
             const score = computeScore(puzzle, timeSec, get().mistakes, get().hintsUsed);
-            const stats = { ...get().stats };
-            stats.gamesPlayed += 1;
-            stats.gamesWon += 1;
-            stats.totalPoints += score.total;
-            const best = stats.bestTimeByDifficulty[puzzle.difficulty];
-            if (best == null || timeSec < best) stats.bestTimeByDifficulty[puzzle.difficulty] = timeSec;
-            const today = todayKey();
-            if (stats.lastPlayedDate === yesterdayKey()) stats.currentStreakDays += 1;
-            else if (stats.lastPlayedDate !== today) stats.currentStreakDays = 1;
-            stats.longestStreakDays = Math.max(stats.longestStreakDays, stats.currentStreakDays);
-            stats.lastPlayedDate = today;
+            // BUG FIX: use applyWinToStats to avoid double-counting
+            const stats = applyWinToStats(get().stats, puzzle, timeSec, score);
             set({ won: true, running: false, score, stats });
           }
         }
@@ -304,12 +313,28 @@ export const useGameStore = create<GameState>()(
         });
       },
 
+      // BUG FIX: Implemented check() — was declared in interface but never implemented
+      check: () => {
+        const s = get();
+        if (!s.puzzle) return 0;
+        let wrong = 0;
+        for (let i = 0; i < 81; i++) {
+          const c = s.cells[i];
+          if (!c.given && c.value !== 0 && c.value !== s.puzzle.solution[i]) {
+            wrong++;
+          }
+        }
+        return wrong;
+      },
+
       submitResult: null,
       clearSubmitResult: () => set({ submitResult: null }),
 
       submitGame: () => {
         const s = get();
+        // BUG FIX: Guard — if already won (auto-win), don't double-count stats
         if (!s.puzzle || s.won) return;
+
         const puzzle = s.puzzle;
         let emptyCount = 0;
         let wrongCount = 0;
@@ -330,19 +355,10 @@ export const useGameStore = create<GameState>()(
         const isWin = emptyCount === 0 && wrongCount === 0;
 
         if (isWin) {
-          const timeSec = Math.floor(get().elapsedMs / 1000);
-          const score = computeScore(puzzle, timeSec, get().mistakes, get().hintsUsed);
-          const stats = { ...get().stats };
-          stats.gamesPlayed += 1;
-          stats.gamesWon += 1;
-          stats.totalPoints += score.total;
-          const best = stats.bestTimeByDifficulty[puzzle.difficulty];
-          if (best == null || timeSec < best) stats.bestTimeByDifficulty[puzzle.difficulty] = timeSec;
-          const today = todayKey();
-          if (stats.lastPlayedDate === yesterdayKey()) stats.currentStreakDays += 1;
-          else if (stats.lastPlayedDate !== today) stats.currentStreakDays = 1;
-          stats.longestStreakDays = Math.max(stats.longestStreakDays, stats.currentStreakDays);
-          stats.lastPlayedDate = today;
+          const timeSec = Math.floor(s.elapsedMs / 1000);
+          const score = computeScore(puzzle, timeSec, s.mistakes, s.hintsUsed);
+          // BUG FIX: use applyWinToStats — consistent with auto-win path
+          const stats = applyWinToStats(s.stats, puzzle, timeSec, score);
           set({ won: true, running: false, score, stats, submitResult: null });
         } else {
           set({

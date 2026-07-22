@@ -3,6 +3,17 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert } from "lucide-react";
 
+/** Mirrors clueTargetFor() in generator.ts so the UI shows accurate clue counts */
+function getClueCount(d: Difficulty, level: number): number {
+  const step = Math.min(9, Math.max(0, level - 1));
+  switch (d) {
+    case "easy":   return Math.max(34, 42 - Math.floor(step * 0.8));
+    case "medium": return Math.max(28, 35 - Math.floor(step * 0.8));
+    case "hard":   return Math.max(22, 28 - Math.floor(step * 0.7));
+    case "expert": return Math.max(17, 23 - Math.floor(step * 0.6));
+  }
+}
+
 const DIFFICULTIES: { id: Difficulty; label: string; desc: string; color: string }[] = [
   { id: "easy", label: "Easy", desc: "Naked & Hidden Singles", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
   { id: "medium", label: "Medium", desc: "Pointing Pairs & Subsets", color: "text-blue-400 border-blue-500/30 bg-blue-500/10" },
@@ -131,7 +142,7 @@ export function NewGameDialog({
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {activeDiff.label} • {Math.max(17, 40 - Math.floor((lvl - 1) * 2.2))} Clues
+                      {activeDiff.label} • {getClueCount(selectedDifficulty, lvl)} Clues
                     </div>
                   </div>
                 </div>

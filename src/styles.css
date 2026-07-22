@@ -1,6 +1,6 @@
 @import "tailwindcss" source(none);
-@source "../src";
 @import "tw-animate-css";
+@source "../src";
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -155,8 +155,15 @@
     color: var(--foreground);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    /* iPhone notch / home bar padding */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
   h1, h2, h3, .display { font-family: var(--font-display); letter-spacing: -0.01em; }
+  /* Minimum 44px tap targets on all interactive elements (WCAG) */
+  button { min-height: 44px; }
+  /* Prevent text size inflation on mobile orientation change */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 }
 
 /* CRT effect */
@@ -218,5 +225,34 @@
 
 .animate-pulse-glow {
   animation: pulseGlow 1.5s infinite;
+}
+
+/* Responsive: controls wrap on very small screens */
+@media (max-width: 360px) {
+  /* Stack controls 2 rows on tiny phones */
+  .controls-bar {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+  .controls-bar > button {
+    flex: 1 1 calc(33% - 0.375rem);
+    min-width: 0;
+    font-size: 0.7rem;
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+  }
+}
+
+/* Keypad: ensure digits remain readable at all zoom levels */
+.sudoku-num {
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Safe-area: extra bottom padding so content clears iPhone home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  main {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
 }
 

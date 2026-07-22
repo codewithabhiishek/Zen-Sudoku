@@ -101,7 +101,7 @@ export function Controls() {
   }, [msg]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1.5">
+    <div className="controls-bar mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1.5">
       <button onClick={undo} disabled={!historyLen} className={btn}>
         <Undo2 className="size-3.5" /> Undo
       </button>
