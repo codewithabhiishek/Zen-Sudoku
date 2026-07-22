@@ -1,0 +1,13 @@
+{
+  "name": "Zen Sudoku",
+  "short_name": "Zen Sudoku",
+  "description": "Clean, fast Sudoku with logic-rated difficulty and offline play.",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#fcfbf8",
+  "theme_color": "#2563eb",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "64x64", "type": "image/png" }
+  ]
+}
