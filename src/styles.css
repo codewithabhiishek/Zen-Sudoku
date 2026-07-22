@@ -227,6 +227,69 @@
   animation: pulseGlow 1.5s infinite;
 }
 
+@keyframes zenGlow {
+  0%, 100% { opacity: 0.35; transform: scale(1) translateY(0); }
+  50% { opacity: 0.7; transform: scale(1.12) translateY(-4px); }
+}
+
+@keyframes logoSparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px var(--color-primary)); }
+  50% { transform: rotate(180deg) scale(1.15); filter: drop-shadow(0 0 8px var(--color-primary)); }
+}
+
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-zen-glow {
+  animation: zenGlow 6s ease-in-out infinite;
+}
+
+.animate-logo-sparkle {
+  animation: logoSparkle 8s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+@keyframes miniGridCycle {
+  0%, 20% { background-color: var(--color-primary); color: var(--color-primary-foreground); transform: scale(1); }
+  25%, 45% { background-color: var(--color-accent); color: #fff; transform: scale(1.15); }
+  50%, 70% { background-color: var(--color-surface-2); color: var(--color-foreground); transform: scale(1); }
+  75%, 95% { background-color: var(--color-primary); color: var(--color-primary-foreground); transform: scale(1); }
+}
+
+.mini-grid-dot-1 { animation: miniGridCycle 3s ease-in-out infinite 0s; }
+.mini-grid-dot-2 { animation: miniGridCycle 3s ease-in-out infinite 0.4s; }
+.mini-grid-dot-3 { animation: miniGridCycle 3s ease-in-out infinite 0.8s; }
+.mini-grid-dot-4 { animation: miniGridCycle 3s ease-in-out infinite 1.2s; }
+
+@keyframes textShimmer {
+  0%, 100% {
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+  }
+  50% {
+    background-size: 200% 100%;
+    background-position: 100% 50%;
+  }
+}
+
+.animate-text-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-foreground) 0%,
+    var(--color-primary) 50%,
+    var(--color-foreground) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 5s ease-in-out infinite;
+}
+
 /* Responsive: controls wrap on very small screens */
 @media (max-width: 360px) {
   /* Stack controls 2 rows on tiny phones */

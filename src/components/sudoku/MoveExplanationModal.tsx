@@ -33,7 +33,7 @@ export function MoveExplanationModal() {
               {isSuccess ? <CheckCircle2 className="size-5" /> : <AlertCircle className="size-5" />}
             </div>
             <div>
-              <h3 className="text-base font-semibold text-foreground">{explanation.title}</h3>
+              <h3 className="display text-base font-bold tracking-tight text-foreground">{explanation.title}</h3>
               <p className="text-xs text-muted-foreground mt-0.5">Sudoku Hint & Analysis</p>
             </div>
           </div>
@@ -73,14 +73,14 @@ export function MoveExplanationModal() {
                 undo();
                 clearExplanation();
               }}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border bg-surface px-4 py-2.5 text-xs font-medium text-foreground transition hover:bg-muted"
+              className="display flex flex-1 items-center justify-center gap-2 rounded-xl border bg-surface px-4 py-2.5 text-xs font-bold text-foreground transition hover:bg-muted"
             >
               <Undo2 className="size-3.5" /> Undo Move
             </button>
           )}
           <button
             onClick={clearExplanation}
-            className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-xs font-medium text-primary-foreground transition hover:opacity-90"
+            className="display flex-1 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground transition hover:opacity-90"
           >
             Got it
           </button>

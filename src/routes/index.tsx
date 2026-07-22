@@ -81,7 +81,20 @@ function SudokuPage() {
       style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
     >
       <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between pb-2">
-        <h1 className="display text-2xl">Zen Sudoku</h1>
+        <div className="flex items-center gap-3">
+          {/* Animated Interactive Mini Sudoku Grid Logo */}
+          <div className="grid size-8 grid-cols-2 grid-rows-2 gap-0.5 rounded-xl border bg-surface p-1 shadow-sm transition-transform hover:scale-105">
+            <span className="mini-grid-dot-1 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">9</span>
+            <span className="mini-grid-dot-2 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">4</span>
+            <span className="mini-grid-dot-3 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">2</span>
+            <span className="mini-grid-dot-4 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">7</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              Zen Sudoku
+            </h1>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <ZoomControls />
           <SettingsSheet />
