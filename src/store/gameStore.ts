@@ -508,6 +508,22 @@ export function findGridConflicts(cells: CellState[]): Set<number> {
   return findConflicts(cells.map((c) => c.value));
 }
 
+/**
+ * Solution-aware conflict detection.
+ * A cell is highlighted as wrong ONLY when its value disagrees with the known solution.
+ * This avoids false positives where two wrong cells share the same digit in a unit
+ * and the correct newly-placed value gets flagged as the duplicate.
+ */
+export function findSolutionConflicts(cells: CellState[], solution: Grid): Set<number> {
+  const out = new Set<number>();
+  for (let i = 0; i < 81; i++) {
+    const c = cells[i];
+    if (c.value === 0 || c.given) continue;
+    if (c.value !== solution[i]) out.add(i);
+  }
+  return out;
+}
+
 export function conflictsWithGiven(cells: CellState[], conflicts: Set<number>): Set<number> {
   const out = new Set<number>();
   for (const idx of conflicts) {

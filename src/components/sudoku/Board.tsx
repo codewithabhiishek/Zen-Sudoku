@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useGameStore, findGridConflicts, conflictsWithGiven } from "@/store/gameStore";
+import { useGameStore, findSolutionConflicts } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { PEERS, ROWS, COLS, BOXES } from "@/lib/sudoku/solver";
 import { cn } from "@/lib/utils";
@@ -23,8 +23,13 @@ export function Board() {
 
   const hint = useGameStore((s) => s.hint);
 
-  const conflicts = useMemo(() => findGridConflicts(cells), [cells]);
-  const givenConflicts = useMemo(() => conflictsWithGiven(cells, conflicts), [cells, conflicts]);
+  const conflicts = useMemo(
+    () => (puzzle ? findSolutionConflicts(cells, puzzle.solution) : new Set<number>()),
+    [cells, puzzle],
+  );
+  // For solution-aware conflicts, every highlighted cell is already a wrong user entry
+  // (not a given), so givenConflicts falls through to an empty set — no extra filter needed.
+  const givenConflicts = useMemo(() => new Set<number>(), []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
