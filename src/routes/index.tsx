@@ -7,6 +7,7 @@ import { Footer } from "@/components/sudoku/Footer";
 import { useGameStore } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
+import { trackDifficultySelected } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import type { Difficulty } from "@/lib/sudoku/types";
 
@@ -197,7 +198,10 @@ function HomePage() {
             return (
               <button
                 key={d.id}
-                onClick={() => setSelectedDiff(d.id)}
+                onClick={() => {
+                  setSelectedDiff(d.id);
+                  trackDifficultySelected(d.id);
+                }}
                 className={cn(
                   "rounded-xl border p-3 text-left transition hover:scale-[1.02] active:scale-[0.99]",
                   selectedDiff === d.id ? "border-primary/50 bg-primary/5" : "bg-surface hover:bg-surface-2",
@@ -233,7 +237,10 @@ function HomePage() {
             {DIFFICULTIES.map((d) => (
               <button
                 key={d.id}
-                onClick={() => setSelectedDiff(d.id)}
+                onClick={() => {
+                  setSelectedDiff(d.id);
+                  trackDifficultySelected(d.id);
+                }}
                 className={cn(
                   "rounded-lg py-2 text-xs font-bold transition-all text-center",
                   selectedDiff === d.id

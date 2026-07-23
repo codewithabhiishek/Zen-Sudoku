@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { trackThemeChanged } from "@/lib/analytics";
 
 export type ThemeId = "graphite" | "forest" | "tokyo" | "catppuccin" | "amoled" | "chessboard";
 
@@ -50,7 +51,10 @@ export const useSettingsStore = create<SettingsState>()(
       leftHanded: false,
       fontScale: 1,
       zoomLevel: 1,
-      setTheme: (theme) => set({ theme }),
+      setTheme: (theme) => {
+        set({ theme });
+        trackThemeChanged(theme);
+      },
       toggle: (key) => set((s) => ({ [key]: !s[key] }) as Partial<SettingsState>),
       setFontScale: (fontScale) => set({ fontScale }),
       zoomIn: () => set((s) => ({ zoomLevel: Math.min(1.6, Number((s.zoomLevel + 0.1).toFixed(2))) })),

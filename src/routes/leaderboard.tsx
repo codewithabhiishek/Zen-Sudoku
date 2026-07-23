@@ -5,6 +5,8 @@ import { getLeaderboard } from "@/database/api";
 import { ArrowLeft, Trophy, Medal, User, Clock, AlertTriangle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { trackLeaderboardViewed } from "@/lib/analytics";
+
 export const Route = createFileRoute("/leaderboard")({
   component: LeaderboardPage,
 });
@@ -37,6 +39,11 @@ export function LeaderboardPage() {
   const [difficulty, setDifficulty] = useState<DiffFilter>("all");
   const [entries, setEntries] = useState<LeaderboardItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Track Leaderboard Viewed event on mount
+  useEffect(() => {
+    trackLeaderboardViewed();
+  }, []);
 
   // Apply current theme
   useEffect(() => {

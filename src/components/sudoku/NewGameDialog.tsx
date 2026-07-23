@@ -2,6 +2,7 @@ import type { Difficulty } from "@/lib/sudoku/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useGameStore } from "@/store/gameStore";
+import { trackDifficultySelected } from "@/lib/analytics";
 import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert, CheckCircle2 } from "lucide-react";
 
 /** Mirrors clueTargetFor() in generator.ts so the UI shows accurate clue counts */
@@ -90,7 +91,10 @@ export function NewGameDialog({
             return (
               <button
                 key={d.id}
-                onClick={() => setSelectedDifficulty(d.id)}
+                onClick={() => {
+                  setSelectedDifficulty(d.id);
+                  trackDifficultySelected(d.id);
+                }}
                 className={cn(
                   "rounded-xl py-2 text-xs font-bold transition-all text-center",
                   active

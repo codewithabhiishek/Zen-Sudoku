@@ -8,6 +8,14 @@ import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
 import { useSettingsStore } from "@/store/settingsStore";
 import {
+  trackGameStarted,
+  trackGameCompleted,
+  trackNewPuzzle,
+  trackHintUsed,
+  trackUndoUsed,
+  trackNotesMode,
+} from "@/lib/analytics";
+import {
   playSelectSound,
   playCorrectSound,
   playErrorSound,
@@ -171,6 +179,27 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
   next.longestStreakDays = Math.max(next.longestStreakDays, next.currentStreakDays);
   next.lastPlayedDate = today;
 
+  // Track Game Completed analytics event
+  try {
+    const currentState = useGameStore.getState();
+    const cells = currentState.cells ?? [];
+    const history = currentState.history ?? [];
+    const notesUsed = cells.some((c) => c.notes.length > 0) || history.some((m) => m.prev.notes.length > 0 || m.next.notes.length > 0);
+    const autoRemoveIncorrect = useSettingsStore.getState().autoRemoveIncorrect;
+
+    trackGameCompleted({
+      difficulty: puzzle.difficulty,
+      solveTimeSeconds: timeSec,
+      mistakes: currentState.mistakes ?? 0,
+      hintsUsed: currentState.hintsUsed ?? 0,
+      undoCount: history.length,
+      notesUsed,
+      autoRemoveIncorrect,
+    });
+  } catch (err) {
+    // Ignore error safely
+  }
+
   return next;
 }
 
@@ -214,6 +243,10 @@ export const useGameStore = create<GameState>()(
           score: null,
           submitResult: null,
         });
+
+        // Trigger analytics for starting a new puzzle
+        trackNewPuzzle(difficulty);
+        trackGameStarted(difficulty);
       },
 
       explanation: null,
@@ -362,7 +395,11 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
       clear: () => get().input(0),
 
-      toggleNotes: () => set((s) => ({ notesMode: !s.notesMode })),
+      toggleNotes: () => {
+        const nextNotesMode = !get().notesMode;
+        set({ notesMode: nextNotesMode });
+        trackNotesMode(nextNotesMode);
+      },
       toggleSmartNotes: () => set((s) => ({ smartNotes: !s.smartNotes })),
       setMistakeLimit: (n) => set({ mistakeLimit: n }),
       toggleHideTimer: () => set((s) => ({ hideTimer: !s.hideTimer })),
@@ -398,6 +435,8 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           history: [...s.history, { idx, prev, next: cells[idx] }],
           future: [],
         });
+
+        trackHintUsed(s.puzzle.difficulty);
       },
 
       // BUG FIX: Implemented check() — was declared in interface but never implemented
@@ -471,6 +510,10 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           future: [...s.future, last],
           selected: last.idx,
         });
+
+        if (s.puzzle) {
+          trackUndoUsed(s.puzzle.difficulty);
+        }
       },
 
       redo: () => {

@@ -8,6 +8,8 @@ import { AnimatedNumber } from "@/components/sudoku/AnimatedNumber";
 import { ArrowLeft, Trophy, Flame, Clock, Target, CheckCircle, BarChart3, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { trackStatisticsViewed } from "@/lib/analytics";
+
 export const Route = createFileRoute("/stats")({
   component: StatsPage,
 });
@@ -24,6 +26,11 @@ export function StatsPage() {
   const localStats = useGameStore((s) => s.stats);
   const history = useGameStore((s) => s.history);
   const [dbStats, setDbStats] = useState<any>(null);
+
+  // Track Statistics Viewed event on mount
+  useEffect(() => {
+    trackStatisticsViewed();
+  }, []);
 
   // Apply theme
   useEffect(() => {
