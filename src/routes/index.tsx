@@ -91,36 +91,30 @@ function SudokuPage() {
 
   return (
     <main
-      className="min-h-dvh px-3 py-4 sm:py-6"
-      style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+      className="flex min-h-dvh flex-col justify-between px-3 py-2 sm:py-6"
+      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
     >
-      {/* Responsive Mobile-First Header */}
-      <header className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        {/* Row 1 (Mobile) / Left (Desktop): Brand & Settings */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 overflow-hidden">
-            {/* Animated Interactive Mini Sudoku Grid Logo */}
-            <div className="grid size-8 shrink-0 grid-cols-2 grid-rows-2 gap-0.5 rounded-xl border bg-surface p-1 shadow-sm transition-transform hover:scale-105">
-              <span className="mini-grid-dot-1 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">9</span>
-              <span className="mini-grid-dot-2 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">4</span>
-              <span className="mini-grid-dot-3 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">2</span>
-              <span className="mini-grid-dot-4 flex items-center justify-center rounded-[4px] font-mono text-[9px] font-bold">7</span>
+      <div className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-1.5 sm:gap-3">
+        {/* Single-Row Mobile Header */}
+        <header className="flex w-full items-center justify-between pb-1 sm:pb-2">
+          {/* Brand Logo & Title */}
+          <div className="flex items-center gap-2 overflow-hidden">
+            <div className="grid size-7 shrink-0 grid-cols-2 grid-rows-2 gap-0.5 rounded-lg border bg-surface p-0.5 shadow-xs sm:size-8 sm:p-1">
+              <span className="mini-grid-dot-1 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">9</span>
+              <span className="mini-grid-dot-2 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">4</span>
+              <span className="mini-grid-dot-3 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">2</span>
+              <span className="mini-grid-dot-4 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">7</span>
             </div>
-            <h1 className="display text-3xl font-bold tracking-tight text-foreground whitespace-nowrap">
+            <h1 className="display text-xl sm:text-3xl font-bold tracking-tight text-foreground whitespace-nowrap">
               Zen Sudoku
             </h1>
           </div>
-          <div className="sm:hidden">
-            <SettingsSheet />
-          </div>
-        </div>
 
-        {/* Row 2 (Mobile) / Right (Desktop): Navigation Actions */}
-        <div className="flex items-center justify-between gap-2 sm:justify-end">
-          <div className="flex flex-1 items-center justify-between gap-2 sm:flex-none">
+          {/* Quick Navigation Group (Profile, Stats, Leaderboard, Fullscreen, Settings) */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
               to="/profile"
-              className="btn-interactive flex h-11 flex-1 sm:size-11 items-center justify-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="btn-interactive grid size-9 sm:size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
               title="Profile"
               aria-label="Profile"
             >
@@ -128,7 +122,7 @@ function SudokuPage() {
             </Link>
             <Link
               to="/stats"
-              className="btn-interactive flex h-11 flex-1 sm:size-11 items-center justify-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="btn-interactive grid size-9 sm:size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
               title="Statistics"
               aria-label="Statistics"
             >
@@ -136,34 +130,34 @@ function SudokuPage() {
             </Link>
             <Link
               to="/leaderboard"
-              className="btn-interactive flex h-11 flex-1 sm:size-11 items-center justify-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="btn-interactive grid size-9 sm:size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
               title="Leaderboards"
               aria-label="Leaderboards"
             >
               <Trophy className="size-4" />
             </Link>
-            <div className="btn-interactive flex h-11 flex-1 sm:size-11 items-center justify-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground sm:ml-2">
+            <div className="hidden sm:block">
               <ZoomControls />
             </div>
-          </div>
-          <div className="hidden sm:block sm:ml-2">
             <SettingsSheet />
           </div>
+        </header>
+
+        <WelcomeModal />
+
+        <GameHeader onNewGame={handleOpenNew} />
+        
+        <div className="my-1 sm:my-3">
+          <Board />
         </div>
-      </header>
-
-      <WelcomeModal />
-
-      <GameHeader onNewGame={handleOpenNew} />
-      <div className="my-3">
-        <Board />
-      </div>
-      <div className="space-y-3">
-        <Controls />
-        <Keypad />
+        
+        <div className="space-y-2 sm:space-y-3">
+          <Controls />
+          <Keypad />
+        </div>
       </div>
 
-      <Footer className="mt-6" />
+      <Footer className="mt-4 hidden sm:flex" />
 
       <NewGameDialog
         open={dialogOpen}
