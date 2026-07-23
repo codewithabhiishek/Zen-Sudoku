@@ -7,7 +7,10 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { getRouter } from "./router";
 import "./styles.css";
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const PUBLISHABLE_KEY =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+  "pk_test_c3VubnktbGlvbmZpc2gtOTYuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
 const router = getRouter();
 const rootElement = document.getElementById("root")!;
