@@ -71,6 +71,7 @@ export function ProfilePage() {
           currentStreakDays: 0,
           longestStreakDays: 0,
           lastPlayedDate: null,
+          completedLevels: [],
         },
         history: [],
       });

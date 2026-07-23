@@ -1,7 +1,8 @@
 import type { Difficulty } from "@/lib/sudoku/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert } from "lucide-react";
+import { useGameStore } from "@/store/gameStore";
+import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert, CheckCircle2 } from "lucide-react";
 
 /** Mirrors clueTargetFor() in generator.ts so the UI shows accurate clue counts */
 function getClueCount(d: Difficulty, level: number): number {
@@ -49,6 +50,7 @@ export function NewGameDialog({
 }) {
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>("easy");
   const [loading, setLoading] = useState<string | null>(null);
+  const completedLevels = useGameStore((s) => s.stats.completedLevels ?? []);
 
   if (!open) return null;
 
@@ -112,34 +114,48 @@ export function NewGameDialog({
 
         {/* 10 Levels Scrollable List */}
         <div className="mt-4 max-h-[340px] overflow-y-auto pr-1 space-y-2">
-          {LEVELS.map((lvl) => {
+        {LEVELS.map((lvl) => {
             const key = `${selectedDifficulty}-${lvl}`;
             const isLoadingThis = loading === key;
             const tag = LEVEL_TAGS[lvl];
+            const isDone = completedLevels.includes(key);
 
             return (
               <button
                 key={lvl}
                 onClick={() => pick(selectedDifficulty, lvl)}
                 disabled={loading !== null}
-                className="group flex w-full items-center justify-between rounded-2xl border bg-surface-2 p-3 text-left transition-all hover:border-primary/50 hover:bg-highlight/50 disabled:opacity-50 active:scale-[0.99]"
+                className={cn(
+                  "group flex w-full items-center justify-between rounded-2xl border p-3 text-left transition-all disabled:opacity-50 active:scale-[0.99]",
+                  isDone
+                    ? "border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10"
+                    : "bg-surface-2 hover:border-primary/50 hover:bg-highlight/50",
+                )}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={cn(
                       "grid size-9 place-items-center rounded-xl font-mono font-bold text-xs border shrink-0",
-                      activeDiff.color,
+                      isDone
+                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                        : activeDiff.color,
                     )}
                   >
-                    L{lvl}
+                    {isDone ? <CheckCircle2 className="size-4" /> : `L${lvl}`}
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground flex items-center gap-2">
                       Level {lvl}
-                      <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1", tag.tagColor)}>
-                        {lvl >= 9 ? <Flame className="size-2.5" /> : lvl >= 7 ? <ShieldAlert className="size-2.5" /> : <Zap className="size-2.5" />}
-                        {tag.name}
-                      </span>
+                      {isDone ? (
+                        <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                          <CheckCircle2 className="size-2.5" /> Complete
+                        </span>
+                      ) : (
+                        <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1", tag.tagColor)}>
+                          {lvl >= 9 ? <Flame className="size-2.5" /> : lvl >= 7 ? <ShieldAlert className="size-2.5" /> : <Zap className="size-2.5" />}
+                          {tag.name}
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {activeDiff.label} • {getClueCount(selectedDifficulty, lvl)} Clues
@@ -147,8 +163,11 @@ export function NewGameDialog({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:translate-x-1">
-                  {isLoadingThis ? "Loading..." : "Play Level"} <ChevronRight className="size-4" />
+                <div className={cn(
+                  "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1",
+                  isDone ? "text-emerald-400" : "text-primary",
+                )}>
+                  {isLoadingThis ? "Loading..." : isDone ? "Play Again" : "Play Level"} <ChevronRight className="size-4" />
                 </div>
               </button>
             );

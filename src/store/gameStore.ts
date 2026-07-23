@@ -40,6 +40,7 @@ export interface Stats {
   currentStreakDays: number;
   longestStreakDays: number;
   lastPlayedDate: string | null;
+  completedLevels: string[]; // e.g. ["easy-1", "easy-2", "medium-3"]
 }
 
 export interface SubmitResult {
@@ -109,6 +110,7 @@ function emptyStats(): Stats {
     currentStreakDays: 0,
     longestStreakDays: 0,
     lastPlayedDate: null,
+    completedLevels: [],
   };
 }
 
@@ -145,7 +147,7 @@ function yesterdayKey(): string {
 
 /** Update stats after a confirmed win. Pure function — returns updated stats. */
 function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: ScoreBreakdown): Stats {
-  const next = { ...stats };
+  const next = { ...stats, completedLevels: [...(stats.completedLevels ?? [])] };
   next.gamesPlayed += 1;
   next.gamesWon += 1;
   next.totalPoints += score.total;
@@ -156,6 +158,13 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
   else if (next.lastPlayedDate !== today) next.currentStreakDays = 1;
   next.longestStreakDays = Math.max(next.longestStreakDays, next.currentStreakDays);
   next.lastPlayedDate = today;
+  // Mark the level as completed if the puzzle had a level number
+  if (puzzle.levelNumber != null) {
+    const key = `${puzzle.difficulty}-${puzzle.levelNumber}`;
+    if (!next.completedLevels.includes(key)) {
+      next.completedLevels.push(key);
+    }
+  }
   return next;
 }
 
