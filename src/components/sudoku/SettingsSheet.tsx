@@ -181,6 +181,7 @@ export function SettingsSheet() {
               {/* 2. GAMEPLAY */}
               <Section title="Gameplay">
                 <Toggle label="Auto-check mistakes" checked={s.highlightErrors} onChange={() => s.toggle("highlightErrors")} />
+                <Toggle label="Auto-remove incorrect entries" checked={s.autoRemoveIncorrect} onChange={() => s.toggle("autoRemoveIncorrect")} />
                 <Toggle label="Highlight same number" checked={s.highlightSame} onChange={() => s.toggle("highlightSame")} />
                 <Toggle label="Highlight row / col / box" checked={s.highlightPeers} onChange={() => s.toggle("highlightPeers")} />
                 <Toggle label="Smart notes (auto-remove)" checked={smartNotes} onChange={toggleSmart} />

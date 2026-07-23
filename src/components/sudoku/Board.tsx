@@ -22,10 +22,19 @@ export function Board() {
   const fontScale = useSettingsStore((s) => s.fontScale);
 
   const hint = useGameStore((s) => s.hint);
+  const flashIdx = useGameStore((s) => s.flashIdx);
+  const clearFlash = useGameStore((s) => s.clearFlash);
+
+  useEffect(() => {
+    if (flashIdx !== null) {
+      const timeout = setTimeout(clearFlash, 350);
+      return () => clearTimeout(timeout);
+    }
+  }, [flashIdx, clearFlash]);
 
   const conflicts = useMemo(
-    () => (puzzle ? findSolutionConflicts(cells, puzzle.solution) : new Set<number>()),
-    [cells, puzzle],
+    () => (puzzle && highlightErrors ? findSolutionConflicts(cells, puzzle.solution) : new Set<number>()),
+    [cells, puzzle, highlightErrors],
   );
   // For solution-aware conflicts, every highlighted cell is already a wrong user entry
   // (not a given), so givenConflicts falls through to an empty set — no extra filter needed.
@@ -108,8 +117,9 @@ export function Board() {
         const inPeer = highlightPeers && !isSelected && (rowSet.has(i) || colSet.has(i) || boxSet.has(i));
         const inSame =
           highlightSame && !isSelected && selectedValue !== 0 && cell.value === selectedValue;
-        const isConflict = conflicts.has(i);
+        const isConflict = highlightErrors && conflicts.has(i);
         const isGivenConflict = givenConflicts.has(i);
+        const isFlashing = flashIdx === i;
 
         return (
           <button
@@ -129,6 +139,7 @@ export function Board() {
               inSame && "bg-same",
               isConflict && "bg-red-500/15 border-red-500/40",
               isSelected && "z-20 bg-primary/20 shadow-[0_0_12px_rgba(59,130,246,0.5)] ring-2 ring-inset ring-primary",
+              isFlashing && "animate-shake",
               paused && "invisible",
               won && "pointer-events-none",
             )}

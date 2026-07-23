@@ -9,6 +9,7 @@ interface SettingsState {
   highlightSame: boolean;
   highlightPeers: boolean;
   highlightErrors: boolean;
+  autoRemoveIncorrect: boolean;
   reduceAnimations: boolean;
   autoSave: boolean;
   keyboardShortcuts: boolean;
@@ -17,7 +18,7 @@ interface SettingsState {
   fontScale: number; // 0.85 - 1.3
   zoomLevel: number; // 0.8 - 1.6
   setTheme: (t: ThemeId) => void;
-  toggle: (key: "sound" | "highlightSame" | "highlightPeers" | "highlightErrors" | "reduceAnimations" | "autoSave" | "keyboardShortcuts" | "haptics" | "leftHanded") => void;
+  toggle: (key: "sound" | "highlightSame" | "highlightPeers" | "highlightErrors" | "autoRemoveIncorrect" | "reduceAnimations" | "autoSave" | "keyboardShortcuts" | "haptics" | "leftHanded") => void;
   setFontScale: (v: number) => void;
   zoomIn: () => void;
   zoomOut: () => void;
@@ -41,6 +42,7 @@ export const useSettingsStore = create<SettingsState>()(
       highlightSame: true,
       highlightPeers: true,
       highlightErrors: true,
+      autoRemoveIncorrect: false,
       reduceAnimations: false,
       autoSave: true,
       keyboardShortcuts: true,

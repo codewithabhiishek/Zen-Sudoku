@@ -5,6 +5,7 @@ import { findConflicts, PEERS, ROWS, COLS, BOXES } from "@/lib/sudoku/solver";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
+import { useSettingsStore } from "@/store/settingsStore";
 import {
   playSelectSound,
   playCorrectSound,
@@ -76,6 +77,8 @@ interface GameState {
   explainCurrent: () => void;
   submitGame: () => void;
   clearSubmitResult: () => void;
+  flashIdx: number | null;        // index of cell currently showing error flash
+  clearFlash: () => void;
   move: (dr: number, dc: number) => void;
   input: (value: number) => void;
   clear: () => void;
@@ -176,6 +179,7 @@ export const useGameStore = create<GameState>()(
       won: false,
       score: null,
       stats: emptyStats(),
+      flashIdx: null,
 
       newGame: (difficulty, level) => {
         const seedStr = level ? `zen-${difficulty}-lvl-${level}` : undefined;
@@ -199,6 +203,7 @@ export const useGameStore = create<GameState>()(
 
       explanation: null,
       clearExplanation: () => set({ explanation: null }),
+      clearFlash: () => set({ flashIdx: null }),
 
       explainCurrent: () => {
         const s = get();
@@ -290,11 +295,22 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           if (s.puzzle.solution[idx] !== value) {
             playErrorSound();
             const mistakes = s.mistakes + 1;
-            const nextState: Partial<GameState> = { mistakes };
+            const nextState: Partial<GameState> = { mistakes, flashIdx: idx };
             if (s.mistakeLimit != null && mistakes >= s.mistakeLimit) {
               nextState.running = false;
             }
+            // Haptic feedback on mobile (respects haptics setting)
+            const { haptics, autoRemoveIncorrect } = useSettingsStore.getState();
+            if (haptics && typeof navigator !== "undefined" && "vibrate" in navigator) {
+              navigator.vibrate(80);
+            }
+            // If auto-remove is enabled, clear the wrong value immediately
+            if (autoRemoveIncorrect) {
+              cells[idx] = { ...cell, value: 0, notes: [] };
+            }
             set(nextState as GameState);
+            // Auto-clear flash after 300 ms
+            setTimeout(() => useGameStore.getState().clearFlash(), 300);
           } else {
             playCorrectSound(value);
             if (s.smartNotes) {
