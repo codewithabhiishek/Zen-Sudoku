@@ -25,11 +25,14 @@ export function ClerkSyncBridge() {
         console.log("[SyncBridge] Running Cloud Sync for user ID:", user.id);
 
         try {
+          const emailPrefix = user.primaryEmailAddress?.emailAddress?.split("@")[0] || "player";
+          const uniqueUsername = user.username || `${emailPrefix}_${user.id.slice(-6)}`;
+
           // 2. Upsert user profile in Neon DB
           await createUser({
             id: user.id,
             email: user.primaryEmailAddress?.emailAddress || "",
-            username: user.username || user.firstName || "ZenPlayer",
+            username: uniqueUsername,
             displayName: user.fullName || user.username || user.firstName || "ZenPlayer",
             avatarUrl: user.imageUrl,
           });
