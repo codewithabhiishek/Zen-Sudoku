@@ -134,14 +134,16 @@ function computeScore(puzzle: Puzzle, timeSec: number, mistakes: number, hints: 
   const base = baseFor(puzzle.difficulty);
   const target = targetTimeSec(puzzle.difficulty);
   const timeBonus = Math.max(0, Math.round(base * (1 - Math.min(1, timeSec / target)) * 0.6));
-  const mistakePenalty = mistakes * 50;
-  const hintPenalty = hints * 100;
-  const noMistakeBonus = mistakes === 0 ? Math.round(base * 0.2) : 0;
-  const noHintBonus = hints === 0 ? Math.round(base * 0.2) : 0;
-  const total = Math.max(
-    0,
-    base + timeBonus - mistakePenalty - hintPenalty + noMistakeBonus + noHintBonus,
-  );
+  const mistakePenalty = mistakes * 25;
+  const hintPenalty = hints * 50;
+  const noMistakeBonus = mistakes === 0 ? Math.round(base * 0.25) : 0;
+  const noHintBonus = hints === 0 ? Math.round(base * 0.25) : 0;
+  
+  // Guaranteed minimum XP on level completion (always at least 50% of base XP!)
+  const minGuaranteed = Math.round(base * 0.5);
+  const calculatedTotal = base + timeBonus - mistakePenalty - hintPenalty + noMistakeBonus + noHintBonus;
+  const total = Math.max(minGuaranteed, calculatedTotal);
+
   return { base, timeBonus, mistakePenalty, hintPenalty, noMistakeBonus, noHintBonus, total };
 }
 
@@ -583,11 +585,25 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           ...(p.stats ?? {}),
         };
         // Auto-heal: sanitize gamesWon & gamesPlayed if previous double-counting created a mismatch with unique completed levels
-        const completedCount = (rawStats.completedLevels ?? []).length;
+        const completedLevels = rawStats.completedLevels ?? [];
+        const completedCount = completedLevels.length;
         if (completedCount > 0 && rawStats.gamesWon > completedCount) {
           rawStats.gamesWon = completedCount;
           rawStats.gamesPlayed = completedCount;
         }
+
+        // Auto-heal XP: guarantee every completed level has contributed at least 50% base XP to totalPoints
+        if (completedCount > 0) {
+          const minExpectedPoints = completedLevels.reduce((sum, key) => {
+            const diff = (key.split("-")[0] || "easy") as Difficulty;
+            const base = baseFor(diff);
+            return sum + Math.round(base * 0.5);
+          }, 0);
+          if (rawStats.totalPoints < minExpectedPoints) {
+            rawStats.totalPoints = minExpectedPoints;
+          }
+        }
+
         return {
           ...current,
           ...p,
