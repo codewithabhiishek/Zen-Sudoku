@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type ThemeId = "light" | "dark" | "crt" | "paper" | "contrast";
+export type ThemeId = "graphite" | "forest" | "tokyo" | "catppuccin" | "amoled" | "chessboard";
 
 interface SettingsState {
   theme: ThemeId;
@@ -9,10 +9,15 @@ interface SettingsState {
   highlightSame: boolean;
   highlightPeers: boolean;
   highlightErrors: boolean;
+  reduceAnimations: boolean;
+  autoSave: boolean;
+  keyboardShortcuts: boolean;
+  haptics: boolean;
+  leftHanded: boolean;
   fontScale: number; // 0.85 - 1.3
   zoomLevel: number; // 0.8 - 1.6
   setTheme: (t: ThemeId) => void;
-  toggle: (key: "sound" | "highlightSame" | "highlightPeers" | "highlightErrors") => void;
+  toggle: (key: "sound" | "highlightSame" | "highlightPeers" | "highlightErrors" | "reduceAnimations" | "autoSave" | "keyboardShortcuts" | "haptics" | "leftHanded") => void;
   setFontScale: (v: number) => void;
   zoomIn: () => void;
   zoomOut: () => void;
@@ -20,24 +25,27 @@ interface SettingsState {
 }
 
 export const THEMES: { id: ThemeId; label: string; swatch: string[] }[] = [
-  { id: "light", label: "Light", swatch: ["#ffffff", "#0a0a0a", "#2563eb"] },
-  { id: "dark", label: "Dark", swatch: ["#0b0f19", "#e5e7eb", "#6366f1"] },
-  { id: "crt", label: "Retro CRT", swatch: ["#0a0a0a", "#39ff14", "#ff0080"] },
-  { id: "paper", label: "Paper", swatch: ["#f4ecd8", "#2b2418", "#7a5c2e"] },
-  { id: "contrast", label: "High Contrast", swatch: ["#000000", "#ffffff", "#ffe600"] },
+  { id: "graphite", label: "Graphite", swatch: ["#0E1116", "#171C23", "#7C9DFF"] },
+  { id: "forest", label: "Forest Zen", swatch: ["#08120D", "#13211B", "#5CBF89"] },
+  { id: "tokyo", label: "Tokyo Night", swatch: ["#1A1B26", "#24283B", "#7AA2F7"] },
+  { id: "catppuccin", label: "Catppuccin Mocha", swatch: ["#1E1E2E", "#313244", "#89B4FA"] },
+  { id: "amoled", label: "AMOLED", swatch: ["#000000", "#0A0A0A", "#4EA8FF"] },
+  { id: "chessboard", label: "Chessboard Beige", swatch: ["#F3EFE6", "#ECE4D6", "#8B6B45"] },
 ];
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      theme:
-        typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light",
-      sound: false,
+      theme: "graphite",
+      sound: true,
       highlightSame: true,
       highlightPeers: true,
       highlightErrors: true,
+      reduceAnimations: false,
+      autoSave: true,
+      keyboardShortcuts: true,
+      haptics: true,
+      leftHanded: false,
       fontScale: 1,
       zoomLevel: 1,
       setTheme: (theme) => set({ theme }),

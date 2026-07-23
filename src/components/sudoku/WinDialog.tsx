@@ -22,44 +22,63 @@ export function WinDialog({ onNewGame }: { onNewGame: () => void }) {
     if (!won) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
-    confetti({ particleCount: 120, spread: 80, origin: { y: 0.4 } });
+    confetti({ particleCount: 75, spread: 60, origin: { y: 0.4 } });
   }, [won]);
 
   if (!won || !score || !puzzle) return null;
 
+  const isPerfectRun = mistakes === 0 && hints === 0;
+
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-background/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border bg-surface p-6 shadow-2xl">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Puzzle solved</p>
-        <h2 className="display text-3xl">Nicely done.</h2>
-        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-background/80 p-4 backdrop-blur-md animate-backdrop-fade-in">
+      <div className="w-full max-w-md rounded-2xl border bg-surface p-6 sm:p-8 shadow-2xl animate-modal-pop">
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-500">
+            ✓ Puzzle Complete
+          </div>
+          {isPerfectRun && (
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-500">
+              ✨ Perfect Run
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 flex items-baseline justify-between">
+          <h2 className="display text-4xl font-bold tracking-tight">{fmt(elapsed)}</h2>
+          <span className="display text-2xl font-bold text-primary">+{score.total} XP</span>
+        </div>
+
+        <div className="mt-6 grid grid-cols-3 gap-2 text-center">
           <Stat label="Time" value={fmt(elapsed)} />
           <Stat label="Mistakes" value={String(mistakes)} />
           <Stat label="Hints" value={String(hints)} />
         </div>
+
         <div className="mt-5 rounded-xl border bg-surface-2 p-4">
           <div className="mb-2 flex items-baseline justify-between">
-            <span className="text-sm text-muted-foreground">Score</span>
-            <span className="display text-3xl">{score.total}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Score Breakdown</span>
+            <span className="font-mono text-sm font-bold">{score.total} pts</span>
           </div>
-          <dl className="space-y-1 text-sm">
+          <dl className="space-y-1.5 text-xs">
             <Row label={`Base (${puzzle.difficulty})`} v={score.base} />
             <Row label="Time bonus" v={score.timeBonus} />
-            {score.noMistakeBonus > 0 && <Row label="No mistakes" v={score.noMistakeBonus} />}
-            {score.noHintBonus > 0 && <Row label="No hints" v={score.noHintBonus} />}
+            {score.noMistakeBonus > 0 && <Row label="No mistakes bonus" v={score.noMistakeBonus} />}
+            {score.noHintBonus > 0 && <Row label="No hints bonus" v={score.noHintBonus} />}
             {score.mistakePenalty > 0 && <Row label="Mistake penalty" v={-score.mistakePenalty} />}
             {score.hintPenalty > 0 && <Row label="Hint penalty" v={-score.hintPenalty} />}
           </dl>
         </div>
+
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
           <span>Total points: {stats.totalPoints}</span>
           <span>Streak: {stats.currentStreakDays} 🔥</span>
         </div>
+
         <button
           onClick={onNewGame}
-          className="mt-5 w-full rounded-xl bg-primary py-3 font-semibold text-primary-foreground transition hover:opacity-90"
+          className="btn-interactive mt-6 w-full rounded-xl bg-primary py-3 font-bold text-primary-foreground shadow-md transition hover:bg-primary/90"
         >
-          New puzzle
+          Next Puzzle
         </button>
       </div>
     </div>

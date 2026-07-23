@@ -6,14 +6,23 @@ import { Eraser, PencilLine } from "lucide-react";
 export function Keypad() {
   const input = useGameStore((s) => s.input);
   const cells = useGameStore((s) => s.cells);
+  const puzzle = useGameStore((s) => s.puzzle);
   const notesMode = useGameStore((s) => s.notesMode);
   const toggleNotes = useGameStore((s) => s.toggleNotes);
 
   const remaining = useMemo(() => {
     const counts = new Array(10).fill(0);
-    for (const c of cells) if (c.value) counts[c.value]++;
+    for (let i = 0; i < cells.length; i++) {
+      const c = cells[i];
+      if (!c.value) continue;
+      // FIX: Only count given numbers OR correct user entries matching the solution.
+      // Incorrect user entries should NOT decrement remaining counts or disable keypad buttons.
+      if (c.given || (puzzle && c.value === puzzle.solution[i])) {
+        counts[c.value]++;
+      }
+    }
     return counts.map((n) => 9 - n);
-  }, [cells]);
+  }, [cells, puzzle]);
 
   return (
     <div className="mx-auto w-full max-w-[min(92vw,560px)] space-y-2">

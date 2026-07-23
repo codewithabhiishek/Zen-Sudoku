@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { BarChart2, Trophy, User } from "lucide-react";
 import { Board } from "@/components/sudoku/Board";
 import { Keypad } from "@/components/sudoku/Keypad";
 import { Controls, GameHeader } from "@/components/sudoku/Controls";
@@ -9,8 +10,10 @@ import { SettingsSheet } from "@/components/sudoku/SettingsSheet";
 import { MoveExplanationModal } from "@/components/sudoku/MoveExplanationModal";
 import { SubmitModal } from "@/components/sudoku/SubmitModal";
 import { ZoomControls } from "@/components/sudoku/ZoomControls";
+import { WelcomeModal } from "@/components/sudoku/WelcomeModal";
 import { useGameStore } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useUserStore } from "@/store/userStore";
 import type { Difficulty } from "@/lib/sudoku/types";
 
 export const Route = createFileRoute("/")({
@@ -29,14 +32,24 @@ function SudokuPage() {
   const [hydrated, setHydrated] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    setHydrated(true);
+    useUserStore.getState().initUser();
+  }, []);
 
   // Apply theme class to <html>
   useEffect(() => {
     if (typeof document === "undefined") return;
     const root = document.documentElement;
-    root.classList.remove("theme-dark", "theme-crt", "theme-paper", "theme-contrast");
-    if (theme !== "light") root.classList.add(`theme-${theme}`);
+    root.classList.remove(
+      "theme-graphite",
+      "theme-forest",
+      "theme-tokyo",
+      "theme-catppuccin",
+      "theme-amoled",
+      "theme-chessboard",
+    );
+    root.classList.add(`theme-${theme}`);
   }, [theme]);
 
   // Set page title
@@ -95,11 +108,44 @@ function SudokuPage() {
             </h1>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <ZoomControls />
-          <SettingsSheet />
+        <div className="flex items-center">
+          {/* Navigation Pages Group */}
+          <div className="flex items-center gap-2 mr-3 sm:mr-3.5">
+            <Link
+              to="/profile"
+              className="btn-interactive grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              title="Profile"
+              aria-label="Profile"
+            >
+              <User className="size-4" />
+            </Link>
+            <Link
+              to="/stats"
+              className="btn-interactive grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              title="Statistics"
+              aria-label="Statistics"
+            >
+              <BarChart2 className="size-4" />
+            </Link>
+            <Link
+              to="/leaderboard"
+              className="btn-interactive grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              title="Leaderboards"
+              aria-label="Leaderboards"
+            >
+              <Trophy className="size-4" />
+            </Link>
+          </div>
+
+          {/* Quick Actions Group */}
+          <div className="flex items-center gap-2">
+            <ZoomControls />
+            <SettingsSheet />
+          </div>
         </div>
       </div>
+
+      <WelcomeModal />
 
       <GameHeader onNewGame={handleOpenNew} />
       <div className="my-3">
@@ -110,26 +156,17 @@ function SudokuPage() {
         <Keypad />
       </div>
 
-      <p className="mx-auto mt-5 max-w-[min(92vw,560px)] text-center text-xs text-muted-foreground">
-        Every puzzle is verified to have exactly one solution. Progress saves automatically.
-      </p>
-
-      {/* Abhishek Copyright Footer Credit */}
-      <div className="mx-auto mt-4 flex w-full max-w-[min(92vw,560px)] items-center justify-center">
+      {/* Minimal Footer */}
+      <footer className="mx-auto mt-6 flex w-full max-w-[min(92vw,560px)] items-center justify-center text-xs text-muted-foreground">
         <a
           href="https://github.com/codewithabhiishek/Zen-Sudoku"
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-foreground backdrop-blur-sm transition-all hover:scale-105 hover:border-primary/50 hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10"
+          className="hover:text-foreground transition-colors"
         >
-          <span className="text-muted-foreground">© 2026</span>
-          <span className="display font-bold text-primary underline decoration-primary/40 underline-offset-2 transition-colors group-hover:text-primary">
-            Abhishek
-          </span>
-          <span className="text-muted-foreground">•</span>
-          <span className="font-semibold text-foreground">Open Source</span>
+          © 2026 Zen Sudoku • Made by Abhishek
         </a>
-      </div>
+      </footer>
 
       <NewGameDialog
         open={dialogOpen}

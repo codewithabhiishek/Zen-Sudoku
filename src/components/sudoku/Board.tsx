@@ -21,6 +21,8 @@ export function Board() {
   const highlightErrors = useSettingsStore((s) => s.highlightErrors);
   const fontScale = useSettingsStore((s) => s.fontScale);
 
+  const hint = useGameStore((s) => s.hint);
+
   const conflicts = useMemo(() => findGridConflicts(cells), [cells]);
   const givenConflicts = useMemo(() => conflictsWithGiven(cells, conflicts), [cells, conflicts]);
 
@@ -35,14 +37,47 @@ export function Board() {
       else if (k === "ArrowLeft") { move(0, -1); e.preventDefault(); }
       else if (k === "ArrowRight") { move(0, 1); e.preventDefault(); }
       else if (k === "n" || k === "N") { toggleNotes(); e.preventDefault(); }
+      else if (k === "h" || k === "H") { hint(); e.preventDefault(); }
+      else if (k === "f" || k === "F") {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.().catch(() => {});
+        } else {
+          document.exitFullscreen?.().catch(() => {});
+        }
+        e.preventDefault();
+      }
       else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey) && e.shiftKey) { redo(); e.preventDefault(); }
       else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey)) { undo(); e.preventDefault(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [input, move, toggleNotes, undo, redo]);
+  }, [input, move, toggleNotes, hint, undo, redo]);
 
-  if (cells.length !== 81) return null;
+  if (cells.length !== 81) {
+    return (
+      <div
+        className="relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)] animate-pulse"
+        style={{ borderColor: "var(--color-border-strong)" }}
+      >
+        {Array.from({ length: 81 }).map((_, i) => {
+          const r = Math.floor(i / 9);
+          const c = i % 9;
+          return (
+            <div
+              key={i}
+              className={cn(
+                "flex items-center justify-center border border-border bg-surface-2/40",
+                (c === 2 || c === 5) && "border-r-2 border-r-[color:var(--color-border-strong)]",
+                (r === 2 || r === 5) && "border-b-2 border-b-[color:var(--color-border-strong)]"
+              )}
+            >
+              <div className="size-3.5 rounded-full bg-muted/40" />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
   const selectedValue = selected != null ? cells[selected].value : 0;
   const peerSet = selected != null ? new Set(PEERS[selected]) : new Set<number>();
@@ -56,7 +91,7 @@ export function Board() {
 
   return (
     <div
-      className="relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-lg"
+      className="relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)]"
       style={{ borderColor: "var(--color-border-strong)" }}
       role="grid"
       aria-label="Sudoku board"
@@ -88,7 +123,7 @@ export function Board() {
               inPeer && "bg-highlight",
               inSame && "bg-same",
               isConflict && "bg-conflict",
-              isSelected && "bg-highlight-strong ring-2 ring-[color:var(--color-primary)]",
+              isSelected && "z-20 bg-highlight-strong ring-2 ring-inset ring-[color:var(--color-primary)]",
               paused && "invisible",
               won && "pointer-events-none",
             )}
@@ -107,7 +142,7 @@ export function Board() {
               </span>
             ) : cell.notes.length > 0 ? (
               <div
-                className="grid h-full w-full grid-cols-3 grid-rows-3 p-[6%] text-[0.32em] leading-none text-muted-foreground"
+                className="grid h-full w-full grid-cols-3 grid-rows-3 p-[6%] text-[0.32em] leading-none text-[color:var(--color-notes)] font-medium"
                 aria-hidden
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (

@@ -56,13 +56,22 @@ export function explainMove(
   // 4. Solution check
   const correctVal = solution[idx];
   if (placedValue !== correctVal) {
+    const existingErrors = cells.filter((c, i) => !c.given && c.value !== 0 && c.value !== solution[i]).length;
+    const details = [
+      `Digit ${placedValue} does not match the unique mathematical solution for this cell.`,
+    ];
+    if (existingErrors > 0) {
+      details.push(
+        `Note: There ${existingErrors === 1 ? "is 1 earlier incorrect entry" : `are ${existingErrors} earlier incorrect entries`} on the board blocking logical progress. Undo or erase previous mistakes.`,
+      );
+    }
     return {
       isCorrect: false,
       title: `Incorrect Digit: ${placedValue}`,
-      reason: `Digit ${placedValue} does not lead to a valid overall solution for this puzzle.`,
-      details: [
-        `Digit ${placedValue} has no rule conflicts with existing numbers, but it blocks the true mathematical solution for this cell.`,
-      ],
+      reason: existingErrors > 0
+        ? `No valid move can be completed here because an earlier incorrect entry is blocking this row, column, or box.`
+        : `Digit ${placedValue} does not lead to a valid solution for this puzzle.`,
+      details,
     };
   }
 

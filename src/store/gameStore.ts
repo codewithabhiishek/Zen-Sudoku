@@ -1,10 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CellState, Difficulty, Grid, Puzzle } from "@/lib/sudoku/types";
-import { findConflicts, PEERS } from "@/lib/sudoku/solver";
+import { findConflicts, PEERS, ROWS, COLS, BOXES } from "@/lib/sudoku/solver";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
+import {
+  playSelectSound,
+  playCorrectSound,
+  playErrorSound,
+  playNotesSound,
+  playEraseSound,
+  playHintSound,
+  playWinSound,
+} from "@/lib/sudoku/audio";
 
 export interface Move {
   idx: number;
@@ -201,7 +210,10 @@ export const useGameStore = create<GameState>()(
         set({ explanation });
       },
 
-      select: (idx) => set({ selected: idx, explanation: null }),
+      select: (idx) => {
+        playSelectSound();
+        set({ selected: idx, explanation: null });
+      },
 
       move: (dr, dc) => {
         const { selected } = get();
@@ -210,6 +222,7 @@ export const useGameStore = create<GameState>()(
         let c = selected % 9;
         r = Math.max(0, Math.min(8, r + dr));
         c = Math.max(0, Math.min(8, c + dc));
+        playSelectSound();
         set({ selected: r * 9 + c, explanation: null });
       },
 
@@ -231,25 +244,66 @@ export const useGameStore = create<GameState>()(
             ? cell.notes.filter((n) => n !== value)
             : [...cell.notes, value].sort();
           cells[idx] = { ...cell, notes };
+          playNotesSound();
         } else if (value === 0) {
           cells[idx] = { ...cell, value: 0, notes: [] };
+          playEraseSound();
         } else {
+          // --- Move Instrumentation Log ---
+          const r = Math.floor(idx / 9);
+          const c = idx % 9;
+          const b = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+          const rowVals = ROWS[r].map((i) => (i === idx ? value : cells[i].value)).filter((v) => v !== 0);
+          const colVals = COLS[c].map((i) => (i === idx ? value : cells[i].value)).filter((v) => v !== 0);
+          const boxVals = BOXES[b].map((i) => (i === idx ? value : cells[i].value)).filter((v) => v !== 0);
+
+          const rowDup = rowVals.filter((v) => v === value).length > 1;
+          const colDup = colVals.filter((v) => v === value).length > 1;
+          const boxDup = boxVals.filter((v) => v === value).length > 1;
+          const matchesSolution = s.puzzle.solution[idx] === value;
+          const isRowValid = !rowDup;
+          const isColValid = !colDup;
+          const isBoxValid = !boxDup;
+          const accepted = true; // State is updated regardless of correctness
+
+          if (import.meta.env.DEV) {
+            console.log(`
+--------------------------------
+Cell: (${r}, ${c}) [index ${idx}]
+Attempted value: ${value}
+Row contents: [${ROWS[r].map((i) => cells[i].value).join(", ")}]
+Column contents: [${COLS[c].map((i) => cells[i].value).join(", ")}]
+Box contents: [${BOXES[b].map((i) => cells[i].value).join(", ")}]
+Row valid? ${isRowValid}
+Column valid? ${isColValid}
+Box valid? ${isBoxValid}
+Matches solution? ${matchesSolution}
+Accepted? ${accepted}
+Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "Mistake logged (does not match solution)."} ${!isRowValid || !isColValid || !isBoxValid ? "Rule conflict introduced." : ""}
+--------------------------------
+            `);
+          }
+
           cells[idx] = { ...cell, value, notes: [] };
 
           // track mistake if wrong
           if (s.puzzle.solution[idx] !== value) {
+            playErrorSound();
             const mistakes = s.mistakes + 1;
             const nextState: Partial<GameState> = { mistakes };
             if (s.mistakeLimit != null && mistakes >= s.mistakeLimit) {
               nextState.running = false;
             }
             set(nextState as GameState);
-          } else if (s.smartNotes) {
-            // strip this value from peer notes
-            for (const p of PEERS[idx]) {
-              const pc = cells[p];
-              if (pc.value === 0 && pc.notes.includes(value)) {
-                cells[p] = { ...pc, notes: pc.notes.filter((n) => n !== value) };
+          } else {
+            playCorrectSound(value);
+            if (s.smartNotes) {
+              // strip this value from peer notes
+              for (const p of PEERS[idx]) {
+                const pc = cells[p];
+                if (pc.value === 0 && pc.notes.includes(value)) {
+                  cells[p] = { ...pc, notes: pc.notes.filter((n) => n !== value) };
+                }
               }
             }
           }
@@ -265,6 +319,7 @@ export const useGameStore = create<GameState>()(
           const puzzle = get().puzzle!;
           const correct = cells.every((c, i) => c.value === puzzle.solution[i]);
           if (correct) {
+            playWinSound();
             const timeSec = Math.floor(get().elapsedMs / 1000);
             const score = computeScore(puzzle, timeSec, get().mistakes, get().hintsUsed);
             // BUG FIX: use applyWinToStats to avoid double-counting
@@ -302,6 +357,7 @@ export const useGameStore = create<GameState>()(
 
         // Generate explanation for the hint
         const explanation = explainMove(cells, s.puzzle.solution, idx, v);
+        playHintSound();
 
         set({
           cells,
@@ -466,4 +522,149 @@ export function conflictsWithGiven(cells: CellState[], conflicts: Set<number>): 
     }
   }
   return out;
+}
+
+export interface BoardValidationReport {
+  rowDuplicates: { row: number; value: number; indices: number[] }[];
+  colDuplicates: { col: number; value: number; indices: number[] }[];
+  boxDuplicates: { box: number; value: number; indices: number[] }[];
+  solutionDisagreements: { idx: number; row: number; col: number; placed: number; expected: number }[];
+  impossibleEmptyCells: {
+    idx: number;
+    row: number;
+    col: number;
+    box: number;
+    explanation: {
+      rowValues: number[];
+      colValues: number[];
+      boxValues: number[];
+      rowAllows: number[];
+      colAllows: number[];
+      boxAllows: number[];
+      intersection: number[];
+    };
+  }[];
+}
+
+export function validateEntireBoard(cells: CellState[], solution?: Grid): BoardValidationReport {
+  const grid = cells.map((c) => c.value);
+  const report: BoardValidationReport = {
+    rowDuplicates: [],
+    colDuplicates: [],
+    boxDuplicates: [],
+    solutionDisagreements: [],
+    impossibleEmptyCells: [],
+  };
+
+  // 1. Check Row Duplicates
+  for (let r = 0; r < 9; r++) {
+    const seen = new Map<number, number[]>();
+    for (const idx of ROWS[r]) {
+      const v = grid[idx];
+      if (v !== 0) {
+        const arr = seen.get(v) ?? [];
+        arr.push(idx);
+        seen.set(v, arr);
+      }
+    }
+    for (const [val, indices] of seen.entries()) {
+      if (indices.length > 1) {
+        report.rowDuplicates.push({ row: r, value: val, indices });
+      }
+    }
+  }
+
+  // 2. Check Col Duplicates
+  for (let c = 0; c < 9; c++) {
+    const seen = new Map<number, number[]>();
+    for (const idx of COLS[c]) {
+      const v = grid[idx];
+      if (v !== 0) {
+        const arr = seen.get(v) ?? [];
+        arr.push(idx);
+        seen.set(v, arr);
+      }
+    }
+    for (const [val, indices] of seen.entries()) {
+      if (indices.length > 1) {
+        report.colDuplicates.push({ col: c, value: val, indices });
+      }
+    }
+  }
+
+  // 3. Check Box Duplicates
+  for (let b = 0; b < 9; b++) {
+    const seen = new Map<number, number[]>();
+    for (const idx of BOXES[b]) {
+      const v = grid[idx];
+      if (v !== 0) {
+        const arr = seen.get(v) ?? [];
+        arr.push(idx);
+        seen.set(v, arr);
+      }
+    }
+    for (const [val, indices] of seen.entries()) {
+      if (indices.length > 1) {
+        report.boxDuplicates.push({ box: b, value: val, indices });
+      }
+    }
+  }
+
+  // 4. Check Disagreements with Stored Solution
+  if (solution) {
+    for (let i = 0; i < 81; i++) {
+      if (grid[i] !== 0 && grid[i] !== solution[i]) {
+        report.solutionDisagreements.push({
+          idx: i,
+          row: Math.floor(i / 9),
+          col: i % 9,
+          placed: grid[i],
+          expected: solution[i],
+        });
+      }
+    }
+  }
+
+  // 5. Check Impossible Empty Cells (0 legal candidates)
+  for (let i = 0; i < 81; i++) {
+    if (grid[i] !== 0) continue;
+    const r = Math.floor(i / 9);
+    const c = i % 9;
+    const b = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+
+    const rowVals = Array.from(new Set(ROWS[r].map((idx) => grid[idx]).filter((v) => v !== 0))).sort((a, b) => a - b);
+    const colVals = Array.from(new Set(COLS[c].map((idx) => grid[idx]).filter((v) => v !== 0))).sort((a, b) => a - b);
+    const boxVals = Array.from(new Set(BOXES[b].map((idx) => grid[idx]).filter((v) => v !== 0))).sort((a, b) => a - b);
+
+    const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const rowAllows = ALL.filter((v) => !rowVals.includes(v));
+    const colAllows = ALL.filter((v) => !colVals.includes(v));
+    const boxAllows = ALL.filter((v) => !boxVals.includes(v));
+
+    const usedPeerVals = new Set<number>();
+    for (const p of PEERS[i]) {
+      if (grid[p] !== 0) usedPeerVals.add(grid[p]);
+    }
+    const intersection = ALL.filter((v) => !usedPeerVals.has(v));
+
+    if (intersection.length === 0) {
+      report.impossibleEmptyCells.push({
+        idx: i,
+        row: r,
+        col: c,
+        box: b,
+        explanation: {
+          rowValues: rowVals,
+          colValues: colVals,
+          boxValues: boxVals,
+          rowAllows,
+          colAllows,
+          boxAllows,
+          intersection,
+        },
+      });
+    }
+  }
+
+  return report;
 }

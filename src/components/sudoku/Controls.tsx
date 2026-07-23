@@ -1,5 +1,5 @@
 import { useGameStore } from "@/store/gameStore";
-import { HelpCircle, Home, Lightbulb, Pause, Play, Redo2, RotateCcw, Search, Send, Undo2 } from "lucide-react";
+import { HelpCircle, Home, Lightbulb, Pause, Play, Redo2, RotateCcw, Search, Send, Undo2, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -36,38 +36,41 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
   }, [running, paused, won, tick]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-3 py-2">
-      <div className="flex items-center gap-2">
+    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-3 py-3">
+      <div className="flex items-center gap-3">
         <button
           onClick={onNewGame}
-          className="flex items-center gap-1 rounded-md border bg-surface px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-muted transition"
+          className="btn-interactive flex items-center gap-1.5 rounded-lg border bg-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-muted transition"
           title="Change Level / Difficulty"
         >
           <Home className="size-3.5 text-primary" /> {puzzle?.difficulty ?? "—"}{puzzle?.levelNumber ? ` • LVL ${puzzle.levelNumber}` : ""}
         </button>
         <span className="text-xs text-muted-foreground">
-          Mistakes: <span className="text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
+          Mistakes <span className="font-semibold text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
         </span>
       </div>
       <div className="flex items-center gap-2">
         <button
           onClick={toggleHideTimer}
-          className="rounded-md px-2 py-1 font-mono text-lg tabular-nums text-foreground hover:bg-muted"
+          className="btn-interactive flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-3 py-1.5 font-mono text-xs sm:text-sm font-semibold tabular-nums text-foreground transition hover:bg-muted"
           aria-label={hideTimer ? "Show timer" : "Hide timer"}
+          title={hideTimer ? "Show timer" : "Hide timer"}
         >
-          {hideTimer ? "—:—" : fmt(elapsed)}
+          <Clock className="size-3.5 text-muted-foreground" />
+          <span>{hideTimer ? "—:—" : fmt(elapsed)}</span>
         </button>
         <button
           onClick={() => (paused ? resume() : pause())}
           disabled={!running || won}
-          className="grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted disabled:opacity-40"
+          className="btn-interactive grid size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted disabled:opacity-40 text-muted-foreground hover:text-foreground"
           aria-label={paused ? "Resume" : "Pause"}
+          title={paused ? "Resume" : "Pause"}
         >
           {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
         </button>
         <button
           onClick={onNewGame}
-          className="grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted"
+          className="btn-interactive grid size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
           title="Restart / Level Select"
           aria-label="New game"
         >
@@ -101,7 +104,7 @@ export function Controls() {
   }, [msg]);
 
   return (
-    <div className="controls-bar mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1.5">
+    <div className="controls-bar mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-2">
       <button onClick={undo} disabled={!historyLen} className={btn}>
         <Undo2 className="size-3.5" /> Undo
       </button>
@@ -109,7 +112,7 @@ export function Controls() {
         <Redo2 className="size-3.5" /> Redo
       </button>
       {selectedHasValue ? (
-        <button onClick={explainCurrent} className={cn(btn, "border-primary/50 text-primary bg-primary/5")}>
+        <button onClick={explainCurrent} className={cn(btn, "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10")}>
           <HelpCircle className="size-3.5" /> Explain
         </button>
       ) : (
@@ -124,9 +127,15 @@ export function Controls() {
         </button>
       )}
       <button onClick={hint} className={btn}>
-        <Lightbulb className="size-3.5" /> Hint <span className="text-muted-foreground">({hintsUsed})</span>
+        <Lightbulb className="size-3.5" /> Hint <span className="text-muted-foreground/70">({hintsUsed})</span>
       </button>
-      <button onClick={submitGame} className={cn(btn, "bg-primary text-primary-foreground border-primary hover:opacity-90 font-semibold")}>
+      <button
+        onClick={submitGame}
+        className={cn(
+          btn,
+          "bg-primary text-primary-foreground border-primary font-semibold hover:bg-primary/90 hover:text-primary-foreground shadow-sm"
+        )}
+      >
         <Send className="size-3.5" /> Submit
       </button>
       {msg && (
@@ -142,5 +151,5 @@ export function Controls() {
 }
 
 const btn = cn(
-  "flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border bg-surface px-2 text-sm font-medium transition hover:bg-muted disabled:opacity-40",
+  "btn-interactive flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2 text-xs sm:text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40",
 );
