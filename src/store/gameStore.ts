@@ -148,8 +148,19 @@ function yesterdayKey(): string {
 /** Update stats after a confirmed win. Pure function — returns updated stats. */
 function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: ScoreBreakdown): Stats {
   const next = { ...stats, completedLevels: [...(stats.completedLevels ?? [])] };
-  next.gamesPlayed += 1;
-  next.gamesWon += 1;
+  const isLevelGame = puzzle.levelNumber != null;
+  const levelKey = isLevelGame ? `${puzzle.difficulty}-${puzzle.levelNumber}` : null;
+  const isNewLevelWin = levelKey != null && !next.completedLevels.includes(levelKey);
+
+  if (isNewLevelWin && levelKey) {
+    next.completedLevels.push(levelKey);
+    next.gamesWon += 1;
+    next.gamesPlayed += 1;
+  } else if (!isLevelGame) {
+    next.gamesWon += 1;
+    next.gamesPlayed += 1;
+  }
+
   next.totalPoints += score.total;
   const best = next.bestTimeByDifficulty[puzzle.difficulty];
   if (best == null || timeSec < best) next.bestTimeByDifficulty[puzzle.difficulty] = timeSec;
@@ -158,13 +169,7 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
   else if (next.lastPlayedDate !== today) next.currentStreakDays = 1;
   next.longestStreakDays = Math.max(next.longestStreakDays, next.currentStreakDays);
   next.lastPlayedDate = today;
-  // Mark the level as completed if the puzzle had a level number
-  if (puzzle.levelNumber != null) {
-    const key = `${puzzle.difficulty}-${puzzle.levelNumber}`;
-    if (!next.completedLevels.includes(key)) {
-      next.completedLevels.push(key);
-    }
-  }
+
   return next;
 }
 
@@ -529,13 +534,20 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
       // crash existing users whose localStorage snapshot is missing those fields.
       merge: (persisted: unknown, current: GameState): GameState => {
         const p = persisted as Partial<GameState>;
+        const rawStats = {
+          ...emptyStats(),
+          ...(p.stats ?? {}),
+        };
+        // Auto-heal: sanitize gamesWon & gamesPlayed if previous double-counting created a mismatch with unique completed levels
+        const completedCount = (rawStats.completedLevels ?? []).length;
+        if (completedCount > 0 && rawStats.gamesWon > completedCount) {
+          rawStats.gamesWon = completedCount;
+          rawStats.gamesPlayed = completedCount;
+        }
         return {
           ...current,
           ...p,
-          stats: {
-            ...emptyStats(),
-            ...(p.stats ?? {}),
-          },
+          stats: rawStats,
         };
       },
     },

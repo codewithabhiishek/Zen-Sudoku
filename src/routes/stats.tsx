@@ -40,17 +40,22 @@ export function StatsPage() {
     document.title = "Personal Statistics • Zen Sudoku";
   }, [theme]);
 
-  // Load async DB stats if available
+  // Load async DB stats if available for registered user
   useEffect(() => {
-    getStatistics("guest_user")
+    const userId = useUserStore.getState().userId;
+    if (!userId) return;
+    getStatistics(userId)
       .then((data) => {
         if (data) setDbStats(data);
       })
       .catch(() => {});
   }, []);
 
-  const played = dbStats?.gamesPlayed ?? localStats.gamesPlayed ?? 0;
-  const won = dbStats?.gamesWon ?? localStats.gamesWon ?? 0;
+  const completedCount = localStats.completedLevels?.length ?? 0;
+  const rawPlayed = dbStats?.gamesPlayed ?? localStats.gamesPlayed ?? 0;
+  const rawWon = dbStats?.gamesWon ?? (completedCount > 0 ? Math.min(localStats.gamesWon, completedCount) : localStats.gamesWon) ?? 0;
+  const won = Math.min(rawWon, rawPlayed);
+  const played = Math.max(rawPlayed, won);
   const winRate = played > 0 ? Number(((won / played) * 100).toFixed(1)) : 0;
   const currentStreak = dbStats?.currentStreak ?? localStats.currentStreakDays ?? 0;
   const longestStreak = dbStats?.longestStreak ?? localStats.longestStreakDays ?? 0;
