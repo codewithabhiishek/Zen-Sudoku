@@ -10,18 +10,20 @@ A modern, high-performance, and mathematical Sudoku application built with React
 - 📊 **Technique-Based Rating**: Difficulty levels (Easy, Medium, Hard, Expert) are classified by the hardest logical technique required (Naked/Hidden Singles, Pointing Pairs, Box-Line Reduction, Hidden Pairs, X-Wing).
 - 🏆 **10 Levels Per Difficulty**: 40 distinct levels scaling smoothly from Starter to Grandmaster.
 - 👤 **Guest Profile System**: Seamless onboarding with zero passwords or email required. Generates a persistent UUID stored in `localStorage` and synchronized with Neon PostgreSQL.
-- 📈 **Personal Statistics Page (`/stats`)**: Lifetime statistics including Win Rate %, Current Streak Days, Longest Streak, Best Solve Times per difficulty, total XP, and recent game moves.
+- 📈 **Personal Statistics Page (`/stats`)**: Lifetime statistics including Win Rate %, Current Streak Days with visual progress bars, Longest Streak, Best Solve Times per difficulty, total XP, and recent game moves.
 - 🥇 **Global & Daily Leaderboards (`/leaderboard`)**: Real-time rankings filterable by period (*Global, Daily, Weekly, Monthly, All-Time*) and difficulty rating.
-- 🎨 **Multiple Visual Themes**:
-  - **AMOLED**: True dark mode for OLED screens.
-  - **Midnight**: Deep blue executive theme.
-  - **Light**: Clean, high-contrast day design.
-  - **Retro CRT**: 80s arcade terminal vibe with scanlines & green/pink neon glow.
-  - **Paper**: Bookish print-puzzle aesthetics.
-  - **High Contrast**: Maximum accessibility mode.
-- 📱 **Dedicated Mobile-First Layout**: Custom responsive single-row mobile header, 48px minimum touch targets, 9-column digit keypad, and full-width primary submit action.
+- 🎨 **6 Curated Visual Themes**:
+  - ⬛ **Graphite**: Dark slate & soft indigo primary.
+  - 🌲 **Forest Zen**: Deep emerald & mint green accents.
+  - 🗼 **Tokyo Night**: Vibrant neon blue & Japanese night aesthetic.
+  - ☕ **Catppuccin Mocha**: Cozy pastel violet & mocha tones.
+  - ⚡ **AMOLED**: True pure black (`#000000`) mode optimized for OLED battery saving.
+  - ♟️ **Chessboard Beige**: Warm paper & wooden print-puzzle aesthetic.
+- 📱 **Dedicated Mobile-First Layout**: Single-row mobile header, 48px minimum touch targets, 9-column digit keypad, and full-width primary submit action.
+- ⌨️ **Full Desktop Keyboard Shortcuts**: Arrow Keys (Navigate), 1–9 (Input), Backspace/Delete (Erase), N (Notes), H (Hint), F (Fullscreen).
+- 🔊 **Web Audio Synthesizer**: Subtle client-side Web Audio API sounds for moves, mistakes, and puzzle completions.
 - ⏸️ **Auto-Pause & Progress Persistence**: State is automatically saved locally and synced to Neon PostgreSQL; timer automatically pauses when tab is backgrounded.
-- ⚡ **Subtle Micro-Interactions**: Linear & Apple-inspired 60 FPS transitions, card entry staggers, animated count-up numbers, and automatic glowing text effects.
+- ⚡ **Subtle Micro-Interactions**: Linear & Apple-inspired 60 FPS transitions, card entry staggers, blinking timer colon, animated count-up numbers, and automatic glowing text effects.
 
 ---
 
@@ -32,7 +34,7 @@ A modern, high-performance, and mathematical Sudoku application built with React
 - **Styling & Icons**: [Tailwind CSS v4](https://tailwindcss.com/), [Lucide React](https://lucide.dev/)
 - **Database & ORM**: [Neon PostgreSQL](https://neon.tech/) (Serverless), [Drizzle ORM](https://orm.drizzle.team/)
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) with localStorage persistence
-- **Animations**: CSS keyframes, Canvas Confetti, and custom motion utilities
+- **Audio & Animations**: Web Audio API, CSS keyframes, Canvas Confetti
 
 ---
 
