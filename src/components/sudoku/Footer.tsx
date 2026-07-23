@@ -33,9 +33,8 @@ export function Footer({ className }: { className?: string }) {
         href="https://abhiishek-dev.vercel.app/"
         target="_blank"
         rel="noopener noreferrer"
-        className="relative inline-block font-semibold focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded transition-transform hover:scale-105 active:scale-95 animate-glow-text"
+        className="relative inline-block font-bold border-b-2 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded transition-transform hover:scale-105 active:scale-95 animate-glow-text"
         style={{
-          borderBottom: "1.5px solid var(--color-primary)",
           paddingBottom: "1px",
         }}
       >
