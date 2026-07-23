@@ -114,6 +114,14 @@ function HomePage() {
   const activeDiff = DIFFICULTIES.find((d) => d.id === selectedDiff)!;
   const completedForDiff = (d: Difficulty) => completedLevels.filter((k) => k.startsWith(`${d}-`)).length;
 
+  // Calculate guaranteed minimum XP for all completed levels (100 XP per Easy level, 200 XP per Medium, etc.)
+  const minGuaranteedXP = completedLevels.reduce((sum, key) => {
+    const diff = (key.split("-")[0] || "easy") as Difficulty;
+    const base = { easy: 200, medium: 400, hard: 800, expert: 1500 }[diff] || 200;
+    return sum + Math.round(base * 0.5);
+  }, 0);
+  const totalPoints = Math.max(stats.totalPoints || 0, minGuaranteedXP);
+
   return (
     <main
       className="flex min-h-dvh flex-col"
@@ -328,7 +336,7 @@ function HomePage() {
           </span>
           <span className="text-border">•</span>
           <span className="flex items-center gap-1.5 font-semibold">
-            ★ <span className="text-foreground">{stats.totalPoints.toLocaleString()}</span> pts
+            ★ <span className="text-foreground">{totalPoints.toLocaleString()}</span> pts
           </span>
           <span className="text-border">•</span>
           <span className="flex items-center gap-1.5 font-semibold">

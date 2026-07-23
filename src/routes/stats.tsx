@@ -59,7 +59,8 @@ export function StatsPage() {
       .catch(() => {});
   }, []);
 
-  const completedCount = localStats.completedLevels?.length ?? 0;
+  const completedLevels = localStats.completedLevels ?? [];
+  const completedCount = completedLevels.length;
   const rawPlayed = dbStats?.gamesPlayed ?? localStats.gamesPlayed ?? 0;
   const rawWon = dbStats?.gamesWon ?? (completedCount > 0 ? Math.min(localStats.gamesWon, completedCount) : localStats.gamesWon) ?? 0;
   const won = Math.min(rawWon, rawPlayed);
@@ -67,6 +68,14 @@ export function StatsPage() {
   const winRate = played > 0 ? Number(((won / played) * 100).toFixed(1)) : 0;
   const currentStreak = dbStats?.currentStreak ?? localStats.currentStreakDays ?? 0;
   const longestStreak = dbStats?.longestStreak ?? localStats.longestStreakDays ?? 0;
+
+  // Calculate guaranteed minimum XP for all completed levels (100 XP per Easy level, 200 XP per Medium, etc.)
+  const minGuaranteedXP = completedLevels.reduce((sum, key) => {
+    const diff = (key.split("-")[0] || "easy") as "easy" | "medium" | "hard" | "expert";
+    const base = { easy: 200, medium: 400, hard: 800, expert: 1500 }[diff] || 200;
+    return sum + Math.round(base * 0.5);
+  }, 0);
+  const totalPoints = Math.max(localStats.totalPoints || 0, minGuaranteedXP);
 
   const bestEasy = dbStats?.bestEasy ?? localStats.bestTimeByDifficulty.easy;
   const bestMedium = dbStats?.bestMedium ?? localStats.bestTimeByDifficulty.medium;
@@ -135,7 +144,7 @@ export function StatsPage() {
             delayIndex={3}
             icon={<Clock className="size-4 text-accent" />}
             label="Total Points"
-            value={<AnimatedNumber value={localStats.totalPoints || 0} />}
+            value={<AnimatedNumber value={totalPoints} />}
             subtext="Lifetime XP"
           />
         </div>

@@ -93,7 +93,7 @@ export function LeaderboardPage() {
             </Link>
             <div>
               <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">Leaderboards</h1>
-              <p className="text-xs text-muted-foreground">Top Zen Sudoku players around the world</p>
+              <p className="text-xs text-muted-foreground">Top solvers & solve time records</p>
             </div>
           </div>
         </div>
