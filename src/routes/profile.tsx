@@ -3,7 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useUserStore } from "@/store/userStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useGameStore } from "@/store/gameStore";
-import { ArrowLeft, User, Copy, Check, Trash2, RotateCcw, ShieldCheck, Key } from "lucide-react";
+import { SignInButton, UserButton, SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
+import { ArrowLeft, User, Copy, Check, Trash2, RotateCcw, ShieldCheck, Cloud, LogIn, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -16,11 +17,20 @@ export function ProfilePage() {
   const updateUsername = useUserStore((s) => s.updateUsername);
   const deleteProfile = useUserStore((s) => s.deleteProfile);
 
+  const { isLoaded, isSignedIn, user: clerkUser } = useUser();
+
   const [inputName, setInputName] = useState(username);
   const [copied, setCopied] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  useEffect(() => setInputName(username), [username]);
+  useEffect(() => {
+    if (clerkUser?.username || clerkUser?.firstName) {
+      const name = clerkUser.username || clerkUser.firstName || "";
+      setInputName(name);
+    } else {
+      setInputName(username);
+    }
+  }, [username, clerkUser]);
 
   // Apply theme
   useEffect(() => {
@@ -47,8 +57,9 @@ export function ProfilePage() {
   };
 
   const handleCopyUUID = () => {
-    if (!userId) return;
-    navigator.clipboard.writeText(userId);
+    const activeId = clerkUser?.id || userId;
+    if (!activeId) return;
+    navigator.clipboard.writeText(activeId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -93,8 +104,53 @@ export function ProfilePage() {
               <ArrowLeft className="size-5" />
             </Link>
             <div>
-              <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">Guest Profile</h1>
+              <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">
+                {isSignedIn ? "Cloud Profile" : "Guest Profile"}
+              </h1>
               <p className="text-xs text-muted-foreground">Manage your identity and game preferences</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── CLERK CLOUD SYNC CARD ──────────────────────────── */}
+        <div className="mb-6 rounded-2xl border bg-surface p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+                <Cloud className="size-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+                  Cloud Sync
+                  {isSignedIn ? (
+                    <span className="rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold">
+                      Active ✓
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-muted text-muted-foreground border px-2 py-0.5 text-[10px] font-bold">
+                      Guest Mode
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isSignedIn
+                    ? "Your level progress & stats sync automatically across devices."
+                    : "Sign in with Google to sync levels & stats across Mac, PC, and mobile."}
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0">
+              <SignedIn>
+                <UserButton userProfileMode="navigation" userProfileUrl="/profile" />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="btn-interactive flex items-center gap-1.5 rounded-xl border border-primary bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground shadow-xs transition hover:bg-primary/90">
+                    <LogIn className="size-3.5" /> Sign In
+                  </button>
+                </SignInButton>
+              </SignedOut>
             </div>
           </div>
         </div>
@@ -102,13 +158,29 @@ export function ProfilePage() {
         {/* Profile Card */}
         <div className="card-interactive rounded-2xl border bg-surface p-6 shadow-sm space-y-6">
           <div className="flex items-center gap-4 border-b pb-5">
-            <div className="grid size-14 place-items-center rounded-2xl border bg-surface-2 text-primary font-bold text-xl shadow-sm">
-              {username ? username[0].toUpperCase() : <User className="size-6" />}
+            <div className="grid size-14 place-items-center rounded-2xl border bg-surface-2 text-primary font-bold text-xl shadow-sm overflow-hidden">
+              {clerkUser?.imageUrl ? (
+                <img src={clerkUser.imageUrl} alt="Avatar" className="size-full object-cover" />
+              ) : username ? (
+                username[0].toUpperCase()
+              ) : (
+                <User className="size-6" />
+              )}
             </div>
             <div>
-              <h2 className="text-lg font-bold">{username || "Guest Player"}</h2>
+              <h2 className="text-lg font-bold">
+                {clerkUser?.fullName || clerkUser?.username || username || "Guest Player"}
+              </h2>
               <div className="mt-1 flex items-center gap-1.5 text-xs text-emerald-500 font-medium">
-                <ShieldCheck className="size-4" /> Guest Profile Active
+                {isSignedIn ? (
+                  <>
+                    <Sparkles className="size-4 text-primary" /> Logged in via Google / Clerk
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="size-4" /> Guest Profile Active
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { Footer } from "@/components/sudoku/Footer";
 import { useGameStore } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
+import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/clerk-react";
 import { trackDifficultySelected } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import type { Difficulty } from "@/lib/sudoku/types";
