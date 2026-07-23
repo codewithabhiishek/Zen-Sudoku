@@ -39,7 +39,7 @@ export function Keypad() {
               )}
             >
               <span className="sudoku-num text-foreground">{n}</span>
-              <span className="pointer-events-none absolute bottom-0.5 right-1 text-[0.55rem] text-muted-foreground font-mono">
+              <span className="pointer-events-none absolute bottom-0.5 right-1.5 font-mono text-[0.65rem] font-bold text-foreground/80 sm:text-xs">
                 {Math.max(0, left)}
               </span>
             </button>

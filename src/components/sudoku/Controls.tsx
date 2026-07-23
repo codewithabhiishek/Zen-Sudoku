@@ -3,11 +3,19 @@ import { HelpCircle, Home, Lightbulb, Pause, Play, Redo2, RotateCcw, Search, Sen
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-function fmt(ms: number) {
-  const total = Math.floor(ms / 1000);
+function TimerDisplay({ elapsed, hideTimer }: { elapsed: number; hideTimer: boolean }) {
+  if (hideTimer) return <span>—:—</span>;
+  const total = Math.floor(elapsed / 1000);
   const m = Math.floor(total / 60);
   const s = total % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
+  const blink = total % 2 === 0;
+  return (
+    <span className="font-mono tabular-nums">
+      {m}
+      <span className={cn("inline-block transition-opacity duration-200", blink ? "opacity-100" : "opacity-30")}>:</span>
+      {s.toString().padStart(2, "0")}
+    </span>
+  );
 }
 
 export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
@@ -36,7 +44,7 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
   }, [running, paused, won, tick]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between py-1.5 sm:py-3">
+    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between py-1.5 sm:py-3 mb-2 sm:mb-4">
       <div className="flex flex-1 items-center justify-between rounded-lg border bg-surface px-3 py-1.5 sm:px-4 sm:py-2">
         {/* Difficulty */}
         <div className="flex items-center gap-1 text-xs font-semibold capitalize text-muted-foreground sm:text-sm">
@@ -45,25 +53,26 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
             {puzzle?.difficulty
               ? puzzle.difficulty.charAt(0).toUpperCase() + puzzle.difficulty.slice(1)
               : "—"}
-            {puzzle?.levelNumber ? ` • Lv${puzzle.levelNumber}` : ""}
+            {puzzle?.levelNumber ? ` · Level ${puzzle.levelNumber}` : ""}
           </span>
         </div>
 
         {/* Mistakes */}
         <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground sm:text-sm" title="Mistakes made">
-          <span>Mistakes</span>
-          <span className="text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
+          <span className="text-amber-500">⚠</span>
+          <span>Mistakes:</span>
+          <span className="font-semibold text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
         </div>
 
         {/* Timer */}
         <button
           onClick={toggleHideTimer}
-          className="flex items-center gap-1 font-mono text-xs font-semibold tabular-nums text-foreground transition hover:opacity-70 sm:text-sm"
+          className="flex items-center gap-1 text-xs font-semibold text-foreground transition hover:opacity-70 sm:text-sm"
           aria-label={hideTimer ? "Show timer" : "Hide timer"}
           title={hideTimer ? "Show timer" : "Hide timer"}
         >
           <Clock className="size-3.5 text-muted-foreground" />
-          <span>{hideTimer ? "—:—" : fmt(elapsed)}</span>
+          <TimerDisplay elapsed={elapsed} hideTimer={hideTimer} />
         </button>
       </div>
 
@@ -116,22 +125,15 @@ export function Controls() {
 
   return (
     <div className="controls-bar mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1 sm:gap-2">
+      {/* 1. Undo */}
       <button onClick={undo} disabled={!historyLen} className={btn}>
         <Undo2 className="size-3.5" /> <span className="hidden sm:inline">Undo</span>
       </button>
+      {/* 2. Redo */}
       <button onClick={redo} disabled={!futureLen} className={btn}>
         <Redo2 className="size-3.5" /> <span className="hidden sm:inline">Redo</span>
       </button>
-      <button
-        onClick={toggleNotes}
-        className={cn(btn, notesMode && "bg-primary/10 text-primary border-primary/50")}
-        aria-pressed={notesMode}
-      >
-        <PencilLine className="size-3.5" /> <span>Notes</span>
-      </button>
-      <button onClick={() => input(0)} className={btn}>
-        <Eraser className="size-3.5" /> <span>Erase</span>
-      </button>
+      {/* 3. Check / Explain */}
       {selectedHasValue ? (
         <button onClick={explainCurrent} className={cn(btn, "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10")}>
           <HelpCircle className="size-3.5" /> Explain
@@ -147,8 +149,21 @@ export function Controls() {
           <Search className="size-3.5" /> Check
         </button>
       )}
+      {/* 4. Hint */}
       <button onClick={hint} className={btn}>
         <Lightbulb className="size-3.5" /> Hint ({hintsUsed})
+      </button>
+      {/* 5. Notes */}
+      <button
+        onClick={toggleNotes}
+        className={cn(btn, notesMode && "bg-primary/10 text-primary border-primary/50")}
+        aria-pressed={notesMode}
+      >
+        <PencilLine className="size-3.5" /> <span>Notes</span>
+      </button>
+      {/* 6. Erase */}
+      <button onClick={() => input(0)} className={btn}>
+        <Eraser className="size-3.5" /> <span>Erase</span>
       </button>
       {msg && (
         <div
@@ -167,7 +182,7 @@ export function PrimarySubmitButton() {
   return (
     <button
       onClick={submitGame}
-      className="btn-interactive flex h-12 w-full max-w-[min(92vw,560px)] items-center justify-center gap-2 rounded-xl border border-primary bg-primary px-4 font-bold text-primary-foreground shadow-md transition hover:bg-primary/90"
+      className="btn-interactive flex h-12 w-full max-w-[min(92vw,560px)] items-center justify-center gap-2 rounded-xl border border-primary bg-primary px-4 font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.98]"
     >
       <Send className="size-4" /> Submit Puzzle
     </button>

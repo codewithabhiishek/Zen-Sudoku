@@ -91,7 +91,7 @@ export function Board() {
 
   return (
     <div
-      className="relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)]"
+      className="relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
       style={{ borderColor: "var(--color-border-strong)" }}
       role="grid"
       aria-label="Sudoku board"
@@ -115,15 +115,15 @@ export function Board() {
             aria-selected={isSelected}
             onClick={() => select(i)}
             className={cn(
-              "sudoku-cell relative flex items-center justify-center border border-border transition-colors focus:outline-none",
+              "sudoku-cell relative flex items-center justify-center border border-border transition-all duration-150 focus:outline-none",
               "text-[calc(min(4.5vw,26px)*var(--font-scale,1))] leading-none",
               // thick borders every 3
               (c === 2 || c === 5) && "border-r-2 border-r-[color:var(--color-border-strong)]",
               (r === 2 || r === 5) && "border-b-2 border-b-[color:var(--color-border-strong)]",
               inPeer && "bg-highlight",
               inSame && "bg-same",
-              isConflict && "bg-conflict",
-              isSelected && "z-20 bg-highlight-strong ring-2 ring-inset ring-[color:var(--color-primary)]",
+              isConflict && "bg-red-500/15 border-red-500/40",
+              isSelected && "z-20 bg-primary/20 shadow-[0_0_12px_rgba(59,130,246,0.5)] ring-2 ring-inset ring-primary",
               paused && "invisible",
               won && "pointer-events-none",
             )}
@@ -134,8 +134,8 @@ export function Board() {
                 className={cn(
                   "sudoku-num font-semibold tabular-nums",
                   cell.given ? "text-given" : "text-user",
-                  isConflict && "text-danger",
-                  isGivenConflict && "underline decoration-danger decoration-2",
+                  isConflict && "text-red-500 font-bold",
+                  isGivenConflict && "underline decoration-red-500 decoration-2",
                 )}
               >
                 {cell.value}
