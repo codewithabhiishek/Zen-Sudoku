@@ -93,7 +93,7 @@ export function SettingsSheet() {
       <button
         onClick={handleOpen}
         title="Settings"
-        className="grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted"
+        className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
         aria-label="Settings"
       >
         <Settings className="size-4" />

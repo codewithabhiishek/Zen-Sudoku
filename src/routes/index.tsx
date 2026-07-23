@@ -110,11 +110,11 @@ function SudokuPage() {
             </h1>
           </div>
 
-          {/* Quick Navigation Group (Profile, Stats, Leaderboard, Fullscreen, Settings) */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Shared Unified Navigation Toolbar Card */}
+          <div className="flex items-center gap-0.5 sm:gap-1 rounded-xl border bg-surface p-1 shadow-sm">
             <Link
               to="/profile"
-              className="btn-interactive grid size-9 sm:size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
               title="Profile"
               aria-label="Profile"
             >
@@ -122,7 +122,7 @@ function SudokuPage() {
             </Link>
             <Link
               to="/stats"
-              className="btn-interactive grid size-9 sm:size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
               title="Statistics"
               aria-label="Statistics"
             >
@@ -130,7 +130,7 @@ function SudokuPage() {
             </Link>
             <Link
               to="/leaderboard"
-              className="btn-interactive grid size-9 sm:size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
               title="Leaderboards"
               aria-label="Leaderboards"
             >

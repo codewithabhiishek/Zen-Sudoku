@@ -146,7 +146,7 @@ export function ZoomControls() {
         disabled
         type="button"
         title="Fullscreen"
-        className="grid size-11 place-items-center rounded-md border bg-surface/50 text-muted-foreground/40 opacity-40 cursor-not-allowed"
+        className="grid size-8 sm:size-9 place-items-center rounded-lg text-muted-foreground/40 opacity-40 cursor-not-allowed"
         aria-label="Fullscreen"
       >
         <Maximize2 className="size-4" />
@@ -160,8 +160,8 @@ export function ZoomControls() {
       onClick={toggleFullscreen}
       title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
       className={cn(
-        "grid size-11 place-items-center rounded-md border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground",
-        isFullscreen && "border-primary text-primary bg-primary/10",
+        "btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground",
+        isFullscreen && "text-primary bg-primary/10 font-bold",
       )}
       aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
     >
