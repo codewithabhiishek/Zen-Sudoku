@@ -134,8 +134,8 @@ export function ProfilePage() {
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {isSignedIn
-                    ? "Your level progress & stats sync automatically across devices."
-                    : "Sign in with Google to sync levels & stats across Mac, PC, and mobile."}
+                    ? "Your level progress & stats sync automatically across all your devices."
+                    : "Sign in with Google to sync your level progress & stats seamlessly across all your devices."}
                 </p>
               </div>
             </div>
