@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useGameStore } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useUserStore } from "@/store/userStore";
 import { getStatistics } from "@/database/api";
 import { AnimatedNumber } from "@/components/sudoku/AnimatedNumber";
 import { ArrowLeft, Trophy, Flame, Clock, Target, CheckCircle, BarChart3, AlertCircle } from "lucide-react";
