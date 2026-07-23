@@ -39,14 +39,20 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
     <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between py-2 sm:py-3">
       <div className="flex flex-1 items-center justify-between rounded-lg border bg-surface px-3 py-2 sm:px-4">
         {/* Difficulty */}
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:text-sm">
+        <div className="flex items-center gap-1.5 text-xs font-semibold capitalize text-muted-foreground sm:text-sm">
           <Home className="size-3.5 text-primary" />
-          <span>{puzzle?.difficulty ?? "—"}{puzzle?.levelNumber ? ` • Lv${puzzle.levelNumber}` : ""}</span>
+          <span>
+            {puzzle?.difficulty
+              ? puzzle.difficulty.charAt(0).toUpperCase() + puzzle.difficulty.slice(1)
+              : "—"}
+            {puzzle?.levelNumber ? ` • Lv${puzzle.levelNumber}` : ""}
+          </span>
         </div>
 
         {/* Mistakes */}
-        <div className="flex items-center gap-1 text-xs font-semibold text-amber-500 sm:text-sm" title="Mistakes made">
-          <span>⚠ {mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:text-sm" title="Mistakes made">
+          <span>Mistakes</span>
+          <span className="text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
         </div>
 
         {/* Timer */}
