@@ -435,6 +435,20 @@ body, main, div, button {
   animation: pageEnter 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.85;
+    filter: brightness(1.2);
+  }
+}
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
 /* Staggered Card / Row Entry */
 @keyframes cardEntry {
   from {

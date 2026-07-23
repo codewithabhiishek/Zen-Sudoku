@@ -36,33 +36,36 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
   }, [running, paused, won, tick]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-3 py-3">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onNewGame}
-          className="btn-interactive flex items-center gap-1.5 rounded-lg border bg-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-muted transition"
-          title="Change Level / Difficulty"
-        >
-          <Home className="size-3.5 text-primary" /> {puzzle?.difficulty ?? "—"}{puzzle?.levelNumber ? ` • LVL ${puzzle.levelNumber}` : ""}
-        </button>
-        <span className="text-xs text-muted-foreground">
-          Mistakes <span className="font-semibold text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
+    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between py-2 sm:py-3">
+      <div className="flex flex-1 items-center justify-between rounded-lg border bg-surface px-3 py-2 sm:px-4">
+        {/* Difficulty */}
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:text-sm">
+          <Home className="size-3.5 text-primary" />
+          <span>{puzzle?.difficulty ?? "—"}{puzzle?.levelNumber ? ` • Lv${puzzle.levelNumber}` : ""}</span>
+        </div>
+
+        {/* Mistakes */}
+        <div className="flex items-center gap-1 text-xs font-semibold text-amber-500 sm:text-sm" title="Mistakes made">
+          <span>⚠ {mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
+        </div>
+
+        {/* Timer */}
         <button
           onClick={toggleHideTimer}
-          className="btn-interactive flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-3 py-1.5 font-mono text-xs sm:text-sm font-semibold tabular-nums text-foreground transition hover:bg-muted"
+          className="flex items-center gap-1 font-mono text-xs font-semibold tabular-nums text-foreground transition hover:opacity-70 sm:text-sm"
           aria-label={hideTimer ? "Show timer" : "Hide timer"}
           title={hideTimer ? "Show timer" : "Hide timer"}
         >
           <Clock className="size-3.5 text-muted-foreground" />
           <span>{hideTimer ? "—:—" : fmt(elapsed)}</span>
         </button>
+      </div>
+
+      <div className="ml-2 flex items-center gap-1.5 sm:ml-3">
         <button
           onClick={() => (paused ? resume() : pause())}
           disabled={!running || won}
-          className="btn-interactive grid size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted disabled:opacity-40 text-muted-foreground hover:text-foreground"
+          className="btn-interactive grid h-9 w-10 place-items-center rounded-lg border bg-surface text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40 sm:h-10 sm:w-11"
           aria-label={paused ? "Resume" : "Pause"}
           title={paused ? "Resume" : "Pause"}
         >
@@ -70,7 +73,7 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
         </button>
         <button
           onClick={onNewGame}
-          className="btn-interactive grid size-10 place-items-center rounded-lg border bg-surface transition hover:bg-muted text-muted-foreground hover:text-foreground"
+          className="btn-interactive grid h-9 w-10 place-items-center rounded-lg border bg-surface text-muted-foreground transition hover:bg-muted hover:text-foreground sm:h-10 sm:w-11"
           title="Restart / Level Select"
           aria-label="New game"
         >
