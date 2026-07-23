@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useUserStore } from "@/store/userStore";
 import { useGameStore } from "@/store/gameStore";
@@ -8,6 +8,7 @@ type Difficulty = "easy" | "medium" | "hard" | "expert";
 
 export function ClerkSyncBridge() {
   const { isLoaded, isSignedIn, user } = useUser();
+  const hasSyncedRef = useRef(false);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -17,10 +18,11 @@ export function ClerkSyncBridge() {
       const gameStore = useGameStore.getState();
 
       if (isSignedIn && user) {
-        // 1. If stored user ID matches user.id, we are already synced
-        if (userStore.userId === user.id) return;
+        // Run sync at least once per session mount, or when userId switches to a new user
+        if (hasSyncedRef.current && userStore.userId === user.id) return;
+        hasSyncedRef.current = true;
 
-        console.log("[SyncBridge] User signed in via Clerk. Initializing sync for ID:", user.id);
+        console.log("[SyncBridge] Running Cloud Sync for user ID:", user.id);
 
         try {
           // 2. Upsert user profile in Neon DB
