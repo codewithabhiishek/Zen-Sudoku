@@ -1,6 +1,6 @@
 # Zen Sudoku — Mathematical Architecture & Algorithm Logic
 
-This document details all mathematical logic, bitwise operations, graph structures, rating systems, and game scoring formulas used in **Zen Sudoku**.
+This document details all mathematical logic, bitwise operations, graph structures, rating systems, database indexing, and game scoring formulas used in **Zen Sudoku**.
 
 ---
 
@@ -54,21 +54,6 @@ $$\text{Full Candidate Mask (all digits 1..9)} = \sum_{v=1}^{9} 2^v = 0\text{b}1
   }
   ```
 
-### 3.4 Progressive Clue Floor Formula Across 10 Levels
-For each difficulty category $d \in \{\text{easy}, \text{medium}, \text{hard}, \text{expert}\}$ and level $L \in \{1, 2, \dots, 10\}$, the minimum clue count (hole digging floor) $C_{\text{floor}}(d, L)$ is calculated by:
-
-$$\text{step}(L) = \min(9, \max(0, L - 1))$$
-
-$$C_{\text{floor}}(\text{easy}, L) = \max\left(34, 42 - \lfloor 0.8 \cdot \text{step}(L) \rfloor\right)$$
-
-$$C_{\text{floor}}(\text{medium}, L) = \max\left(28, 35 - \lfloor 0.8 \cdot \text{step}(L) \rfloor\right)$$
-
-$$C_{\text{floor}}(\text{hard}, L) = \max\left(22, 28 - \lfloor 0.7 \cdot \text{step}(L) \rfloor\right)$$
-
-$$C_{\text{floor}}(\text{expert}, L) = \max\left(17, 23 - \lfloor 0.6 \cdot \text{step}(L) \rfloor\right)$$
-
-Where Level 10 on `expert` targets $17$ clues — the theoretical mathematical minimum for any valid $9 \times 9$ Sudoku grid with a unique solution.
-
 ---
 
 ## 3. Solver Algorithm & Uniqueness Mathematics
@@ -85,12 +70,20 @@ A valid Sudoku puzzle **must have exactly one unique solution** ($N_{\text{solut
 
 `countSolutions(grid, limit = 2)` stops searching immediately as soon as a 2nd valid solution is found ($N = 2$), operating in $O(1)$ expected time during hole digging.
 
-### 3.3 Symmetric Hole Digging
-Puzzles are created by starting from a complete valid board $S$ and digging symmetric cell pairs $(i, 80 - i)$:
+### 3.3 Progressive Clue Floor Formula Across 10 Levels
+For each difficulty category $d \in \{\text{easy}, \text{medium}, \text{hard}, \text{expert}\}$ and level $L \in \{1, 2, \dots, 10\}$, the minimum clue count (hole digging floor) $C_{\text{floor}}(d, L)$ is calculated by:
 
-$$\text{symmetric\_peer}(i) = 80 - i$$
+$$\text{step}(L) = \min(9, \max(0, L - 1))$$
 
-If setting $g[i] = 0$ and $g[80-i] = 0$ causes $\text{countSolutions}(g, 2) \neq 1$, the digits are restored and skipped.
+$$C_{\text{floor}}(\text{easy}, L) = \max\left(34, 42 - \lfloor 0.8 \cdot \text{step}(L) \rfloor\right)$$
+
+$$C_{\text{floor}}(\text{medium}, L) = \max\left(28, 35 - \lfloor 0.8 \cdot \text{step}(L) \rfloor\right)$$
+
+$$C_{\text{floor}}(\text{hard}, L) = \max\left(22, 28 - \lfloor 0.7 \cdot \text{step}(L) \rfloor\right)$$
+
+$$C_{\text{floor}}(\text{expert}, L) = \max\left(17, 23 - \lfloor 0.6 \cdot \text{step}(L) \rfloor\right)$$
+
+Where Level 10 on `expert` targets $17$ clues — the theoretical mathematical minimum for any valid $9 \times 9$ Sudoku grid with a unique solution.
 
 ---
 
@@ -107,8 +100,6 @@ Puzzles are rated strictly by the **hardest human logical technique** required t
 | **Box-Line Reduction** | 3 | Candidates for digit $v$ in Row $R$ lie entirely within single Box $B$ |
 | **Hidden Pair** | 4 | 2 digits $v_1, v_2$ in unit $U$ appear only within 2 identical cells |
 | **X-Wing** | 5 | Digit $v$ appears in exactly 2 cols in Row $R_1$ and identical 2 cols in Row $R_2$ |
-
-If no logic technique advances the grid state, the solver falls back to backtracking, classifying the puzzle as `expert`.
 
 ---
 
@@ -154,4 +145,34 @@ $$t = \text{imul}(a_{k+1} \oplus (a_{k+1} \gg 15), a_{k+1} \mid 1)$$
 $$t = t \oplus (t + \text{imul}(t \oplus (t \gg 7), t \mid 61))$$
 $$\text{rand}() = \frac{(t \oplus (t \gg 14)) \gg 0}{4294967296}$$
 
-This produces uniform floating point output in $[0, 1)$ deterministically from any string or integer seed.
+---
+
+## 7. Database Relational Model & Leaderboard Indexing
+
+Zen Sudoku uses **Neon PostgreSQL** serverless storage with **Drizzle ORM**.
+
+### 7.1 Relational Schema
+- **`users`**: Stores UUID v4, username, and timestamps. Lookups operate in $O(1)$ via primary key index.
+- **`statistics`**: Stores aggregate user stats ($N_{\text{played}}$, $N_{\text{won}}$, win rate %, streak metrics, best solve times).
+- **`leaderboard`**: Stores period-scoped scores ($S$) and solve times ($t$).
+
+### 7.2 Leaderboard Ranking Complexity
+Global and period rankings use composite B-Tree indexes over `(period, score DESC, solve_time_ms ASC)`:
+
+$$\text{Rank}(u) = 1 + |\{v \in U \mid S_v > S_u \lor (S_v = S_u \land t_v < t_u)\}|$$
+
+Queries run in $O(\log N + K)$ time where $K$ is the requested page size ($K = 50$).
+
+---
+
+## 8. Mobile Viewport & Typography Scaling Mathematics
+
+To eliminate scrolling on mobile viewports ($W \le 768\text{px}$), font scaling and cell sizes are calculated dynamically:
+
+### 8.1 Cell Font Scaling
+$$\text{Font Size} = \min(4.5\text{vw}, 26\text{px}) \cdot \text{scale}$$
+
+### 8.2 Touch Target Constraints
+Every interactive button on mobile satisfies the Apple Human Interface Guidelines floor constraint:
+
+$$\text{Touch Target Height} \ge 48\text{px} \quad (3 \text{rem})$$
