@@ -3,6 +3,7 @@ import { Settings, X, Download, Upload, Trash2, RotateCcw, Cloud, Check } from "
 import { THEMES, useSettingsStore } from "@/store/settingsStore";
 import { useGameStore } from "@/store/gameStore";
 import { getFullscreenElement, checkFullscreenSupport } from "@/components/sudoku/ZoomControls";
+import { Footer } from "@/components/sudoku/Footer";
 import { cn } from "@/lib/utils";
 
 export function SettingsSheet() {
@@ -248,30 +249,7 @@ export function SettingsSheet() {
             </div>
 
             {/* MINIMAL FOOTER */}
-            <footer className="mt-8 border-t pt-4 text-center text-xs text-muted-foreground space-y-1">
-              <div>Zen Sudoku v1.0.0</div>
-              <div className="flex justify-center gap-3 text-[11px]">
-                <a
-                  href="https://github.com/codewithabhiishek/Zen-Sudoku"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline hover:text-foreground transition"
-                >
-                  GitHub
-                </a>
-                <span>•</span>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert("Zen Sudoku Privacy Policy:\n\nZero user tracking. Your game state and preferences are strictly private.");
-                  }}
-                  className="hover:underline hover:text-foreground transition"
-                >
-                  Privacy Policy
-                </a>
-              </div>
-            </footer>
+            <Footer className="mt-8 pt-4 border-t" />
           </div>
         </div>
       )}

@@ -11,6 +11,7 @@ import { MoveExplanationModal } from "@/components/sudoku/MoveExplanationModal";
 import { SubmitModal } from "@/components/sudoku/SubmitModal";
 import { ZoomControls } from "@/components/sudoku/ZoomControls";
 import { WelcomeModal } from "@/components/sudoku/WelcomeModal";
+import { Footer } from "@/components/sudoku/Footer";
 import { useGameStore } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
@@ -156,17 +157,7 @@ function SudokuPage() {
         <Keypad />
       </div>
 
-      {/* Minimal Footer */}
-      <footer className="mx-auto mt-6 flex w-full max-w-[min(92vw,560px)] items-center justify-center text-xs text-muted-foreground">
-        <a
-          href="https://github.com/codewithabhiishek/Zen-Sudoku"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-foreground transition-colors"
-        >
-          © 2026 Zen Sudoku • Made by Abhishek
-        </a>
-      </footer>
+      <Footer className="mt-6" />
 
       <NewGameDialog
         open={dialogOpen}
