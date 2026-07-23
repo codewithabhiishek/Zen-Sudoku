@@ -4,6 +4,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ClerkProvider } from "@clerk/clerk-react";
+import { ClerkSyncBridge } from "./components/ClerkSyncBridge";
 import { getRouter } from "./router";
 import "./styles.css";
 
@@ -19,6 +20,7 @@ if (PUBLISHABLE_KEY) {
   root.render(
     <React.StrictMode>
       <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <ClerkSyncBridge />
         <RouterProvider router={router} />
         <Analytics />
         <SpeedInsights />

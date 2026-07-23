@@ -22,6 +22,7 @@ export interface UpdateStatsData {
   currentStreak?: number;
   longestStreak?: number;
   averageTime?: number;
+  completedLevels?: string[];
 }
 
 export async function updateStatistics(userId: string, data: UpdateStatsData) {
@@ -42,6 +43,7 @@ export async function updateStatistics(userId: string, data: UpdateStatsData) {
           currentStreak: data.currentStreak ?? 0,
           longestStreak: data.longestStreak ?? 0,
           averageTime: data.averageTime ?? 0,
+          completedLevels: data.completedLevels ?? [],
           updatedAt: new Date(),
         })
         .returning();

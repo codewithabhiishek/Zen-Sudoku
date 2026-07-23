@@ -73,6 +73,7 @@ export const statistics = pgTable("statistics", {
   currentStreak: integer("current_streak").default(0).notNull(),
   longestStreak: integer("longest_streak").default(0).notNull(),
   averageTime: integer("average_time").default(0).notNull(),
+  completedLevels: jsonb("completed_levels").default([]),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

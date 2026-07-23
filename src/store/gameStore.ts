@@ -8,7 +8,7 @@ import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
-import { addLeaderboardEntry } from "@/database/api";
+import { addLeaderboardEntry, updateStatistics } from "@/database/api";
 import {
   trackGameStarted,
   trackGameCompleted,
@@ -204,7 +204,7 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
     // Ignore error safely
   }
 
-  // Auto-submit win to Leaderboard DB
+  // Auto-submit win to Leaderboard DB & save user statistics to Neon DB
   try {
     const userId = useUserStore.getState().userId || "guest_player";
     addLeaderboardEntry({
@@ -214,6 +214,22 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
       time: timeSec,
       mistakes: useGameStore.getState().mistakes || 0,
     }).catch(() => {});
+
+    // Save statistics to Neon DB in real-time if signed in
+    if (userId && !userId.startsWith("guest_")) {
+      const best = next.bestTimeByDifficulty;
+      updateStatistics(userId, {
+        gamesPlayed: next.gamesPlayed,
+        gamesWon: next.gamesWon,
+        completedLevels: next.completedLevels,
+        bestEasy: best.easy ?? null,
+        bestMedium: best.medium ?? null,
+        bestHard: best.hard ?? null,
+        bestExpert: best.expert ?? null,
+        currentStreak: next.currentStreakDays,
+        longestStreak: next.longestStreakDays,
+      }).catch(() => {});
+    }
   } catch (err) {
     // Ignore error safely
   }
