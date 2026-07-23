@@ -27,17 +27,20 @@ export function Footer({ className }: { className?: string }) {
       </Link>
       <span className="opacity-30">•</span>
 
-      <a
-        href="https://abhiishek-dev.vercel.app/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative inline-block font-bold border-b-2 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded transition-transform hover:scale-105 active:scale-95 animate-glow-text"
-        style={{
-          paddingBottom: "1px",
-        }}
-      >
-        Abhishek
-      </a>
+      <div className="flex items-center gap-1">
+        <span>Made by</span>
+        <a
+          href="https://abhiishek-dev.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative inline-block font-bold border-b-2 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded transition-transform hover:scale-105 active:scale-95 animate-glow-text"
+          style={{
+            paddingBottom: "1px",
+          }}
+        >
+          Abhishek
+        </a>
+      </div>
     </footer>
   );
 }
