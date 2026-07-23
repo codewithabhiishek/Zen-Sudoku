@@ -82,7 +82,8 @@ export function LeaderboardPage() {
           Object.entries(localStats.bestTimeByDifficulty).forEach(([diff, time]) => {
             if (time != null && time > 0) {
               if (difficulty === "all" || difficulty === diff) {
-                const base = { easy: 200, medium: 400, hard: 800, expert: 1500 }[diff as keyof typeof base] || 200;
+                const basePoints: Record<string, number> = { easy: 200, medium: 400, hard: 800, expert: 1500 };
+                const base = basePoints[diff] || 200;
                 const minXP = Math.round(base * 0.5);
                 const score = Math.max(localStats.totalPoints || 0, minXP);
 

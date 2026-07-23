@@ -213,25 +213,35 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
       score: score.total,
       time: timeSec,
       mistakes: useGameStore.getState().mistakes || 0,
-    }).catch(() => {});
+    }).catch((e) => console.warn("[GameStore] Leaderboard save failed:", e));
 
-    // Save statistics to Neon DB in real-time if signed in
+    // Save statistics to Neon DB in real-time if signed in (Clerk user ID starts with "user_")
     if (userId && !userId.startsWith("guest_")) {
       const best = next.bestTimeByDifficulty;
+      const safeCompletedLevels = Array.isArray(next.completedLevels)
+        ? next.completedLevels
+        : [];
+      console.log(
+        `[GameStore] 💾 Saving to cloud for ${userId}: ${safeCompletedLevels.length} levels, ${next.totalPoints} XP`
+      );
       updateStatistics(userId, {
         gamesPlayed: next.gamesPlayed,
         gamesWon: next.gamesWon,
-        completedLevels: next.completedLevels,
+        completedLevels: safeCompletedLevels,
         bestEasy: best.easy ?? null,
         bestMedium: best.medium ?? null,
         bestHard: best.hard ?? null,
         bestExpert: best.expert ?? null,
         currentStreak: next.currentStreakDays,
         longestStreak: next.longestStreakDays,
-      }).catch(() => {});
+      }).then(() => {
+        console.log("[GameStore] ✅ Cloud stats saved successfully.");
+      }).catch((e) => {
+        console.error("[GameStore] ❌ Cloud stats save FAILED:", e);
+      });
     }
   } catch (err) {
-    // Ignore error safely
+    console.error("[GameStore] ❌ Unexpected error in win save:", err);
   }
 
   return next;

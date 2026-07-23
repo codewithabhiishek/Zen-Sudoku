@@ -6,9 +6,21 @@ import { getStatistics, updateStatistics, createUser } from "@/database/api";
 
 type Difficulty = "easy" | "medium" | "hard" | "expert";
 
+const DB_FIELDS = {
+  easy: "bestEasy" as const,
+  medium: "bestMedium" as const,
+  hard: "bestHard" as const,
+  expert: "bestExpert" as const,
+};
+
+function baseFor(d: Difficulty): number {
+  return { easy: 200, medium: 400, hard: 800, expert: 1500 }[d];
+}
+
 export function ClerkSyncBridge() {
   const { isLoaded, isSignedIn, user } = useUser();
-  const hasSyncedRef = useRef(false);
+  // Track the last synced user ID to avoid double-syncing
+  const lastSyncedUserId = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -18,50 +30,57 @@ export function ClerkSyncBridge() {
       const gameStore = useGameStore.getState();
 
       if (isSignedIn && user) {
-        // Run sync at least once per session mount, or when userId switches to a new user
-        if (hasSyncedRef.current && userStore.userId === user.id) return;
-        hasSyncedRef.current = true;
+        // Only skip if we JUST synced this exact user
+        if (lastSyncedUserId.current === user.id) return;
 
-        console.log("[SyncBridge] Running Cloud Sync for user ID:", user.id);
+        console.log("[SyncBridge] 🔄 Starting Cloud Sync for user:", user.id);
 
         try {
-          const emailPrefix = user.primaryEmailAddress?.emailAddress?.split("@")[0] || "player";
-          const uniqueUsername = user.username || `${emailPrefix}_${user.id.slice(-6)}`;
+          const emailPrefix =
+            user.primaryEmailAddress?.emailAddress?.split("@")[0] || "player";
+          const uniqueUsername =
+            user.username || `${emailPrefix}_${user.id.slice(-6)}`;
 
-          // 2. Upsert user profile in Neon DB
+          // Step 1: Upsert user profile in Neon DB
           await createUser({
             id: user.id,
             email: user.primaryEmailAddress?.emailAddress || "",
             username: uniqueUsername,
-            displayName: user.fullName || user.username || user.firstName || "ZenPlayer",
+            displayName:
+              user.fullName ||
+              user.username ||
+              user.firstName ||
+              "ZenPlayer",
             avatarUrl: user.imageUrl,
           });
 
-          // 3. Fetch cloud stats
+          // Step 2: Fetch cloud stats
           const cloudStats = await getStatistics(user.id);
           const localStats = gameStore.stats;
 
-          // 4. Merge completed levels
-          const localLevels = localStats.completedLevels ?? [];
-          const cloudLevels = (cloudStats?.completedLevels as string[]) ?? [];
+          console.log("[SyncBridge] Local completedLevels:", localStats.completedLevels);
+          console.log("[SyncBridge] Cloud completedLevels:", cloudStats?.completedLevels);
+
+          // Step 3: Merge completed levels — union of local + cloud, never lose data
+          const localLevels: string[] = Array.isArray(localStats.completedLevels)
+            ? localStats.completedLevels
+            : [];
+          const cloudLevels: string[] = Array.isArray(cloudStats?.completedLevels)
+            ? (cloudStats.completedLevels as string[])
+            : [];
           const mergedLevels = Array.from(new Set([...localLevels, ...cloudLevels]));
 
-          // 5. Merge best solve times
-          const mergedBestTimes = { ...(localStats.bestTimeByDifficulty ?? {}) };
+          console.log("[SyncBridge] Merged completedLevels:", mergedLevels);
+
+          // Step 4: Merge best solve times — always keep the BEST (lowest) time
+          const mergedBestTimes: Partial<Record<Difficulty, number>> = {
+            ...(localStats.bestTimeByDifficulty ?? {}),
+          };
           if (cloudStats) {
-            const difficulties: Difficulty[] = ["easy", "medium", "hard", "expert"];
-            const dbFields = {
-              easy: "bestEasy" as const,
-              medium: "bestMedium" as const,
-              hard: "bestHard" as const,
-              expert: "bestExpert" as const,
-            };
-
-            difficulties.forEach((diff) => {
-              const dbField = dbFields[diff];
-              const cloudBest = cloudStats[dbField];
-              const localBest = localStats.bestTimeByDifficulty?.[diff];
-
+            (["easy", "medium", "hard", "expert"] as Difficulty[]).forEach((diff) => {
+              const dbField = DB_FIELDS[diff];
+              const cloudBest = cloudStats[dbField] as number | null | undefined;
+              const localBest = mergedBestTimes[diff];
               if (cloudBest != null && cloudBest > 0) {
                 if (localBest == null || localBest <= 0 || cloudBest < localBest) {
                   mergedBestTimes[diff] = cloudBest;
@@ -70,29 +89,39 @@ export function ClerkSyncBridge() {
             });
           }
 
-          // 6. Merge games played / games won
-          const cloudPlayed = cloudStats?.gamesPlayed ?? 0;
-          const cloudWon = cloudStats?.gamesWon ?? 0;
-          const localPlayed = localStats.gamesPlayed ?? 0;
-          const localWon = localStats.gamesWon ?? 0;
+          // Step 5: Merge games played/won — always take the max
+          const mergedPlayed = Math.max(
+            localStats.gamesPlayed ?? 0,
+            cloudStats?.gamesPlayed ?? 0,
+            mergedLevels.length
+          );
+          const mergedWon = Math.max(
+            localStats.gamesWon ?? 0,
+            cloudStats?.gamesWon ?? 0,
+            mergedLevels.length
+          );
 
-          const mergedPlayed = Math.max(localPlayed, cloudPlayed, mergedLevels.length);
-          const mergedWon = Math.max(localWon, cloudWon, mergedLevels.length);
-
-          // 7. Calculate total points based on merged completed levels
-          const baseFor = (d: Difficulty): number => {
-            return { easy: 200, medium: 400, hard: 800, expert: 1500 }[d];
-          };
+          // Step 6: Calculate total points — guarantee minimum XP per level
           const minExpectedPoints = mergedLevels.reduce((sum, key) => {
             const diff = (key.split("-")[0] || "easy") as Difficulty;
-            const base = baseFor(diff);
-            return sum + Math.round(base * 0.5);
+            return sum + Math.round(baseFor(diff) * 0.5);
           }, 0);
+          const mergedPoints = Math.max(
+            localStats.totalPoints ?? 0,
+            minExpectedPoints
+          );
 
-          const localPoints = localStats.totalPoints ?? 0;
-          const mergedPoints = Math.max(localPoints, minExpectedPoints);
+          // Step 7: Merge streaks
+          const mergedCurrentStreak = Math.max(
+            localStats.currentStreakDays ?? 0,
+            cloudStats?.currentStreak ?? 0
+          );
+          const mergedLongestStreak = Math.max(
+            localStats.longestStreakDays ?? 0,
+            cloudStats?.longestStreak ?? 0
+          );
 
-          // 8. Construct merged stats payload
+          // Step 8: Build the final merged stats object
           const mergedStats = {
             ...localStats,
             completedLevels: mergedLevels,
@@ -100,11 +129,11 @@ export function ClerkSyncBridge() {
             gamesPlayed: mergedPlayed,
             gamesWon: mergedWon,
             totalPoints: mergedPoints,
-            currentStreakDays: Math.max(localStats.currentStreakDays ?? 0, cloudStats?.currentStreak ?? 0),
-            longestStreakDays: Math.max(localStats.longestStreakDays ?? 0, cloudStats?.longestStreak ?? 0),
+            currentStreakDays: mergedCurrentStreak,
+            longestStreakDays: mergedLongestStreak,
           };
 
-          // 9. Push merged stats to Neon DB
+          // Step 9: Push merged stats to Neon DB — always push so cloud stays up-to-date
           await updateStatistics(user.id, {
             gamesPlayed: mergedPlayed,
             gamesWon: mergedWon,
@@ -113,32 +142,46 @@ export function ClerkSyncBridge() {
             bestMedium: mergedBestTimes.medium ?? null,
             bestHard: mergedBestTimes.hard ?? null,
             bestExpert: mergedBestTimes.expert ?? null,
-            currentStreak: mergedStats.currentStreakDays,
-            longestStreak: mergedStats.longestStreakDays,
+            currentStreak: mergedCurrentStreak,
+            longestStreak: mergedLongestStreak,
           });
 
-          // 10. Update local Zustand state
+          // Step 10: Update Zustand stores with merged data
           useUserStore.setState({
             userId: user.id,
-            username: user.username || user.firstName || "ZenPlayer",
-            displayName: user.fullName || user.username || user.firstName || "ZenPlayer",
+            username:
+              user.username || user.firstName || "ZenPlayer",
+            displayName:
+              user.fullName ||
+              user.username ||
+              user.firstName ||
+              "ZenPlayer",
             avatarUrl: user.imageUrl,
             isRegistered: true,
           });
 
           useGameStore.setState({ stats: mergedStats });
 
-          console.log("[SyncBridge] Sync complete. Merged data updated locally and saved to Neon DB.");
+          // Mark this user as synced — prevents repeat sync in same session
+          lastSyncedUserId.current = user.id;
+
+          console.log(
+            `[SyncBridge] ✅ Sync complete! ${mergedLevels.length} levels, ${mergedPoints} XP synced.`
+          );
         } catch (err) {
-          console.error("[SyncBridge] Sync failed:", err);
+          console.error("[SyncBridge] ❌ Sync failed:", err);
+          // Don't set lastSyncedUserId so it retries on next render
         }
-      } else {
-        // User is signed out. If current userId is a Clerk ID, revert back to offline Guest mode
+      } else if (!isSignedIn) {
+        // User signed out — revert to guest mode if previously a Clerk user
         if (userStore.userId && userStore.userId.startsWith("user_")) {
           console.log("[SyncBridge] User signed out. Reverting to Guest profile.");
+          // Clear the sync tracker so next login triggers fresh sync
+          lastSyncedUserId.current = null;
           userStore.deleteProfile();
-          // Generate a guest ID
-          const guestId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+          const guestId = `guest_${Date.now()}_${Math.random()
+            .toString(36)
+            .slice(2, 9)}`;
           localStorage.setItem("zen_sudoku_user_id", guestId);
           useUserStore.setState({
             userId: guestId,
@@ -150,7 +193,7 @@ export function ClerkSyncBridge() {
     };
 
     syncAuth();
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn, user?.id]); // Depend on user.id specifically, not entire user object
 
   return null;
 }
