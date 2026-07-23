@@ -7,6 +7,8 @@ import { generatePuzzle } from "@/lib/sudoku/generator";
 import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useUserStore } from "@/store/userStore";
+import { addLeaderboardEntry } from "@/database/api";
 import {
   trackGameStarted,
   trackGameCompleted,
@@ -198,6 +200,20 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
       notesUsed,
       autoRemoveIncorrect,
     });
+  } catch (err) {
+    // Ignore error safely
+  }
+
+  // Auto-submit win to Leaderboard DB
+  try {
+    const userId = useUserStore.getState().userId || "guest_player";
+    addLeaderboardEntry({
+      userId,
+      difficulty: puzzle.difficulty,
+      score: score.total,
+      time: timeSec,
+      mistakes: useGameStore.getState().mistakes || 0,
+    }).catch(() => {});
   } catch (err) {
     // Ignore error safely
   }

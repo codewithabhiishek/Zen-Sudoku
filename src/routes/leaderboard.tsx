@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useGameStore } from "@/store/gameStore";
+import { useUserStore } from "@/store/userStore";
 import { getLeaderboard } from "@/database/api";
 import { ArrowLeft, Trophy, Medal, User, Clock, AlertTriangle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,17 +63,86 @@ export function LeaderboardPage() {
     document.title = "Leaderboards • Zen Sudoku";
   }, [theme]);
 
-  // Fetch leaderboard data from Neon PostgreSQL database
+  // Fetch leaderboard data from Neon PostgreSQL database with local fallback synthesis
   useEffect(() => {
     setLoading(true);
     const diffArg = difficulty === "all" ? undefined : difficulty;
     getLeaderboard(diffArg, 50)
       .then((data) => {
-        setEntries((data as LeaderboardItem[]) || []);
+        const fetched = (data as LeaderboardItem[]) || [];
+
+        // Synthesize local player entries if local completed games exist
+        const localStats = useGameStore.getState().stats;
+        const userStore = useUserStore.getState();
+        const currentUserId = userStore.userId || "local_player";
+        const currentUsername = userStore.username || "You";
+
+        const synthEntries: LeaderboardItem[] = [];
+        if (localStats.completedLevels && localStats.completedLevels.length > 0) {
+          Object.entries(localStats.bestTimeByDifficulty).forEach(([diff, time]) => {
+            if (time != null && time > 0) {
+              if (difficulty === "all" || difficulty === diff) {
+                const base = { easy: 200, medium: 400, hard: 800, expert: 1500 }[diff as keyof typeof base] || 200;
+                const minXP = Math.round(base * 0.5);
+                const score = Math.max(localStats.totalPoints || 0, minXP);
+
+                synthEntries.push({
+                  id: `local-${diff}`,
+                  userId: currentUserId,
+                  username: currentUsername,
+                  displayName: currentUsername,
+                  avatarUrl: null,
+                  difficulty: diff,
+                  score,
+                  time,
+                  mistakes: 0,
+                  createdAt: new Date().toISOString(),
+                });
+              }
+            }
+          });
+        }
+
+        const combined = [...fetched];
+        synthEntries.forEach((s) => {
+          if (!combined.some((item) => item.userId === s.userId && item.difficulty === s.difficulty)) {
+            combined.push(s);
+          }
+        });
+
+        combined.sort((a, b) => b.score - a.score || a.time - b.time);
+        setEntries(combined);
       })
       .catch((err) => {
         console.error("Leaderboard fetch error:", err);
-        setEntries([]);
+        // Fallback to local entries on network/DB error
+        const localStats = useGameStore.getState().stats;
+        const userStore = useUserStore.getState();
+        const currentUserId = userStore.userId || "local_player";
+        const currentUsername = userStore.username || "You";
+
+        const synthEntries: LeaderboardItem[] = [];
+        if (localStats.completedLevels && localStats.completedLevels.length > 0) {
+          Object.entries(localStats.bestTimeByDifficulty).forEach(([diff, time]) => {
+            if (time != null && time > 0) {
+              if (difficulty === "all" || difficulty === diff) {
+                synthEntries.push({
+                  id: `local-${diff}`,
+                  userId: currentUserId,
+                  username: currentUsername,
+                  displayName: currentUsername,
+                  avatarUrl: null,
+                  difficulty: diff,
+                  score: localStats.totalPoints || 300,
+                  time,
+                  mistakes: 0,
+                  createdAt: new Date().toISOString(),
+                });
+              }
+            }
+          });
+        }
+        setEntries(synthEntries);
       })
       .finally(() => {
         setLoading(false);
