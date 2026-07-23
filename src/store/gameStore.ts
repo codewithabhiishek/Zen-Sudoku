@@ -525,6 +525,19 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
         score: s.score,
         stats: s.stats,
       }),
+      // Deep-merge stats so adding new fields (e.g. completedLevels) doesn't
+      // crash existing users whose localStorage snapshot is missing those fields.
+      merge: (persisted: unknown, current: GameState): GameState => {
+        const p = persisted as Partial<GameState>;
+        return {
+          ...current,
+          ...p,
+          stats: {
+            ...emptyStats(),
+            ...(p.stats ?? {}),
+          },
+        };
+      },
     },
   ),
 );
