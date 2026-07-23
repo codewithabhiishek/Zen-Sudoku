@@ -1,6 +1,6 @@
 # Zen Sudoku — Mathematical Architecture & Algorithm Logic
 
-This document details all mathematical logic, bitwise operations, graph structures, rating systems, database indexing, and game scoring formulas used in **Zen Sudoku**.
+This document details all mathematical logic, bitwise operations, graph structures, rating systems, database indexing, conflict detection, feedback systems, and game scoring formulas used in **Zen Sudoku**.
 
 ---
 
@@ -134,9 +134,50 @@ $$S = \max\left(0, B + T_{\text{bonus}} - P_{\text{mistakes}} - P_{\text{hints}}
    - No Mistake Bonus: $B_{\text{perfect\_mistakes}} = \begin{cases} \lfloor 0.2 \cdot B \rfloor & \text{if } n_{\text{mistakes}} = 0 \\ 0 & \text{otherwise} \end{cases}$
    - No Hint Bonus: $B_{\text{perfect\_hints}} = \begin{cases} \lfloor 0.2 \cdot B \rfloor & \text{if } n_{\text{hints}} = 0 \\ 0 & \text{otherwise} \end{cases}$
 
+### 5.2 Score Floor & Zero XP Behavior
+
+The score is **clamped to $\geq 0$** by the $\max(0, \dots)$ wrapper. When $n_{\text{mistakes}}$ is large enough that penalties exceed total bonuses, the displayed score is $0$ XP. This is intentional — high mistake counts reflect unsuccessful play. The UI explicitly shows `0 XP — too many mistakes` in this case rather than `+0 XP` to make the outcome clear.
+
+**Example**: Easy puzzle, 9 mistakes, 0 hints, 6:52 time:
+$$S = \max(0,\ 200 + 0 - 450 - 0 + 0 + 40) = \max(0,\ -210) = 0$$
+
 ---
 
-## 6. Seeded Pseudo-Random Number Generator (Mulberry32)
+## 6. Solution-Aware Conflict Detection
+
+### 6.1 Old Approach (Peer-Duplicate Scanning)
+The naive approach scanned each row/col/box for duplicate values on the live board:
+
+$$\text{conflict}(i) = \exists j \in \mathcal{P}_i : g[j] = g[i] \land g[i] \neq 0$$
+
+**Problem**: If a player left a wrong value $v_w$ at cell $j$ and later entered the correct value $v_c = v_w$ at cell $i$ (same unit), both cells would be flagged as conflicts — including the **correct** cell.
+
+### 6.2 Current Approach (Solution Comparison)
+Each user-entered cell is compared directly against the known solution:
+
+$$\text{conflict}(i) = \neg \text{given}(i) \land g[i] \neq 0 \land g[i] \neq s[i]$$
+
+Where $s[i]$ is the pre-computed solution value at position $i$. This guarantees:
+- Correct entries are **never** highlighted red, regardless of what other cells contain.
+- Only genuinely wrong entries are marked as conflicts.
+- The solution array $s$ is **never mutated** after puzzle generation.
+
+---
+
+## 7. Wrong-Entry Feedback System
+
+When a player enters a digit that does not match the solution, three simultaneous feedback signals fire:
+
+1. **Error sound**: Web Audio API tone synthesized client-side.
+2. **Shake animation**: CSS `@keyframes shakeError` applied for $350\text{ms}$ via `flashIdx` state:
+   $$\text{translateX}(t) = \begin{cases} -4\text{px} & t \in [20\%, 60\%] \\ +4\text{px} & t \in [40\%, 80\%] \\ 0 & t = 0\% \text{ or } 100\% \end{cases}$$
+3. **Haptic vibration** (mobile): `navigator.vibrate(80)` — $80\text{ms}$ pulse, gated behind the `haptics` setting and API availability check.
+
+The `flashIdx` state is set to the cell index on mistake and cleared after $350\text{ms}$ via `setTimeout`, keeping the animation atomic and non-blocking.
+
+---
+
+## 8. Seeded Pseudo-Random Number Generator (Mulberry32)
 
 To ensure reproducible daily puzzles and seeded game replays, a 32-bit Mulberry32 PRNG is used instead of non-deterministic `Math.random()`:
 
@@ -147,16 +188,16 @@ $$\text{rand}() = \frac{(t \oplus (t \gg 14)) \gg 0}{4294967296}$$
 
 ---
 
-## 7. Database Relational Model & Leaderboard Indexing
+## 9. Database Relational Model & Leaderboard Indexing
 
 Zen Sudoku uses **Neon PostgreSQL** serverless storage with **Drizzle ORM**.
 
-### 7.1 Relational Schema
+### 9.1 Relational Schema
 - **`users`**: Stores UUID v4, username, and timestamps. Lookups operate in $O(1)$ via primary key index.
 - **`statistics`**: Stores aggregate user stats ($N_{\text{played}}$, $N_{\text{won}}$, win rate %, streak metrics, best solve times).
 - **`leaderboard`**: Stores period-scoped scores ($S$) and solve times ($t$).
 
-### 7.2 Leaderboard Ranking Complexity
+### 9.2 Leaderboard Ranking Complexity
 Global and period rankings use composite B-Tree indexes over `(period, score DESC, solve_time_ms ASC)`:
 
 $$\text{Rank}(u) = 1 + |\{v \in U \mid S_v > S_u \lor (S_v = S_u \land t_v < t_u)\}|$$
@@ -165,14 +206,21 @@ Queries run in $O(\log N + K)$ time where $K$ is the requested page size ($K = 5
 
 ---
 
-## 8. Mobile Viewport & Typography Scaling Mathematics
+## 10. Mobile Viewport & Typography Scaling Mathematics
 
 To eliminate scrolling on mobile viewports ($W \le 768\text{px}$), font scaling and cell sizes are calculated dynamically:
 
-### 8.1 Cell Font Scaling
+### 10.1 Cell Font Scaling
 $$\text{Font Size} = \min(4.5\text{vw}, 26\text{px}) \cdot \text{scale}$$
 
-### 8.2 Touch Target Constraints
+### 10.2 Touch Target Constraints
 Every interactive button on mobile satisfies the Apple Human Interface Guidelines floor constraint:
 
 $$\text{Touch Target Height} \ge 48\text{px} \quad (3 \text{rem})$$
+
+### 10.3 Dedicated Mobile Layout Breakpoint
+The single-viewport mobile layout activates at:
+
+$$W_{\text{mobile}} \le 768\text{px}$$
+
+At this breakpoint: footer is hidden, fullscreen controls are suppressed, and the game board occupies the maximum available vertical space with the keypad anchored directly below.

@@ -45,7 +45,11 @@ export function WinDialog({ onNewGame }: { onNewGame: () => void }) {
 
         <div className="mt-4 flex items-baseline justify-between">
           <h2 className="display text-4xl font-bold tracking-tight">{fmt(elapsed)}</h2>
-          <span className="display text-2xl font-bold text-primary">+{score.total} XP</span>
+          {score.total > 0 ? (
+            <span className="display text-2xl font-bold text-primary">+{score.total} XP</span>
+          ) : (
+            <span className="display text-base font-semibold text-muted-foreground">0 XP — too many mistakes</span>
+          )}
         </div>
 
         <div className="mt-6 grid grid-cols-3 gap-2 text-center">

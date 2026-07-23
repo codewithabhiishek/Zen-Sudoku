@@ -29,6 +29,7 @@ function SudokuPage() {
   const newGame = useGameStore((s) => s.newGame);
   const resume = useGameStore((s) => s.resume);
   const pause = useGameStore((s) => s.pause);
+  const reset = useGameStore((s) => s.reset);
 
   const [hydrated, setHydrated] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -85,7 +86,12 @@ function SudokuPage() {
   };
 
   const handleOpenNew = () => {
-    if (puzzle && !won && running) resume();
+    if (won) {
+      // Game is won: reset state first so WinDialog unmounts, then open NewGameDialog
+      reset();
+    } else if (puzzle && running) {
+      resume();
+    }
     setDialogOpen(true);
   };
 
