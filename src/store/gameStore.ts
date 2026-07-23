@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CellState, Difficulty, Grid, Puzzle } from "@/lib/sudoku/types";
+export type { CellState };
 import { findConflicts, PEERS, ROWS, COLS, BOXES } from "@/lib/sudoku/solver";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { pickHintCell } from "@/lib/sudoku/techniques";
