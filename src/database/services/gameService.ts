@@ -73,3 +73,16 @@ export async function completeGame(
 export async function getActiveGameSession(userId: string) {
   return await gameRepo.getActiveGameSession(userId);
 }
+
+export async function upsertActiveGameSession(data: {
+  userId: string;
+  difficulty: string;
+  elapsedTime: number;
+  mistakes: number;
+  boardState: unknown;
+  solution: unknown;
+  seed?: string;
+  status?: string;
+}) {
+  return await gameRepo.upsertActiveGameSession(data);
+}

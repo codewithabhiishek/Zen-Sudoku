@@ -115,9 +115,56 @@ export async function getActiveGameSession(userId: string) {
       .from(gameSessions)
       .where(eq(gameSessions.userId, userId))
       .limit(10);
-    return sessions.find((s) => s.status === "in_progress") || null;
+    const inProgress = sessions.filter((s) => s.status === "in_progress");
+    if (!inProgress.length) return null;
+    inProgress.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    return inProgress[0];
   } catch (error) {
     console.error("Database Error [getActiveGameSession]:", error);
+    return null;
+  }
+}
+
+export async function upsertActiveGameSession(data: {
+  userId: string;
+  difficulty: string;
+  elapsedTime: number;
+  mistakes: number;
+  boardState: unknown;
+  solution: unknown;
+  seed?: string;
+  status?: string;
+}) {
+  try {
+    const active = await getActiveGameSession(data.userId);
+    const now = new Date();
+    if (active) {
+      const [updated] = await db
+        .update(gameSessions)
+        .set({
+          elapsedTime: data.elapsedTime,
+          mistakes: data.mistakes,
+          boardState: data.boardState,
+          status: data.status || "in_progress",
+          updatedAt: now,
+        })
+        .where(eq(gameSessions.id, active.id))
+        .returning();
+      return updated;
+    } else {
+      return await saveGame({
+        userId: data.userId,
+        difficulty: data.difficulty,
+        status: data.status || "in_progress",
+        elapsedTime: data.elapsedTime,
+        mistakes: data.mistakes,
+        boardState: data.boardState,
+        solution: data.solution,
+        seed: data.seed,
+      });
+    }
+  } catch (error) {
+    console.error("Database Error [upsertActiveGameSession]:", error);
     return null;
   }
 }

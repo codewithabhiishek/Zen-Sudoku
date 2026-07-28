@@ -8,7 +8,7 @@ import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
-import { addLeaderboardEntry, updateStatistics } from "@/database/api";
+import { addLeaderboardEntry, updateStatistics, upsertActiveGameSession } from "@/database/api";
 import {
   trackGameStarted,
   trackGameCompleted,
@@ -422,6 +422,23 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
         const history = [...s.history, { idx, prev, next }];
         set({ cells, history, future: [] });
 
+        // Cloud sync active game state in background for cross-device continuation (iPhone <-> Desktop)
+        try {
+          const userId = useUserStore.getState().userId;
+          if (userId && !userId.startsWith("guest_") && s.puzzle) {
+            upsertActiveGameSession({
+              userId,
+              difficulty: s.puzzle.difficulty,
+              elapsedTime: Math.floor(get().elapsedMs / 1000),
+              mistakes: get().mistakes,
+              boardState: { puzzle: s.puzzle.puzzle, cells: cells },
+              solution: s.puzzle.solution,
+              seed: s.puzzle.seed,
+              status: "in_progress",
+            }).catch(() => {});
+          }
+        } catch (e) {}
+
         // Auto-win check: only triggers when all 81 cells are filled correctly
         const allFilled = cells.every((c) => c.value !== 0);
         if (allFilled) {
@@ -434,6 +451,23 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
             // BUG FIX: use applyWinToStats to avoid double-counting
             const stats = applyWinToStats(get().stats, puzzle, timeSec, score);
             set({ won: true, running: false, score, stats });
+
+            // Mark session as completed in Neon DB
+            try {
+              const userId = useUserStore.getState().userId;
+              if (userId && !userId.startsWith("guest_")) {
+                upsertActiveGameSession({
+                  userId,
+                  difficulty: puzzle.difficulty,
+                  elapsedTime: timeSec,
+                  mistakes: get().mistakes,
+                  boardState: { puzzle: puzzle.puzzle, cells: cells },
+                  solution: puzzle.solution,
+                  seed: puzzle.seed,
+                  status: "completed",
+                }).catch(() => {});
+              }
+            } catch (e) {}
           }
         }
       },
