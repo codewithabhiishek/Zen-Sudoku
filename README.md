@@ -9,8 +9,13 @@ A modern, high-performance, and mathematical Sudoku application built with React
 - 🎯 **Guaranteed Unique Puzzles**: Puzzles are generated and verified via backtracking & MRV solvers to ensure a single valid solution every time.
 - 📊 **Technique-Based Rating**: Difficulty levels (Easy, Medium, Hard, Expert) are classified by the hardest logical technique required (Naked/Hidden Singles, Pointing Pairs, Box-Line Reduction, Hidden Pairs, X-Wing).
 - 🏆 **10 Levels Per Difficulty**: 40 distinct levels scaling smoothly from Starter to Grandmaster.
-- 👤 **Guest Profile System**: Seamless onboarding with zero passwords or email required. Generates a persistent UUID stored in `localStorage` and synchronized with Neon PostgreSQL.
-- 📈 **Personal Statistics Page (`/stats`)**: Lifetime statistics including Win Rate %, Current Streak Days with visual progress bars, Longest Streak, Best Solve Times per difficulty, total XP, and recent game moves.
+- 📱 **Full PWA & Mobile Optimization**:
+  - Web App Manifest + 180×180 `apple-touch-icon` for iOS & Android "Add to Home Screen".
+  - `touch-action: manipulation` & `-webkit-tap-highlight-color: transparent` to eliminate 300ms tap delay and touch highlights.
+  - Prevents horizontal overscroll, text selection on fast grid taps, and iOS text input auto-zooming.
+  - Responsive vertical space compression for short-screen mobile devices.
+- 👤 **Guest & Cloud Profile System**: Seamless onboarding with zero passwords required. Generates a persistent UUID stored in `localStorage` and synchronized with Neon PostgreSQL, with Clerk user support.
+- 📈 **Personal Statistics Page (`/stats`)**: Lifetime statistics including Win Rate %, ISO-standardized Current Streak Days with visual progress bars, Longest Streak, Best Solve Times per difficulty, replay-guarded XP calculation, and recent game moves.
 - 🥇 **Global & Daily Leaderboards (`/leaderboard`)**: Real-time rankings filterable by period (*Global, Daily, Weekly, Monthly, All-Time*) and difficulty rating.
 - 🎨 **6 Curated Visual Themes**:
   - ⬛ **Graphite**: Dark slate & soft indigo primary.
@@ -19,11 +24,9 @@ A modern, high-performance, and mathematical Sudoku application built with React
   - ☕ **Catppuccin Mocha**: Cozy pastel violet & mocha tones.
   - ⚡ **AMOLED**: True pure black (`#000000`) mode optimized for OLED battery saving.
   - ♟️ **Chessboard Beige**: Warm paper & wooden print-puzzle aesthetic.
-- 📱 **Dedicated Mobile-First Layout**: Single-row mobile header, 48px minimum touch targets, 9-column digit keypad, and full-width primary submit action.
 - ⌨️ **Full Desktop Keyboard Shortcuts**: Arrow Keys (Navigate), 1–9 (Input), Backspace/Delete (Erase), N (Notes), H (Hint), F (Fullscreen).
-- 🔊 **Web Audio Synthesizer**: Subtle client-side Web Audio API sounds for moves, mistakes, and puzzle completions.
+- 🔊 **Web Audio Synthesizer**: Client-side Web Audio API sounds for moves, mistakes, hints, and puzzle completions.
 - ⏸️ **Auto-Pause & Progress Persistence**: State is automatically saved locally and synced to Neon PostgreSQL; timer automatically pauses when tab is backgrounded.
-- ⚡ **Subtle Micro-Interactions**: Linear & Apple-inspired 60 FPS transitions, card entry staggers, blinking timer colon, animated count-up numbers, and automatic glowing text effects.
 
 ---
 
@@ -34,6 +37,7 @@ A modern, high-performance, and mathematical Sudoku application built with React
 - **Styling & Icons**: [Tailwind CSS v4](https://tailwindcss.com/), [Lucide React](https://lucide.dev/)
 - **Database & ORM**: [Neon PostgreSQL](https://neon.tech/) (Serverless), [Drizzle ORM](https://orm.drizzle.team/)
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) with localStorage persistence
+- **Authentication**: [Clerk](https://clerk.com/)
 - **Audio & Animations**: Web Audio API, CSS keyframes, Canvas Confetti
 
 ---
