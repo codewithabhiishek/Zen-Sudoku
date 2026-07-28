@@ -78,6 +78,14 @@ function HomePage() {
     useUserStore.getState().initUser();
   }, []);
 
+  const reset = useGameStore((s) => s.reset);
+
+  useEffect(() => {
+    if (won) {
+      reset();
+    }
+  }, [won, reset]);
+
   // Apply theme class to <html>
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -96,6 +104,7 @@ function HomePage() {
   const filledCells = cells.filter((c) => c.value !== 0 && !c.given).length;
   const totalEmpty = cells.filter((c) => !c.given).length;
   const progressPct = totalEmpty > 0 ? Math.round((filledCells / totalEmpty) * 100) : 0;
+  const isFullyFilled = totalEmpty > 0 && filledCells === totalEmpty;
 
   const pickLevel = async (d: Difficulty, level: number) => {
     const key = `${d}-${level}`;
@@ -138,7 +147,7 @@ function HomePage() {
               <span className="mini-grid-dot-3 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">2</span>
               <span className="mini-grid-dot-4 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">7</span>
             </div>
-            <h1 className="display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="display text-2xl font-bold tracking-tight text-foreground">
               Zen Sudoku
             </h1>
           </div>
@@ -181,7 +190,7 @@ function HomePage() {
                     <span className="flex items-center gap-1">
                       <Clock className="size-3" /> {fmt(elapsedMs)}
                     </span>
-                    <span>{progressPct}% complete</span>
+                    <span>{isFullyFilled ? "81/81 filled · Has errors" : `${progressPct}% complete`}</span>
                   </div>
                   {/* Progress bar */}
                   <div className="mt-2 h-1.5 w-48 max-w-full overflow-hidden rounded-full bg-muted">
@@ -193,7 +202,7 @@ function HomePage() {
                 </div>
               </div>
               <div className="flex items-center gap-1 text-sm font-semibold text-primary transition group-hover:translate-x-1">
-                Resume <ChevronRight className="size-4" />
+                {isFullyFilled ? "Fix Errors" : "Resume"} <ChevronRight className="size-4" />
               </div>
             </div>
           </button>
