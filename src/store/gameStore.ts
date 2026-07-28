@@ -150,12 +150,10 @@ function computeScore(puzzle: Puzzle, timeSec: number, mistakes: number, hints: 
 }
 
 function todayKey(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  return new Date().toISOString().slice(0, 10); // "2026-07-04" — always zero-padded
 }
 function yesterdayKey(): string {
-  const d = new Date(Date.now() - 86400_000);
-  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  return new Date(Date.now() - 86400_000).toISOString().slice(0, 10);
 }
 
 /** Update stats after a confirmed win. Pure function — returns updated stats. */
@@ -174,7 +172,10 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
     next.gamesPlayed += 1;
   }
 
-  next.totalPoints += score.total;
+  // Only add XP on a first-time level win (or non-level games) — prevent replay double-counting
+  if (isNewLevelWin || !isLevelGame) {
+    next.totalPoints += score.total;
+  }
   const best = next.bestTimeByDifficulty[puzzle.difficulty];
   if (best == null || timeSec < best) next.bestTimeByDifficulty[puzzle.difficulty] = timeSec;
   const today = todayKey();
