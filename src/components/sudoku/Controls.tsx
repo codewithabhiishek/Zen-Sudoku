@@ -44,7 +44,7 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
   }, [running, paused, won, tick]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between py-1.5 sm:py-3 mb-2 sm:mb-4">
+    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between py-1.5 sm:py-3 mb-1.5 sm:mb-4 game-header-compress">
       <div className="flex flex-1 items-center justify-between rounded-lg border bg-surface px-3 py-1.5 sm:px-4 sm:py-2">
         {/* Difficulty */}
         <div className="flex items-center gap-1 text-xs font-semibold capitalize text-muted-foreground sm:text-sm">
@@ -190,5 +190,5 @@ export function PrimarySubmitButton() {
 }
 
 const btn = cn(
-  "btn-interactive flex h-11 flex-1 items-center justify-center gap-1 rounded-lg border border-border/80 bg-surface px-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40 sm:px-2.5 sm:text-sm",
+  "controls-btn-compress btn-interactive flex h-10 sm:h-11 flex-1 items-center justify-center gap-1 rounded-lg border border-border/80 bg-surface px-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40 sm:px-2.5 sm:text-sm",
 );

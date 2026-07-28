@@ -3,11 +3,14 @@
   "short_name": "Zen Sudoku",
   "description": "Clean, fast Sudoku with logic-rated difficulty and offline play.",
   "display": "standalone",
+  "orientation": "portrait",
   "start_url": "/",
   "scope": "/",
-  "background_color": "#fcfbf8",
-  "theme_color": "#2563eb",
+  "background_color": "#0E1116",
+  "theme_color": "#0E1116",
   "icons": [
-    { "src": "/favicon.png", "sizes": "64x64", "type": "image/png" }
+    { "src": "/favicon.png", "sizes": "64x64", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

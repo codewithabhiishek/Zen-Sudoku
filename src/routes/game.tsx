@@ -91,7 +91,7 @@ function GamePage() {
       className="flex min-h-dvh flex-col justify-between px-3 py-2 sm:py-6"
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
     >
-      <div className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-1.5 sm:gap-3">
+      <div className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-1.5 sm:gap-3 game-gap-compress">
         {/* Single-Row Mobile Header */}
         <header className="flex w-full items-center justify-between pb-1 sm:pb-2">
           {/* Brand Logo & Title — click goes home */}
@@ -155,11 +155,11 @@ function GamePage() {
 
         <GameHeader onNewGame={handleGoHome} />
 
-        <div className="my-1 sm:my-3">
+        <div className="my-1 sm:my-2">
           <Board />
         </div>
 
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-1.5 sm:space-y-3">
           <Controls />
           <Keypad />
         </div>

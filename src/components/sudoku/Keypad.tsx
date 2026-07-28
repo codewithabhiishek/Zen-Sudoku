@@ -22,9 +22,9 @@ export function Keypad() {
   }, [cells, puzzle]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-2">
+    <div className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-1.5 sm:gap-2">
       {/* 9-Column Digit Keypad */}
-      <div className="grid grid-cols-9 gap-1 sm:gap-1.5">
+      <div className="keypad-grid grid grid-cols-9 gap-1 sm:gap-1.5">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
           const left = remaining[n];
           const done = left <= 0;
@@ -35,7 +35,7 @@ export function Keypad() {
               disabled={done && !notesMode}
               aria-label={`Enter ${n}${done ? " (complete)" : ""}`}
               className={cn(
-                "btn-interactive relative flex h-11 sm:h-12 flex-1 items-center justify-center rounded-lg border bg-surface font-display text-xl sm:text-2xl font-semibold transition hover:bg-muted disabled:opacity-30",
+                "keypad-btn keypad-btn-compress btn-interactive relative flex h-10 sm:h-12 flex-1 items-center justify-center rounded-lg border bg-surface font-display text-lg sm:text-2xl font-semibold transition hover:bg-muted disabled:opacity-30",
               )}
             >
               <span className="sudoku-num text-foreground">{n}</span>

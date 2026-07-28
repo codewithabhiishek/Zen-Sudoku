@@ -223,7 +223,18 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html, body {
+
+  html {
+    /* Prevent text size inflation on mobile orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Prevent horizontal scroll / overscroll bounce on iOS */
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    scroll-behavior: smooth;
+  }
+
+  body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-body);
@@ -231,12 +242,34 @@
     /* iPhone notch / home bar padding */
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    /* Prevent rubber-band scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
   }
+
   h1, h2, h3, .display { font-family: var(--font-display); letter-spacing: -0.01em; }
+
   /* Minimum 44px tap targets on all interactive elements (WCAG) */
   button { min-height: 44px; }
-  /* Prevent text size inflation on mobile orientation change */
-  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+  /* Eliminate 300ms tap delay on iOS/Android — critical for game buttons */
+  button, a, [role="button"], [role="gridcell"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent text selection on game cells during fast tapping */
+  .sudoku-cell {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Ensure inputs don't zoom on iOS (font-size must be ≥16px) */
+  input, select, textarea {
+    font-size: max(16px, 1rem);
+  }
 }
 
 /* CRT effect */
@@ -504,21 +537,6 @@ body, main, div, button {
   animation: modalPopIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Responsive: controls wrap on very small screens */
-@media (max-width: 360px) {
-  .controls-bar {
-    flex-wrap: wrap;
-    gap: 0.375rem;
-  }
-  .controls-bar > button {
-    flex: 1 1 calc(33% - 0.375rem);
-    min-width: 0;
-    font-size: 0.7rem;
-    padding-left: 0.375rem;
-    padding-right: 0.375rem;
-  }
-}
-
 /* Keypad: ensure digits remain readable at all zoom levels */
 .sudoku-num {
   font-variant-numeric: tabular-nums;
@@ -529,6 +547,73 @@ body, main, div, button {
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   main {
     padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* ─── MOBILE RESPONSIVENESS ─────────────────────────────────────── */
+
+/* Controls bar: 6 buttons in a row — allow wrap on very small screens */
+@media (max-width: 374px) {
+  .controls-bar {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+  .controls-bar > button {
+    flex: 1 1 calc(33% - 0.375rem);
+    min-width: 0;
+    font-size: 0.68rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    min-height: 40px;
+  }
+}
+
+/* Keypad: tighten on very narrow phones */
+@media (max-width: 374px) {
+  .keypad-grid {
+    gap: 0.2rem;
+  }
+  .keypad-btn {
+    height: 2.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Board: keep square and fully visible */
+@media (max-width: 374px) {
+  .board-container {
+    max-width: min(96vw, 340px);
+  }
+}
+
+/* Game page: compress vertical gaps on short screens */
+@media (max-height: 700px) and (max-width: 480px) {
+  .game-gap-compress {
+    gap: 0.25rem !important;
+  }
+  .game-header-compress {
+    padding-top: 0 !important;
+    padding-bottom: 0.25rem !important;
+    margin-bottom: 0 !important;
+  }
+  .keypad-btn-compress {
+    height: 2.25rem !important;
+  }
+  .controls-btn-compress {
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+  }
+}
+
+/* Leaderboard table: better column distribution on mobile */
+@media (max-width: 480px) {
+  .lb-col-score { display: none; }
+}
+
+/* Homepage level list: make it scrollable on short devices */
+@media (max-height: 750px) {
+  .level-list-container {
+    max-height: 240px !important;
   }
 }
 

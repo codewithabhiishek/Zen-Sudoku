@@ -105,7 +105,7 @@ export function Board() {
 
   return (
     <div
-      className="relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
+      className="board-container relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
       style={{ borderColor: "var(--color-border-strong)" }}
       role="grid"
       aria-label="Sudoku board"
@@ -130,8 +130,8 @@ export function Board() {
             aria-selected={isSelected}
             onClick={() => select(i)}
             className={cn(
-              "sudoku-cell relative flex items-center justify-center border border-border transition-all duration-150 focus:outline-none",
-              "text-[calc(min(4.5vw,26px)*var(--font-scale,1))] leading-none",
+              "sudoku-cell relative flex items-center justify-center border border-border transition-all duration-150 focus:outline-none select-none",
+              "text-[calc(min(4.2vw,24px)*var(--font-scale,1))] leading-none",
               // thick borders every 3
               (c === 2 || c === 5) && "border-r-2 border-r-[color:var(--color-border-strong)]",
               (r === 2 || r === 5) && "border-b-2 border-b-[color:var(--color-border-strong)]",

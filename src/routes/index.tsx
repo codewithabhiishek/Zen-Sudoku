@@ -128,7 +128,7 @@ function HomePage() {
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
     >
       {/* ── TOP NAV ─────────────────────────────────────────── */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3 sm:pt-5">
+      <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 pt-3 sm:pt-5">
         <header className="flex w-full items-center justify-between pb-4 sm:pb-6">
           {/* Brand */}
           <div className="flex items-center gap-2.5">
@@ -271,7 +271,7 @@ function HomePage() {
           </div>
 
           {/* Level List */}
-          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="level-list-container space-y-2 max-h-[380px] overflow-y-auto pr-1">
             {LEVELS.map((lvl) => {
               const key = `${selectedDiff}-${lvl}`;
               const isLoadingThis = loading === key;
