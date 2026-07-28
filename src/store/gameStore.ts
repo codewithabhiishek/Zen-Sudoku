@@ -8,7 +8,7 @@ import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
-import { addLeaderboardEntry, updateStatistics, upsertActiveGameSession } from "@/database/api";
+import { addLeaderboardEntry, updateStatistics, upsertActiveGameSession, clearActiveGameSessions } from "@/database/api";
 import {
   trackGameStarted,
   trackGameCompleted,
@@ -448,23 +448,18 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
             playWinSound();
             const timeSec = Math.floor(get().elapsedMs / 1000);
             const score = computeScore(puzzle, timeSec, get().mistakes, get().hintsUsed);
-            // BUG FIX: use applyWinToStats to avoid double-counting
             const stats = applyWinToStats(get().stats, puzzle, timeSec, score);
-            set({ won: true, running: false, score, stats });
+            set({ won: true, running: false, score, stats, paused: false });
 
             // Mark session as completed in Neon DB
             try {
               const userId = useUserStore.getState().userId;
               if (userId && !userId.startsWith("guest_")) {
-                upsertActiveGameSession({
-                  userId,
-                  difficulty: puzzle.difficulty,
-                  elapsedTime: timeSec,
-                  mistakes: get().mistakes,
-                  boardState: { puzzle: puzzle.puzzle, cells: cells },
-                  solution: puzzle.solution,
-                  seed: puzzle.seed,
-                  status: "completed",
+                clearActiveGameSessions(userId).catch(() => {});
+                updateStatistics(userId, {
+                  completedLevels: stats.completedLevels,
+                  gamesWon: stats.gamesWon,
+                  gamesPlayed: stats.gamesPlayed,
                 }).catch(() => {});
               }
             } catch (e) {}
@@ -516,6 +511,32 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
         });
 
         trackHintUsed(s.puzzle.difficulty);
+
+        // Auto-win check after hint placement
+        const allFilled = cells.every((c) => c.value !== 0);
+        if (allFilled) {
+          const puzzle = s.puzzle;
+          const correct = cells.every((c, i) => c.value === puzzle.solution[i]);
+          if (correct) {
+            playWinSound();
+            const timeSec = Math.floor(get().elapsedMs / 1000);
+            const score = computeScore(puzzle, timeSec, get().mistakes, get().hintsUsed);
+            const stats = applyWinToStats(get().stats, puzzle, timeSec, score);
+            set({ won: true, running: false, score, stats, paused: false });
+
+            try {
+              const userId = useUserStore.getState().userId;
+              if (userId && !userId.startsWith("guest_")) {
+                clearActiveGameSessions(userId).catch(() => {});
+                updateStatistics(userId, {
+                  completedLevels: stats.completedLevels,
+                  gamesWon: stats.gamesWon,
+                  gamesPlayed: stats.gamesPlayed,
+                }).catch(() => {});
+              }
+            } catch (e) {}
+          }
+        }
       },
 
       // BUG FIX: Implemented check() — was declared in interface but never implemented
@@ -562,9 +583,20 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
         if (isWin) {
           const timeSec = Math.floor(s.elapsedMs / 1000);
           const score = computeScore(puzzle, timeSec, s.mistakes, s.hintsUsed);
-          // BUG FIX: use applyWinToStats — consistent with auto-win path
           const stats = applyWinToStats(s.stats, puzzle, timeSec, score);
-          set({ won: true, running: false, score, stats, submitResult: null });
+          set({ won: true, running: false, score, stats, submitResult: null, paused: false });
+
+          try {
+            const userId = useUserStore.getState().userId;
+            if (userId && !userId.startsWith("guest_")) {
+              clearActiveGameSessions(userId).catch(() => {});
+              updateStatistics(userId, {
+                completedLevels: stats.completedLevels,
+                gamesWon: stats.gamesWon,
+                gamesPlayed: stats.gamesPlayed,
+              }).catch(() => {});
+            }
+          } catch (e) {}
         } else {
           set({
             submitResult: {

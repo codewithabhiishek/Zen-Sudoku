@@ -76,7 +76,11 @@ function GamePage() {
 
   // Go home: pause the game and navigate to /
   const handleGoHome = () => {
-    if (running && !won) pause();
+    if (won) {
+      reset();
+    } else if (running) {
+      pause();
+    }
     navigate({ to: "/" });
   };
 

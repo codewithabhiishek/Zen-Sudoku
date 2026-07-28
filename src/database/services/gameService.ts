@@ -74,6 +74,10 @@ export async function getActiveGameSession(userId: string) {
   return await gameRepo.getActiveGameSession(userId);
 }
 
+export async function clearActiveGameSessions(userId: string) {
+  return await gameRepo.clearActiveGameSessions(userId);
+}
+
 export async function upsertActiveGameSession(data: {
   userId: string;
   difficulty: string;

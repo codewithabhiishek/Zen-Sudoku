@@ -1,6 +1,6 @@
 import { db } from "../index";
 import { gameSessions, gameHistory } from "../schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface CreateGameSessionData {
   userId: string;
@@ -108,17 +108,27 @@ export async function completeGame(
   }
 }
 
+export async function clearActiveGameSessions(userId: string) {
+  try {
+    await db
+      .update(gameSessions)
+      .set({ status: "completed", updatedAt: new Date() })
+      .where(and(eq(gameSessions.userId, userId), eq(gameSessions.status, "in_progress")));
+  } catch (error) {
+    console.error("Database Error [clearActiveGameSessions]:", error);
+  }
+}
+
 export async function getActiveGameSession(userId: string) {
   try {
     const sessions = await db
       .select()
       .from(gameSessions)
-      .where(eq(gameSessions.userId, userId))
+      .where(and(eq(gameSessions.userId, userId), eq(gameSessions.status, "in_progress")))
       .limit(10);
-    const inProgress = sessions.filter((s) => s.status === "in_progress");
-    if (!inProgress.length) return null;
-    inProgress.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-    return inProgress[0];
+    if (!sessions.length) return null;
+    sessions.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    return sessions[0];
   } catch (error) {
     console.error("Database Error [getActiveGameSession]:", error);
     return null;
@@ -136,6 +146,11 @@ export async function upsertActiveGameSession(data: {
   status?: string;
 }) {
   try {
+    if (data.status === "completed") {
+      await clearActiveGameSessions(data.userId);
+      return null;
+    }
+
     const active = await getActiveGameSession(data.userId);
     const now = new Date();
     if (active) {

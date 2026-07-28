@@ -76,7 +76,7 @@ export function generatePuzzle(difficulty: Difficulty, seed?: string, levelNumbe
     const p: Puzzle = {
       puzzle,
       solution,
-      difficulty: rating.difficulty,
+      difficulty: levelNumber ? difficulty : rating.difficulty,
       seed: `${seedNum}-${attempt}`,
       clueCount,
       levelNumber,

@@ -164,7 +164,8 @@ export function ClerkSyncBridge() {
 
           // Step 11: Sync active in-progress game between devices (iPhone <-> Desktop)
           const activeSession = await getActiveGameSession(user.id);
-          if (activeSession && activeSession.boardState) {
+          const currentStore = useGameStore.getState();
+          if (!currentStore.won && activeSession && activeSession.status === "in_progress" && activeSession.boardState) {
             const cloudCells = (activeSession.boardState as any).cells || [];
             const cloudPuzzle = (activeSession.boardState as any).puzzle || [];
             const cloudSolution = (activeSession.solution as any) || [];
@@ -225,12 +226,14 @@ export function ClerkSyncBridge() {
     const activePollInterval = setInterval(async () => {
       if (!isSignedIn || !user || document.hidden) return;
       try {
+        const currentStore = useGameStore.getState();
+        if (currentStore.won) return;
+
         const activeSession = await getActiveGameSession(user.id);
-        if (activeSession && activeSession.boardState) {
+        if (activeSession && activeSession.status === "in_progress" && activeSession.boardState) {
           const cloudCells = (activeSession.boardState as any).cells || [];
           const cloudPuzzle = (activeSession.boardState as any).puzzle || [];
           const cloudSolution = (activeSession.solution as any) || [];
-          const currentStore = useGameStore.getState();
 
           if (cloudCells.length === 81 && !currentStore.won) {
             const cloudFilled = cloudCells.filter((c: any) => c.value !== 0).length;
