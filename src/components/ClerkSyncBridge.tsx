@@ -89,16 +89,15 @@ export function ClerkSyncBridge() {
             });
           }
 
-          // Step 5: Merge games played/won — always take the max
+          // Step 5: Merge games played/won — sanitize with completed levels count
+          const completedCount = mergedLevels.length;
+          const mergedWon = completedCount > 0
+            ? completedCount
+            : Math.max(localStats.gamesWon ?? 0, cloudStats?.gamesWon ?? 0);
           const mergedPlayed = Math.max(
             localStats.gamesPlayed ?? 0,
             cloudStats?.gamesPlayed ?? 0,
-            mergedLevels.length
-          );
-          const mergedWon = Math.max(
-            localStats.gamesWon ?? 0,
-            cloudStats?.gamesWon ?? 0,
-            mergedLevels.length
+            mergedWon
           );
 
           // Step 6: Calculate total points — guarantee minimum XP per level
@@ -240,8 +239,8 @@ export function ClerkSyncBridge() {
               stats: {
                 ...currentStore.stats,
                 completedLevels: mergedLevels,
-                gamesWon: Math.max(currentStore.stats.gamesWon, cloudStats.gamesWon ?? 0, mergedLevels.length),
-                gamesPlayed: Math.max(currentStore.stats.gamesPlayed, cloudStats.gamesPlayed ?? 0, mergedLevels.length),
+                gamesWon: mergedLevels.length,
+                gamesPlayed: mergedLevels.length,
               },
             });
           }

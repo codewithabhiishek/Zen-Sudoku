@@ -59,15 +59,13 @@ export function StatsPage() {
       .catch(() => {});
   }, []);
 
-  const completedLevels = localStats.completedLevels ?? [];
+  const completedLevels = Array.from(new Set([...(localStats.completedLevels ?? []), ...(dbStats?.completedLevels ?? [])]));
   const completedCount = completedLevels.length;
-  const rawPlayed = dbStats?.gamesPlayed ?? localStats.gamesPlayed ?? 0;
-  const rawWon = dbStats?.gamesWon ?? (completedCount > 0 ? Math.min(localStats.gamesWon, completedCount) : localStats.gamesWon) ?? 0;
-  const won = Math.min(rawWon, rawPlayed);
-  const played = Math.max(rawPlayed, won);
+  const won = completedCount > 0 ? completedCount : Math.min(dbStats?.gamesWon ?? localStats.gamesWon ?? 0, dbStats?.gamesPlayed ?? localStats.gamesPlayed ?? 0);
+  const played = Math.max(dbStats?.gamesPlayed ?? localStats.gamesPlayed ?? 0, won);
   const winRate = played > 0 ? Number(((won / played) * 100).toFixed(1)) : 0;
-  const currentStreak = dbStats?.currentStreak ?? localStats.currentStreakDays ?? 0;
-  const longestStreak = dbStats?.longestStreak ?? localStats.longestStreakDays ?? 0;
+  const currentStreak = Math.max(localStats.currentStreakDays ?? 0, dbStats?.currentStreak ?? 0);
+  const longestStreak = Math.max(localStats.longestStreakDays ?? 0, dbStats?.longestStreak ?? 0);
 
   // Calculate guaranteed minimum XP for all completed levels (100 XP per Easy level, 200 XP per Medium, etc.)
   const minGuaranteedXP = completedLevels.reduce((sum, key) => {

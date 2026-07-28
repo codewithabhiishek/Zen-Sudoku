@@ -696,7 +696,7 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
         // Auto-heal: sanitize gamesWon & gamesPlayed if previous double-counting created a mismatch with unique completed levels
         const completedLevels = rawStats.completedLevels ?? [];
         const completedCount = completedLevels.length;
-        if (completedCount > 0 && rawStats.gamesWon > completedCount) {
+        if (completedCount > 0) {
           rawStats.gamesWon = completedCount;
           rawStats.gamesPlayed = completedCount;
         }
