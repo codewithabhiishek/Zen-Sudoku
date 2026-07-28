@@ -104,13 +104,23 @@ export function LeaderboardPage() {
           });
         }
 
-        const combined = [...fetched];
-        synthEntries.forEach((s) => {
-          if (!combined.some((item) => item.userId === s.userId && item.difficulty === s.difficulty)) {
-            combined.push(s);
+        // Deduplicate entries by unique (userId, difficulty) or id
+        const combinedMap = new Map<string, LeaderboardItem>();
+        fetched.forEach((item) => {
+          const key = `${item.userId || item.username || item.id}-${item.difficulty}`;
+          if (!combinedMap.has(key)) {
+            combinedMap.set(key, item);
           }
         });
 
+        synthEntries.forEach((s) => {
+          const key = `${s.userId || s.username || s.id}-${s.difficulty}`;
+          if (!combinedMap.has(key)) {
+            combinedMap.set(key, s);
+          }
+        });
+
+        const combined = Array.from(combinedMap.values());
         combined.sort((a, b) => b.score - a.score || a.time - b.time);
         setEntries(combined);
       })

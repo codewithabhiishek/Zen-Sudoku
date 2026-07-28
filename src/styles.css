@@ -228,9 +228,9 @@
     /* Prevent text size inflation on mobile orientation change */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    /* Prevent horizontal scroll / overscroll bounce on iOS */
+    /* Prevent horizontal scroll while enabling vertical scroll */
     overflow-x: hidden;
-    overscroll-behavior-x: none;
+    overflow-y: auto;
     scroll-behavior: smooth;
   }
 
@@ -244,8 +244,8 @@
     padding-right: env(safe-area-inset-right);
     /* Prevent horizontal scroll */
     overflow-x: hidden;
-    overscroll-behavior: none;
-    /* Prevent rubber-band scrolling on iOS */
+    overflow-y: auto;
+    /* Smooth scrolling on mobile */
     -webkit-overflow-scrolling: touch;
   }
 
