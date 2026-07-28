@@ -228,9 +228,7 @@
     /* Prevent text size inflation on mobile orientation change */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    /* Prevent horizontal scroll while enabling vertical scroll */
     overflow-x: hidden;
-    overflow-y: auto;
     scroll-behavior: smooth;
   }
 
@@ -242,11 +240,24 @@
     /* iPhone notch / home bar padding */
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
-    /* Prevent horizontal scroll */
     overflow-x: hidden;
-    overflow-y: auto;
-    /* Smooth scrolling on mobile */
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Strict iPhone rubber-band overscroll protection on touch/mobile devices */
+  @media (pointer: coarse), (max-width: 768px) {
+    html, body {
+      overscroll-behavior: none;
+      overscroll-behavior-y: none;
+    }
+  }
+
+  /* Desktop scrolling: allow natural vertical scrolling for mouse/pointer devices */
+  @media (pointer: fine) and (min-width: 769px) {
+    html, body {
+      overflow-y: auto;
+      overscroll-behavior-y: auto;
+    }
   }
 
   h1, h2, h3, .display { font-family: var(--font-display); letter-spacing: -0.01em; }
