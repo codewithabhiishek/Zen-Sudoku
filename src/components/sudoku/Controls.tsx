@@ -126,17 +126,17 @@ export function Controls() {
   return (
     <div className="controls-bar mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1 sm:gap-2">
       {/* 1. Undo */}
-      <button onClick={undo} disabled={!historyLen} className={btn}>
-        <Undo2 className="size-3.5" /> <span className="hidden sm:inline">Undo</span>
+      <button onClick={undo} disabled={!historyLen} className={btn} title="Undo">
+        <Undo2 className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Undo</span>
       </button>
       {/* 2. Redo */}
-      <button onClick={redo} disabled={!futureLen} className={btn}>
-        <Redo2 className="size-3.5" /> <span className="hidden sm:inline">Redo</span>
+      <button onClick={redo} disabled={!futureLen} className={btn} title="Redo">
+        <Redo2 className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Redo</span>
       </button>
       {/* 3. Check / Explain */}
       {selectedHasValue ? (
-        <button onClick={explainCurrent} className={cn(btn, "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10")}>
-          <HelpCircle className="size-3.5" /> Explain
+        <button onClick={explainCurrent} className={cn(btn, "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10")} title="Explain Move">
+          <HelpCircle className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Explain</span>
         </button>
       ) : (
         <button
@@ -145,25 +145,27 @@ export function Controls() {
             setMsg(wrong === 0 ? "Looking good so far" : `${wrong} wrong so far`);
           }}
           className={btn}
+          title="Check Board"
         >
-          <Search className="size-3.5" /> Check
+          <Search className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Check</span>
         </button>
       )}
       {/* 4. Hint */}
-      <button onClick={hint} className={btn}>
-        <Lightbulb className="size-3.5" /> Hint ({hintsUsed})
+      <button onClick={hint} className={btn} title="Get Hint">
+        <Lightbulb className="size-3.5 shrink-0" /> <span className="text-[10px] sm:text-xs">Hint ({hintsUsed})</span>
       </button>
       {/* 5. Notes */}
       <button
         onClick={toggleNotes}
         className={cn(btn, notesMode && "bg-primary/10 text-primary border-primary/50")}
         aria-pressed={notesMode}
+        title="Toggle Pencil Notes"
       >
-        <PencilLine className="size-3.5" /> <span>Notes</span>
+        <PencilLine className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Notes</span>
       </button>
       {/* 6. Erase */}
-      <button onClick={() => input(0)} className={btn}>
-        <Eraser className="size-3.5" /> <span>Erase</span>
+      <button onClick={() => input(0)} className={btn} title="Erase Cell">
+        <Eraser className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Erase</span>
       </button>
       {msg && (
         <div
@@ -190,5 +192,5 @@ export function PrimarySubmitButton() {
 }
 
 const btn = cn(
-  "controls-btn-compress btn-interactive flex h-10 sm:h-11 flex-1 items-center justify-center gap-1 rounded-lg border border-border/80 bg-surface px-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40 sm:px-2.5 sm:text-sm",
+  "controls-btn-compress btn-interactive flex h-9 sm:h-11 min-h-[38px] flex-1 items-center justify-center gap-1 rounded-lg border border-border/80 bg-surface px-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40 sm:px-2.5 sm:text-sm shrink-0 min-w-0",
 );
