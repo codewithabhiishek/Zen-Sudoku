@@ -107,3 +107,17 @@ export async function completeGame(
     throw error;
   }
 }
+
+export async function getActiveGameSession(userId: string) {
+  try {
+    const sessions = await db
+      .select()
+      .from(gameSessions)
+      .where(eq(gameSessions.userId, userId))
+      .limit(10);
+    return sessions.find((s) => s.status === "in_progress") || null;
+  } catch (error) {
+    console.error("Database Error [getActiveGameSession]:", error);
+    return null;
+  }
+}

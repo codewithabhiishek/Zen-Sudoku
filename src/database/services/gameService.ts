@@ -69,3 +69,7 @@ export async function completeGame(
 
   return history;
 }
+
+export async function getActiveGameSession(userId: string) {
+  return await gameRepo.getActiveGameSession(userId);
+}

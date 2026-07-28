@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useUserStore } from "@/store/userStore";
 import { useGameStore } from "@/store/gameStore";
-import { getStatistics, updateStatistics, createUser } from "@/database/api";
+import { getStatistics, updateStatistics, createUser, getActiveGameSession, saveGame } from "@/database/api";
 
 type Difficulty = "easy" | "medium" | "hard" | "expert";
 
@@ -161,6 +161,31 @@ export function ClerkSyncBridge() {
           });
 
           useGameStore.setState({ stats: mergedStats });
+
+          // Step 11: Sync active in-progress game between devices (iPhone <-> Desktop)
+          const activeSession = await getActiveGameSession(user.id);
+          if (activeSession && activeSession.boardState) {
+            const currentGameState = useGameStore.getState();
+            // If local device has no active puzzle, or cloud puzzle was updated more recently
+            if (!currentGameState.puzzle || !currentGameState.running) {
+              console.log("[SyncBridge] 🎮 Restoring active in-progress game from cloud...");
+              useGameStore.setState({
+                puzzle: {
+                  puzzle: (activeSession.boardState as any).puzzle || [],
+                  solution: (activeSession.solution as any) || [],
+                  difficulty: activeSession.difficulty as Difficulty,
+                  clueCount: ((activeSession.boardState as any).puzzle || []).filter((v: number) => v !== 0).length,
+                  seed: activeSession.seed || undefined,
+                },
+                cells: (activeSession.boardState as any).cells || [],
+                elapsedMs: (activeSession.elapsedTime || 0) * 1000,
+                mistakes: activeSession.mistakes || 0,
+                running: true,
+                paused: true, // Start paused on device transition so timer doesn't run unexpectedly
+                won: false,
+              });
+            }
+          }
 
           // Mark this user as synced — prevents repeat sync in same session
           lastSyncedUserId.current = user.id;
