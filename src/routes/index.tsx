@@ -68,7 +68,6 @@ function HomePage() {
   const newGame = useGameStore((s) => s.newGame);
   const resume = useGameStore((s) => s.resume);
   const stats = useGameStore((s) => s.stats);
-  const completedLevels = stats.completedLevels ?? [];
 
   const navigate = useNavigate();
   const [selectedDiff, setSelectedDiff] = useState<Difficulty>("easy");
@@ -108,15 +107,15 @@ function HomePage() {
   };
 
   const activeDiff = DIFFICULTIES.find((d) => d.id === selectedDiff)!;
+  const completedLevels = Array.from(new Set(stats.completedLevels ?? [])).filter(Boolean);
+  const completedCount = completedLevels.length;
   const completedForDiff = (d: Difficulty) => completedLevels.filter((k) => k.startsWith(`${d}-`)).length;
 
-  // Calculate guaranteed minimum XP for all completed levels (100 XP per Easy level, 200 XP per Medium, etc.)
-  const minGuaranteedXP = completedLevels.reduce((sum, key) => {
+  const totalPoints = completedLevels.reduce((sum, key) => {
     const diff = (key.split("-")[0] || "easy") as Difficulty;
-    const base = { easy: 200, medium: 400, hard: 800, expert: 1500 }[diff] || 200;
-    return sum + Math.round(base * 0.5);
+    const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
+    return sum + base;
   }, 0);
-  const totalPoints = Math.max(stats.totalPoints || 0, minGuaranteedXP);
 
   return (
     <main
@@ -336,7 +335,7 @@ function HomePage() {
           </span>
           <span className="text-border">•</span>
           <span className="flex items-center gap-1.5 font-semibold">
-            <span className="text-foreground">{stats.gamesWon}</span> won
+            <span className="text-foreground">{completedCount}</span> won
           </span>
         </div>
       </div>

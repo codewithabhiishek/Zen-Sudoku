@@ -158,31 +158,45 @@ function yesterdayKey(): string {
 
 /** Update stats after a confirmed win. Pure function — returns updated stats. */
 function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: ScoreBreakdown): Stats {
-  const next = { ...stats, completedLevels: [...(stats.completedLevels ?? [])] };
+  const nextLevels = Array.from(new Set(stats.completedLevels ?? [])).filter(Boolean);
   const isLevelGame = puzzle.levelNumber != null;
   const levelKey = isLevelGame ? `${puzzle.difficulty}-${puzzle.levelNumber}` : null;
-  const isNewLevelWin = levelKey != null && !next.completedLevels.includes(levelKey);
 
-  if (isNewLevelWin && levelKey) {
-    next.completedLevels.push(levelKey);
-    next.gamesWon += 1;
-    next.gamesPlayed += 1;
-  } else if (!isLevelGame) {
-    next.gamesWon += 1;
-    next.gamesPlayed += 1;
+  if (levelKey && !nextLevels.includes(levelKey)) {
+    nextLevels.push(levelKey);
   }
 
-  // Only add XP on a first-time level win (or non-level games) — prevent replay double-counting
-  if (isNewLevelWin || !isLevelGame) {
-    next.totalPoints += score.total;
-  }
-  const best = next.bestTimeByDifficulty[puzzle.difficulty];
-  if (best == null || timeSec < best) next.bestTimeByDifficulty[puzzle.difficulty] = timeSec;
+  const count = nextLevels.length;
+  const totalPoints = count > 0
+    ? nextLevels.reduce((sum, key) => {
+        const diff = (key.split("-")[0] || "easy") as Difficulty;
+        const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
+        return sum + base;
+      }, 0)
+    : stats.totalPoints + score.total;
+
+  const best = stats.bestTimeByDifficulty[puzzle.difficulty];
+  const newBestTime = best == null ? timeSec : Math.min(best, timeSec);
   const today = todayKey();
-  if (next.lastPlayedDate === yesterdayKey()) next.currentStreakDays += 1;
-  else if (next.lastPlayedDate !== today) next.currentStreakDays = 1;
-  next.longestStreakDays = Math.max(next.longestStreakDays, next.currentStreakDays);
-  next.lastPlayedDate = today;
+  let currentStreak = stats.currentStreakDays;
+  if (stats.lastPlayedDate === yesterdayKey()) currentStreak += 1;
+  else if (stats.lastPlayedDate !== today) currentStreak = 1;
+  const longestStreak = Math.max(stats.longestStreakDays, currentStreak);
+
+  const next = {
+    ...stats,
+    completedLevels: nextLevels,
+    gamesWon: count > 0 ? count : stats.gamesWon + 1,
+    gamesPlayed: count > 0 ? count : stats.gamesPlayed + 1,
+    totalPoints,
+    bestTimeByDifficulty: {
+      ...stats.bestTimeByDifficulty,
+      [puzzle.difficulty]: newBestTime,
+    },
+    currentStreakDays: currentStreak,
+    longestStreakDays: longestStreak,
+    lastPlayedDate: today,
+  };
 
   // Track Game Completed analytics event
   try {

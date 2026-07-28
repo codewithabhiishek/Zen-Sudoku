@@ -100,15 +100,12 @@ export function ClerkSyncBridge() {
             mergedWon
           );
 
-          // Step 6: Calculate total points — guarantee minimum XP per level
-          const minExpectedPoints = mergedLevels.reduce((sum, key) => {
+          // Step 6: Calculate total points
+          const mergedPoints = mergedLevels.reduce((sum, key) => {
             const diff = (key.split("-")[0] || "easy") as Difficulty;
-            return sum + Math.round(baseFor(diff) * 0.5);
+            const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
+            return sum + base;
           }, 0);
-          const mergedPoints = Math.max(
-            localStats.totalPoints ?? 0,
-            minExpectedPoints
-          );
 
           // Step 7: Merge streaks
           const mergedCurrentStreak = Math.max(
