@@ -6,6 +6,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useSettingsStore } from "@/store/settingsStore";
 
 function NotFoundComponent() {
   return (
