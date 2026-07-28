@@ -165,23 +165,25 @@ export function ClerkSyncBridge() {
           // Step 11: Sync active in-progress game between devices (iPhone <-> Desktop)
           const activeSession = await getActiveGameSession(user.id);
           if (activeSession && activeSession.boardState) {
-            const currentGameState = useGameStore.getState();
-            // If local device has no active puzzle, or cloud puzzle was updated more recently
-            if (!currentGameState.puzzle || !currentGameState.running) {
-              console.log("[SyncBridge] 🎮 Restoring active in-progress game from cloud...");
+            const cloudCells = (activeSession.boardState as any).cells || [];
+            const cloudPuzzle = (activeSession.boardState as any).puzzle || [];
+            const cloudSolution = (activeSession.solution as any) || [];
+
+            if (cloudCells.length === 81 && cloudPuzzle.length === 81) {
+              console.log("[SyncBridge] 🎮 Syncing active in-progress game from cloud...");
               useGameStore.setState({
                 puzzle: {
-                  puzzle: (activeSession.boardState as any).puzzle || [],
-                  solution: (activeSession.solution as any) || [],
+                  puzzle: cloudPuzzle,
+                  solution: cloudSolution,
                   difficulty: activeSession.difficulty as Difficulty,
-                  clueCount: ((activeSession.boardState as any).puzzle || []).filter((v: number) => v !== 0).length,
+                  clueCount: cloudPuzzle.filter((v: number) => v !== 0).length,
                   seed: activeSession.seed || undefined,
                 },
-                cells: (activeSession.boardState as any).cells || [],
+                cells: cloudCells,
                 elapsedMs: (activeSession.elapsedTime || 0) * 1000,
                 mistakes: activeSession.mistakes || 0,
                 running: true,
-                paused: true, // Start paused on device transition so timer doesn't run unexpectedly
+                paused: false,
                 won: false,
               });
             }
@@ -218,6 +220,50 @@ export function ClerkSyncBridge() {
     };
 
     syncAuth();
+
+    // Step 12: Real-time background sync every 4 seconds when tab is active
+    const activePollInterval = setInterval(async () => {
+      if (!isSignedIn || !user || document.hidden) return;
+      try {
+        const activeSession = await getActiveGameSession(user.id);
+        if (activeSession && activeSession.boardState) {
+          const cloudCells = (activeSession.boardState as any).cells || [];
+          const cloudPuzzle = (activeSession.boardState as any).puzzle || [];
+          const cloudSolution = (activeSession.solution as any) || [];
+          const currentStore = useGameStore.getState();
+
+          if (cloudCells.length === 81 && !currentStore.won) {
+            const cloudFilled = cloudCells.filter((c: any) => c.value !== 0).length;
+            const localFilled = (currentStore.cells || []).filter((c: any) => c.value !== 0).length;
+
+            // Update if cloud has newer moves played on another device
+            if (cloudFilled > localFilled || (cloudFilled === localFilled && Math.abs(Math.floor(currentStore.elapsedMs / 1000) - activeSession.elapsedTime) > 3)) {
+              console.log("[SyncBridge] ⚡ Real-time move sync from secondary device!");
+              useGameStore.setState({
+                puzzle: {
+                  puzzle: cloudPuzzle,
+                  solution: cloudSolution,
+                  difficulty: activeSession.difficulty as Difficulty,
+                  clueCount: cloudPuzzle.filter((v: number) => v !== 0).length,
+                  seed: activeSession.seed || undefined,
+                },
+                cells: cloudCells,
+                elapsedMs: (activeSession.elapsedTime || 0) * 1000,
+                mistakes: activeSession.mistakes || 0,
+                running: true,
+                won: false,
+              });
+            }
+          }
+        }
+      } catch (err) {
+        // Ignore polling glitches
+      }
+    }, 4000);
+
+    return () => {
+      clearInterval(activePollInterval);
+    };
   }, [isLoaded, isSignedIn, user?.id]); // Depend on user.id specifically, not entire user object
 
   return null;
