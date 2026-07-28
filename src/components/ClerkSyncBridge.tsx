@@ -223,13 +223,33 @@ export function ClerkSyncBridge() {
     syncAuth();
 
     // Step 12: Real-time background sync every 4 seconds when tab is active
-    const activePollInterval = setInterval(async () => {
+    const runRealtimeSync = async () => {
       if (!isSignedIn || !user || document.hidden) return;
       try {
         const currentStore = useGameStore.getState();
-        if (currentStore.won) return;
 
+        // 1. Poll cloud statistics for real-time level completion sync (iPhone -> Laptop)
+        const cloudStats = await getStatistics(user.id);
+        if (cloudStats && Array.isArray(cloudStats.completedLevels)) {
+          const cloudLevels = cloudStats.completedLevels as string[];
+          const localLevels = currentStore.stats.completedLevels ?? [];
+          const mergedLevels = Array.from(new Set([...localLevels, ...cloudLevels]));
+          if (mergedLevels.length > localLevels.length) {
+            console.log("[SyncBridge] ⚡ Real-time level completion sync from cloud!", mergedLevels);
+            useGameStore.setState({
+              stats: {
+                ...currentStore.stats,
+                completedLevels: mergedLevels,
+                gamesWon: Math.max(currentStore.stats.gamesWon, cloudStats.gamesWon ?? 0, mergedLevels.length),
+                gamesPlayed: Math.max(currentStore.stats.gamesPlayed, cloudStats.gamesPlayed ?? 0, mergedLevels.length),
+              },
+            });
+          }
+        }
+
+        // 2. Poll active game session for move sync or game completion (iPhone -> Laptop)
         const activeSession = await getActiveGameSession(user.id);
+
         if (activeSession && activeSession.status === "in_progress" && activeSession.boardState) {
           const cloudCells = (activeSession.boardState as any).cells || [];
           const cloudPuzzle = (activeSession.boardState as any).puzzle || [];
@@ -258,14 +278,28 @@ export function ClerkSyncBridge() {
               });
             }
           }
+        } else if (!activeSession && currentStore.puzzle && !currentStore.won) {
+          // Cloud has NO in-progress session (game was completed on phone), but local laptop store still has active puzzle.
+          // Reset local puzzle state so Resume banner disappears on laptop!
+          console.log("[SyncBridge] 🧹 Game completed on secondary device — clearing active session on this device!");
+          currentStore.reset();
         }
       } catch (err) {
         // Ignore polling glitches
       }
-    }, 4000);
+    };
+
+    const activePollInterval = setInterval(runRealtimeSync, 4000);
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) runRealtimeSync();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearInterval(activePollInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isLoaded, isSignedIn, user?.id]); // Depend on user.id specifically, not entire user object
 
