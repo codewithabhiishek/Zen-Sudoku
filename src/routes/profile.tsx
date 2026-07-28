@@ -140,13 +140,8 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="shrink-0 flex items-center gap-2">
+            <div className="shrink-0">
               <SignedIn>
-                <SignOutButton redirectUrl="/profile">
-                  <button className="btn-interactive flex items-center gap-1.5 rounded-xl border border-border bg-surface-2 px-3 py-2 text-xs font-bold text-foreground transition hover:bg-muted">
-                    <LogOut className="size-3.5 text-danger" /> Log Out
-                  </button>
-                </SignOutButton>
                 <UserButton userProfileMode="navigation" userProfileUrl="/profile" />
               </SignedIn>
               <SignedOut>
@@ -236,14 +231,21 @@ export function ProfilePage() {
           {/* Danger Zone */}
           <div className="space-y-3 border-t pt-5">
             <label className="block text-xs font-semibold text-danger uppercase tracking-wider">
-              Danger Zone
+              Account Actions & Danger Zone
             </label>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2.5 sm:grid-cols-3">
+              <SignedIn>
+                <SignOutButton redirectUrl="/profile">
+                  <button className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 transition">
+                    <LogOut className="size-4" /> Sign Out
+                  </button>
+                </SignOutButton>
+              </SignedIn>
               <button
                 onClick={handleResetProgress}
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs font-semibold text-amber-500 hover:bg-amber-500/20 transition"
               >
-                <RotateCcw className="size-4" /> Reset Game Progress
+                <RotateCcw className="size-4" /> Reset Progress
               </button>
               <button
                 onClick={handleDeleteProfile}
