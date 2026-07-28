@@ -123,6 +123,33 @@ function RootComponent() {
     };
   }, []);
 
+  // Global theme synchronization: Ensures selected theme persists across refreshes & route changes
+  useEffect(() => {
+    const applyTheme = (t: string) => {
+      if (typeof document === "undefined") return;
+      const root = document.documentElement;
+      root.classList.remove(
+        "theme-graphite",
+        "theme-forest",
+        "theme-tokyo",
+        "theme-catppuccin",
+        "theme-amoled",
+        "theme-chessboard"
+      );
+      root.classList.add(`theme-${t}`);
+    };
+
+    // Apply on route mount
+    applyTheme(useSettingsStore.getState().theme);
+
+    // Subscribe to store changes so theme updates instantly everywhere
+    const unsub = useSettingsStore.subscribe((state) => {
+      applyTheme(state.theme);
+    });
+
+    return () => unsub();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
