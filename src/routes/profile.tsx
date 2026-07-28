@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useUserStore } from "@/store/userStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useGameStore } from "@/store/gameStore";
-import { SignInButton, UserButton, SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
-import { ArrowLeft, User, Copy, Check, Trash2, RotateCcw, ShieldCheck, Cloud, LogIn, Sparkles } from "lucide-react";
+import { SignInButton, UserButton, SignOutButton, SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
+import { ArrowLeft, User, Copy, Check, Trash2, RotateCcw, ShieldCheck, Cloud, LogIn, LogOut, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -140,8 +140,13 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="shrink-0">
+            <div className="shrink-0 flex items-center gap-2">
               <SignedIn>
+                <SignOutButton redirectUrl="/profile">
+                  <button className="btn-interactive flex items-center gap-1.5 rounded-xl border border-border bg-surface-2 px-3 py-2 text-xs font-bold text-foreground transition hover:bg-muted">
+                    <LogOut className="size-3.5 text-danger" /> Log Out
+                  </button>
+                </SignOutButton>
                 <UserButton userProfileMode="navigation" userProfileUrl="/profile" />
               </SignedIn>
               <SignedOut>
