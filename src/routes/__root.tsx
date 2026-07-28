@@ -73,6 +73,56 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // Auto-reload PWA on new deployments when running in standalone Home Screen mode
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let initialETag: string | null = null;
+
+    const checkAppVersion = async () => {
+      try {
+        // Fetch current index.html headers to check for new deployment/build
+        const res = await fetch(`/?_v=${Date.now()}`, { cache: "no-store", method: "HEAD" });
+        const etag = res.headers.get("etag") || res.headers.get("last-modified");
+
+        if (etag) {
+          if (initialETag && initialETag !== etag) {
+            console.log("[PWA Auto-Update] New version detected! Auto-reloading web app...");
+            window.location.reload();
+          } else {
+            initialETag = etag;
+          }
+        }
+      } catch (err) {
+        // Ignore network check glitches silently
+      }
+    };
+
+    // Initial check on launch
+    checkAppVersion();
+
+    // Periodic check every 30 seconds when window is visible
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        checkAppVersion();
+      }
+    }, 30000);
+
+    // Also check immediately when bringing the app back to foreground
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkAppVersion();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
