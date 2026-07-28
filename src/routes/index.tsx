@@ -80,31 +80,18 @@ function HomePage() {
 
   const reset = useGameStore((s) => s.reset);
 
-  useEffect(() => {
-    if (won) {
-      reset();
-    }
-  }, [won, reset]);
-
-  // Apply theme class to <html>
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    root.classList.remove("theme-graphite","theme-forest","theme-tokyo","theme-catppuccin","theme-amoled","theme-chessboard");
-    root.classList.add(`theme-${theme}`);
-  }, [theme]);
-
-  useEffect(() => {
-    document.title = "Zen Sudoku — Home";
-  }, []);
-
-  const hasInProgress = !!puzzle && !won && (running || paused);
-
   // Count cells filled
   const filledCells = cells.filter((c) => c.value !== 0 && !c.given).length;
   const totalEmpty = cells.filter((c) => !c.given).length;
   const progressPct = totalEmpty > 0 ? Math.round((filledCells / totalEmpty) * 100) : 0;
   const isFullyFilled = totalEmpty > 0 && filledCells === totalEmpty;
+  const hasInProgress = !!puzzle && !won && !isFullyFilled && (running || paused);
+
+  useEffect(() => {
+    if (won || isFullyFilled) {
+      reset();
+    }
+  }, [won, isFullyFilled, reset]);
 
   const pickLevel = async (d: Difficulty, level: number) => {
     const key = `${d}-${level}`;
@@ -190,7 +177,7 @@ function HomePage() {
                     <span className="flex items-center gap-1">
                       <Clock className="size-3" /> {fmt(elapsedMs)}
                     </span>
-                    <span>{isFullyFilled ? "81/81 filled · Has errors" : `${progressPct}% complete`}</span>
+                    <span>{progressPct}% complete</span>
                   </div>
                   {/* Progress bar */}
                   <div className="mt-2 h-1.5 w-48 max-w-full overflow-hidden rounded-full bg-muted">
@@ -202,7 +189,7 @@ function HomePage() {
                 </div>
               </div>
               <div className="flex items-center gap-1 text-sm font-semibold text-primary transition group-hover:translate-x-1">
-                {isFullyFilled ? "Fix Errors" : "Resume"} <ChevronRight className="size-4" />
+                Resume <ChevronRight className="size-4" />
               </div>
             </div>
           </button>
