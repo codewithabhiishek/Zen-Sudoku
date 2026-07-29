@@ -77,7 +77,7 @@ export function generatePuzzle(difficulty: Difficulty, seed?: string, levelNumbe
       puzzle,
       solution,
       difficulty: levelNumber ? difficulty : rating.difficulty,
-      seed: `${seedNum}-${attempt}`,
+      seed: seed ?? `${seedNum}-${attempt}`,
       clueCount,
       levelNumber,
     };

@@ -286,9 +286,14 @@ export const useGameStore = create<GameState>()(
 
       newGame: (difficulty, level) => {
         const seedStr = level ? `zen-${difficulty}-lvl-${level}` : undefined;
-        const puzzle = generatePuzzle(difficulty, seedStr, level);
+        const generated = generatePuzzle(difficulty, seedStr, level);
+        const puzzleObj = {
+          ...generated,
+          levelNumber: level ?? generated.levelNumber,
+          seed: seedStr || generated.seed,
+        };
         set({
-          puzzle,
+          puzzle: puzzleObj,
           cells: initCells(puzzle.puzzle),
           selected: null,
           mistakes: 0,

@@ -169,7 +169,7 @@ function HomePage() {
                   <div className="text-sm font-bold text-foreground flex items-center gap-2">
                     Continue Game
                     <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary capitalize">
-                      {puzzle!.difficulty}{(puzzle!.levelNumber ?? (puzzle!.seed?.includes("-lvl-") ? parseInt(puzzle!.seed.split("-lvl-")[1]) : undefined)) ? ` · Level ${puzzle!.levelNumber ?? parseInt(puzzle!.seed!.split("-lvl-")[1])}` : ""}
+                      {puzzle!.difficulty}{((puzzle as any)?.levelNumber ?? (puzzle?.seed?.includes("-lvl-") ? parseInt(puzzle.seed.split("-lvl-")[1]) : undefined)) ? ` · Level ${(puzzle as any)?.levelNumber ?? parseInt(puzzle!.seed!.split("-lvl-")[1])}` : ""}
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
