@@ -167,6 +167,8 @@ export function ClerkSyncBridge() {
             const cloudSolution = (activeSession.solution as any) || [];
 
             if (cloudCells.length === 81 && cloudPuzzle.length === 81) {
+              const seedStr = activeSession.seed || undefined;
+              const levelNumber = seedStr?.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
               console.log("[SyncBridge] 🎮 Syncing active in-progress game from cloud...");
               useGameStore.setState({
                 puzzle: {
@@ -174,7 +176,8 @@ export function ClerkSyncBridge() {
                   solution: cloudSolution,
                   difficulty: activeSession.difficulty as Difficulty,
                   clueCount: cloudPuzzle.filter((v: number) => v !== 0).length,
-                  seed: activeSession.seed || undefined,
+                  seed: seedStr,
+                  levelNumber,
                 },
                 cells: cloudCells,
                 elapsedMs: (activeSession.elapsedTime || 0) * 1000,
@@ -257,6 +260,8 @@ export function ClerkSyncBridge() {
 
             // Update if cloud has newer moves played on another device
             if (cloudFilled > localFilled || (cloudFilled === localFilled && Math.abs(Math.floor(currentStore.elapsedMs / 1000) - activeSession.elapsedTime) > 3)) {
+              const seedStr = activeSession.seed || undefined;
+              const levelNumber = seedStr?.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
               console.log("[SyncBridge] ⚡ Real-time move sync from secondary device!");
               useGameStore.setState({
                 puzzle: {
@@ -264,7 +269,8 @@ export function ClerkSyncBridge() {
                   solution: cloudSolution,
                   difficulty: activeSession.difficulty as Difficulty,
                   clueCount: cloudPuzzle.filter((v: number) => v !== 0).length,
-                  seed: activeSession.seed || undefined,
+                  seed: seedStr,
+                  levelNumber,
                 },
                 cells: cloudCells,
                 elapsedMs: (activeSession.elapsedTime || 0) * 1000,
