@@ -42,6 +42,22 @@ A modern, high-performance, and mathematical Sudoku application built with React
 
 ---
 
+## ✅ Testing (E2E Playwright)
+
+The application includes a comprehensive **Playwright End-to-End (E2E) test suite** with 14 automated tests covering core gameplay mechanics and infrastructure, including:
+- **Authentication & Sessions**: Integrates official `@clerk/testing` to verify real authentication flows.
+- **Cloud Auto-Save Sync**: Intercepts `neon.tech` SQL queries to prove instantaneous cloud saves.
+- **Multi-Device Synchronization**: Simulates dual-browser tabs (Desktop/Phone) to verify seamless real-time syncing of active game sessions without race conditions.
+- **Offline Resilience**: Simulates network drops and ensures that local moves correctly overwrite stale cloud data upon reconnection.
+- **Logic & Progression**: Tests hints, mistakes, cell notes, progression locking (Level 1 to 10), and statistics accumulation across devices.
+
+Run the test suite locally:
+```bash
+npm run test:e2e
+```
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
