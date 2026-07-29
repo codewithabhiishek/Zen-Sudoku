@@ -274,11 +274,6 @@ export function ClerkSyncBridge() {
               });
             }
           }
-        } else if (!activeSession && currentStore.puzzle && !currentStore.won) {
-          // Cloud has NO in-progress session (game was completed on phone), but local laptop store still has active puzzle.
-          // Reset local puzzle state so Resume banner disappears on laptop!
-          console.log("[SyncBridge] 🧹 Game completed on secondary device — clearing active session on this device!");
-          currentStore.reset();
         }
       } catch (err) {
         // Ignore polling glitches

@@ -306,6 +306,23 @@ export const useGameStore = create<GameState>()(
         // Trigger analytics for starting a new puzzle
         trackNewPuzzle(difficulty);
         trackGameStarted(difficulty);
+
+        // Save initial active game session to cloud DB asynchronously
+        const userId = useUserStore.getState().userId;
+        if (userId && !userId.startsWith("guest_")) {
+          const cells = initCells(puzzle.puzzle);
+          upsertActiveGameSession(userId, {
+            puzzleId: `lvl-${difficulty}-${level ?? "custom"}`,
+            difficulty,
+            boardState: { cells, puzzle: puzzle.puzzle },
+            solution: puzzle.solution,
+            elapsedTime: 0,
+            mistakes: 0,
+            hintsUsed: 0,
+            seed: seedStr,
+            status: "in_progress",
+          }).catch((e) => console.warn("[GameStore] Active session init save failed:", e));
+        }
       },
 
       explanation: null,
