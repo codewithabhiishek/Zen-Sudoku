@@ -294,7 +294,7 @@ export const useGameStore = create<GameState>()(
         };
         set({
           puzzle: puzzleObj,
-          cells: initCells(puzzle.puzzle),
+          cells: initCells(puzzleObj.puzzle),
           selected: null,
           mistakes: 0,
           hintsUsed: 0,
@@ -315,12 +315,12 @@ export const useGameStore = create<GameState>()(
         // Save initial active game session to cloud DB asynchronously
         const userId = useUserStore.getState().userId;
         if (userId && !userId.startsWith("guest_")) {
-          const cells = initCells(puzzle.puzzle);
+          const cells = initCells(puzzleObj.puzzle);
           upsertActiveGameSession({
             userId,
             difficulty,
-            boardState: { cells, puzzle: puzzle.puzzle },
-            solution: puzzle.solution,
+            boardState: { cells, puzzle: puzzleObj.puzzle },
+            solution: puzzleObj.solution,
             elapsedTime: 0,
             mistakes: 0,
             seed: seedStr,
