@@ -18,7 +18,7 @@ function TimerDisplay({ elapsed, hideTimer }: { elapsed: number; hideTimer: bool
   );
 }
 
-export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
+export function GameHeader({ onRestart }: { onRestart: () => void }) {
   const puzzle = useGameStore((s) => s.puzzle);
   const elapsed = useGameStore((s) => s.elapsedMs);
   const paused = useGameStore((s) => s.paused);
@@ -87,10 +87,10 @@ export function GameHeader({ onNewGame }: { onNewGame: () => void }) {
           {paused ? <Play className="size-3.5 sm:size-4" /> : <Pause className="size-3.5 sm:size-4" />}
         </button>
         <button
-          onClick={onNewGame}
+          onClick={onRestart}
           className="btn-interactive grid h-8 w-9 place-items-center rounded-lg border bg-surface text-muted-foreground transition hover:bg-muted hover:text-foreground sm:h-10 sm:w-11"
-          title="Restart / Level Select"
-          aria-label="New game"
+          title="Restart Puzzle"
+          aria-label="Restart Puzzle"
         >
           <RotateCcw className="size-3.5 sm:size-4" />
         </button>

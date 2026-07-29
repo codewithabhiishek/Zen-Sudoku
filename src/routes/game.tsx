@@ -26,6 +26,7 @@ function GamePage() {
   const pause = useGameStore((s) => s.pause);
   const resume = useGameStore((s) => s.resume);
   const reset = useGameStore((s) => s.reset);
+  const restart = useGameStore((s) => s.restart);
 
   const navigate = useNavigate();
 
@@ -157,7 +158,7 @@ function GamePage() {
           </div>
         </header>
 
-        <GameHeader onNewGame={handleGoHome} />
+        <GameHeader onRestart={restart} />
 
         <div className="my-1 sm:my-2">
           <Board />

@@ -106,6 +106,7 @@ interface GameState {
   resume: () => void;
   tick: (dtMs: number) => void;
   reset: () => void;
+  restart: () => void;
 }
 
 function initCells(puzzle: Grid): CellState[] {
@@ -717,6 +718,40 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           won: false,
           score: null,
         }),
+
+      restart: () => {
+        const p = get().puzzle;
+        if (!p) return;
+        set({
+          cells: initCells(p.puzzle),
+          selected: null,
+          history: [],
+          future: [],
+          mistakes: 0,
+          hintsUsed: 0,
+          elapsedMs: 0,
+          running: true,
+          paused: false,
+          won: false,
+          score: null,
+          submitResult: null,
+        });
+
+        // Cloud sync the restarted session
+        const userId = useUserStore.getState().userId;
+        if (userId && !userId.startsWith("guest_")) {
+          upsertActiveGameSession({
+            userId,
+            difficulty: p.difficulty,
+            boardState: { cells: initCells(p.puzzle), puzzle: p.puzzle, hintsUsed: 0 },
+            solution: p.solution,
+            elapsedTime: 0,
+            mistakes: 0,
+            seed: p.seed,
+            status: "in_progress",
+          }).catch((e) => console.warn("[GameStore] Active session restart save failed:", e));
+        }
+      },
     }),
     {
       name: "sudoku-game-v1",
