@@ -33,6 +33,7 @@ export function Keypad() {
               key={n}
               onClick={() => input(n)}
               disabled={done && !notesMode}
+              data-testid={`numpad-${n}`}
               aria-label={`Enter ${n}${done ? " (complete)" : ""}`}
               className={cn(
                 "keypad-btn keypad-btn-compress btn-interactive relative flex h-10 sm:h-12 flex-1 items-center justify-center rounded-lg border bg-surface font-display text-lg sm:text-2xl font-semibold transition hover:bg-muted disabled:opacity-30",

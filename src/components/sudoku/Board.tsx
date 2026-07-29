@@ -126,6 +126,7 @@ export function Board() {
             key={i}
             type="button"
             role="gridcell"
+            data-testid={`cell-${r}-${c}`}
             aria-label={`Row ${r + 1} column ${c + 1} ${cell.given ? "given" : "editable"} ${cell.value ? `value ${cell.value}` : "empty"}`}
             aria-selected={isSelected}
             onClick={() => select(i)}

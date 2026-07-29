@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BarChart2, Trophy, User, ChevronRight, CheckCircle2, Flame, ShieldAlert, Zap, Sparkles, Layers, Play, Clock, Flame as StreakIcon } from "lucide-react";
+import { BarChart2, Trophy, User, ChevronRight, CheckCircle2, Flame, ShieldAlert, Zap, Sparkles, Layers, Play, Clock, Flame as StreakIcon, Lock } from "lucide-react";
 import { SettingsSheet } from "@/components/sudoku/SettingsSheet";
 import { ZoomControls } from "@/components/sudoku/ZoomControls";
 import { Footer } from "@/components/sudoku/Footer";
@@ -94,7 +94,14 @@ function HomePage() {
 
   const savedLevel = puzzle?.levelNumber ?? (puzzle?.seed?.includes("-lvl-") ? parseInt(puzzle.seed.split("-lvl-")[1]) : undefined);
 
+  const isLevelUnlocked = (d: Difficulty, lvl: number) => {
+    if (lvl === 1) return true;
+    return completedLevels.includes(`${d}-${lvl - 1}`);
+  };
+
   const pickLevel = async (d: Difficulty, level: number) => {
+    if (!isLevelUnlocked(d, level)) return;
+    
     const key = `${d}-${level}`;
     setLoading(key);
     await new Promise((r) => setTimeout(r, 20));
@@ -160,6 +167,7 @@ function HomePage() {
         {hasInProgress && (
           <button
             onClick={handleResume}
+            data-testid="continue-game-btn"
             className="group mb-5 w-full rounded-2xl border border-primary/30 bg-primary/5 p-4 text-left transition hover:bg-primary/10 hover:border-primary/50 active:scale-[0.99]"
           >
             <div className="flex items-center justify-between">
@@ -274,12 +282,14 @@ function HomePage() {
               const isLoadingThis = loading === key;
               const tag = LEVEL_TAGS[lvl];
               const isDone = completedLevels.includes(key);
+              const unlocked = isLevelUnlocked(selectedDiff, lvl);
 
               return (
                 <button
                   key={lvl}
                   onClick={() => pickLevel(selectedDiff, lvl)}
-                  disabled={loading !== null}
+                  disabled={loading !== null || !unlocked}
+                  data-testid={`level-btn-${lvl}`}
                   className={cn(
                     "group flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all disabled:opacity-50 active:scale-[0.99]",
                     isDone
@@ -300,6 +310,10 @@ function HomePage() {
                         {isDone ? (
                           <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                             <CheckCircle2 className="size-2.5" /> Complete
+                          </span>
+                        ) : !unlocked ? (
+                          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-muted/50 text-muted-foreground border-border/50">
+                            <Lock className="size-2.5" /> Locked
                           </span>
                         ) : (
                           <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1", tag.tagColor)}>
