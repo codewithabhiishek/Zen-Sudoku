@@ -319,7 +319,7 @@ export const useGameStore = create<GameState>()(
           upsertActiveGameSession({
             userId,
             difficulty,
-            boardState: { cells, puzzle: puzzleObj.puzzle },
+            boardState: { cells, puzzle: puzzleObj.puzzle, hintsUsed: 0 },
             solution: puzzleObj.solution,
             elapsedTime: 0,
             mistakes: 0,
@@ -466,7 +466,7 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
               difficulty: s.puzzle.difficulty,
               elapsedTime: Math.floor(get().elapsedMs / 1000),
               mistakes: get().mistakes,
-              boardState: { puzzle: s.puzzle.puzzle, cells: cells },
+              boardState: { puzzle: s.puzzle.puzzle, cells: cells, hintsUsed: get().hintsUsed },
               solution: s.puzzle.solution,
               seed: s.puzzle.seed,
               status: "in_progress",
@@ -544,6 +544,23 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           history: [...s.history, { idx, prev, next: cells[idx] }],
           future: [],
         });
+
+        // Cloud sync after hint
+        try {
+          const userId = useUserStore.getState().userId;
+          if (userId && !userId.startsWith("guest_") && s.puzzle) {
+            upsertActiveGameSession({
+              userId,
+              difficulty: s.puzzle.difficulty,
+              elapsedTime: Math.floor(get().elapsedMs / 1000),
+              mistakes: get().mistakes,
+              boardState: { puzzle: s.puzzle.puzzle, cells, hintsUsed: get().hintsUsed },
+              solution: s.puzzle.solution,
+              seed: s.puzzle.seed,
+              status: "in_progress",
+            }).catch(() => {});
+          }
+        } catch (e) {}
 
         trackHintUsed(s.puzzle.difficulty);
 
@@ -728,12 +745,12 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           ...emptyStats(),
           ...(p.stats ?? {}),
         };
-        // Auto-heal: sanitize gamesWon & gamesPlayed if previous double-counting created a mismatch with unique completed levels
+        // Auto-heal: sanitize gamesWon & gamesPlayed to ensure they are at least the completed levels count
         const completedLevels = rawStats.completedLevels ?? [];
         const completedCount = completedLevels.length;
         if (completedCount > 0) {
-          rawStats.gamesWon = completedCount;
-          rawStats.gamesPlayed = completedCount;
+          rawStats.gamesWon = Math.max(rawStats.gamesWon ?? 0, completedCount);
+          rawStats.gamesPlayed = Math.max(rawStats.gamesPlayed ?? 0, completedCount);
         }
 
         // Auto-heal XP: guarantee every completed level has contributed at least 50% base XP to totalPoints

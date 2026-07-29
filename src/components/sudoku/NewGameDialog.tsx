@@ -3,7 +3,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useGameStore } from "@/store/gameStore";
 import { trackDifficultySelected } from "@/lib/analytics";
-import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert, CheckCircle2, Lock } from "lucide-react";
 
 /** Mirrors clueTargetFor() in generator.ts so the UI shows accurate clue counts */
 function getClueCount(d: Difficulty, level: number): number {
@@ -123,17 +123,21 @@ export function NewGameDialog({
             const isLoadingThis = loading === key;
             const tag = LEVEL_TAGS[lvl];
             const isDone = completedLevels.includes(key);
+            
+            // Lock logic: Level N > 1 requires Level N-1 to be completed
+            const isLocked = lvl > 1 && !completedLevels.includes(`${selectedDifficulty}-${lvl - 1}`);
 
             return (
               <button
                 key={lvl}
                 onClick={() => pick(selectedDifficulty, lvl)}
-                disabled={loading !== null}
+                disabled={loading !== null || isLocked}
                 className={cn(
-                  "group flex w-full items-center justify-between rounded-2xl border p-3 text-left transition-all disabled:opacity-50 active:scale-[0.99]",
+                  "group flex w-full items-center justify-between rounded-2xl border p-3 text-left transition-all disabled:opacity-50",
+                  isLocked ? "bg-surface/50 border-border/30 cursor-not-allowed opacity-50 grayscale" : "active:scale-[0.99]",
                   isDone
                     ? "border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10"
-                    : "bg-surface-2 hover:border-primary/50 hover:bg-highlight/50",
+                    : !isLocked ? "bg-surface-2 hover:border-primary/50 hover:bg-highlight/50" : "",
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -142,10 +146,12 @@ export function NewGameDialog({
                       "grid size-9 place-items-center rounded-xl font-mono font-bold text-xs border shrink-0",
                       isDone
                         ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                        : isLocked
+                        ? "bg-muted text-muted-foreground border-border/50"
                         : activeDiff.color,
                     )}
                   >
-                    {isDone ? <CheckCircle2 className="size-4" /> : `L${lvl}`}
+                    {isDone ? <CheckCircle2 className="size-4" /> : isLocked ? <Lock className="size-4" /> : `L${lvl}`}
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground flex items-center gap-2">
@@ -153,6 +159,10 @@ export function NewGameDialog({
                       {isDone ? (
                         <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                           <CheckCircle2 className="size-2.5" /> Complete
+                        </span>
+                      ) : isLocked ? (
+                        <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-muted text-muted-foreground border-border/50">
+                          <Lock className="size-2.5" /> Locked
                         </span>
                       ) : (
                         <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1", tag.tagColor)}>
@@ -169,9 +179,9 @@ export function NewGameDialog({
 
                 <div className={cn(
                   "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1",
-                  isDone ? "text-emerald-400" : "text-primary",
+                  isDone ? "text-emerald-400" : isLocked ? "text-muted-foreground" : "text-primary",
                 )}>
-                  {isLoadingThis ? "Loading..." : isDone ? "Play Again" : "Play Level"} <ChevronRight className="size-4" />
+                  {isLoadingThis ? "Loading..." : isLocked ? "Locked" : isDone ? "Play Again" : "Play Level"} { !isLocked && <ChevronRight className="size-4" /> }
                 </div>
               </button>
             );

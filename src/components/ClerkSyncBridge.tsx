@@ -89,23 +89,17 @@ export function ClerkSyncBridge() {
             });
           }
 
-          // Step 5: Merge games played/won — sanitize with completed levels count
-          const completedCount = mergedLevels.length;
-          const mergedWon = completedCount > 0
-            ? completedCount
-            : Math.max(localStats.gamesWon ?? 0, cloudStats?.gamesWon ?? 0);
-          const mergedPlayed = Math.max(
-            localStats.gamesPlayed ?? 0,
-            cloudStats?.gamesPlayed ?? 0,
-            mergedWon
-          );
+          // Step 5: Merge games played/won — accumulate wins and plays, do not hardcode to completedCount
+          const mergedWon = Math.max(localStats.gamesWon ?? 0, cloudStats?.gamesWon ?? 0, mergedLevels.length);
+          const mergedPlayed = Math.max(localStats.gamesPlayed ?? 0, cloudStats?.gamesPlayed ?? 0, mergedWon);
 
-          // Step 6: Calculate total points
-          const mergedPoints = mergedLevels.reduce((sum, key) => {
+          // Step 6: Calculate total points — take max of existing points or minimum derived from completed levels
+          const minDerivedPoints = mergedLevels.reduce((sum, key) => {
             const diff = (key.split("-")[0] || "easy") as Difficulty;
             const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
             return sum + base;
           }, 0);
+          const mergedPoints = Math.max(localStats.totalPoints ?? 0, cloudStats?.totalPoints ?? 0, minDerivedPoints);
 
           // Step 7: Merge streaks
           const mergedCurrentStreak = Math.max(
@@ -165,27 +159,36 @@ export function ClerkSyncBridge() {
             const cloudCells = (activeSession.boardState as any).cells || [];
             const cloudPuzzle = (activeSession.boardState as any).puzzle || [];
             const cloudSolution = (activeSession.solution as any) || [];
+            const cloudHintsUsed = (activeSession.boardState as any).hintsUsed || 0;
 
             if (cloudCells.length === 81 && cloudPuzzle.length === 81) {
-              const seedStr = activeSession.seed || undefined;
-              const levelNumber = seedStr?.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
-              console.log("[SyncBridge] 🎮 Syncing active in-progress game from cloud...");
-              useGameStore.setState({
-                puzzle: {
-                  puzzle: cloudPuzzle,
-                  solution: cloudSolution,
-                  difficulty: activeSession.difficulty as Difficulty,
-                  clueCount: cloudPuzzle.filter((v: number) => v !== 0).length,
-                  seed: seedStr,
-                  levelNumber,
-                },
-                cells: cloudCells,
-                elapsedMs: (activeSession.elapsedTime || 0) * 1000,
-                mistakes: activeSession.mistakes || 0,
-                running: true,
-                paused: false,
-                won: false,
-              });
+              const cloudFilled = cloudCells.filter((c: any) => c.value !== 0).length;
+              const localFilled = (currentStore.cells || []).filter((c: any) => c.value !== 0).length;
+              const cloudTotalActions = cloudFilled + (activeSession.mistakes || 0) + cloudHintsUsed;
+              const localTotalActions = localFilled + currentStore.mistakes + currentStore.hintsUsed;
+
+              if (cloudTotalActions > localTotalActions || currentStore.cells.length === 0) {
+                const seedStr = activeSession.seed || undefined;
+                const levelNumber = seedStr?.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
+                console.log("[SyncBridge] 🎮 Syncing active in-progress game from cloud...");
+                useGameStore.setState({
+                  puzzle: {
+                    puzzle: cloudPuzzle,
+                    solution: cloudSolution,
+                    difficulty: activeSession.difficulty as Difficulty,
+                    clueCount: cloudPuzzle.filter((v: number) => v !== 0).length,
+                    seed: seedStr,
+                    levelNumber,
+                  },
+                  cells: cloudCells,
+                  elapsedMs: (activeSession.elapsedTime || 0) * 1000,
+                  mistakes: activeSession.mistakes || 0,
+                  hintsUsed: cloudHintsUsed,
+                  running: true,
+                  paused: false,
+                  won: false,
+                });
+              }
             }
           }
 
@@ -257,9 +260,12 @@ export function ClerkSyncBridge() {
           if (cloudCells.length === 81 && !currentStore.won) {
             const cloudFilled = cloudCells.filter((c: any) => c.value !== 0).length;
             const localFilled = (currentStore.cells || []).filter((c: any) => c.value !== 0).length;
+            const cloudHintsUsed = (activeSession.boardState as any).hintsUsed || 0;
+            const cloudTotalActions = cloudFilled + (activeSession.mistakes || 0) + cloudHintsUsed;
+            const localTotalActions = localFilled + currentStore.mistakes + currentStore.hintsUsed;
 
-            // Update if cloud has newer moves played on another device
-            if (cloudFilled > localFilled || (cloudFilled === localFilled && Math.abs(Math.floor(currentStore.elapsedMs / 1000) - activeSession.elapsedTime) > 3)) {
+            // Update if cloud has strictly more moves/actions played on another device (avoids infinite loop)
+            if (cloudTotalActions > localTotalActions) {
               const seedStr = activeSession.seed || undefined;
               const levelNumber = seedStr?.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
               console.log("[SyncBridge] ⚡ Real-time move sync from secondary device!");
@@ -275,6 +281,7 @@ export function ClerkSyncBridge() {
                 cells: cloudCells,
                 elapsedMs: (activeSession.elapsedTime || 0) * 1000,
                 mistakes: activeSession.mistakes || 0,
+                hintsUsed: cloudHintsUsed,
                 running: true,
                 won: false,
               });
