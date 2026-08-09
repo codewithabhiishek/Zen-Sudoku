@@ -99,7 +99,7 @@ export function ClerkSyncBridge() {
             const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
             return sum + base;
           }, 0);
-          const mergedPoints = Math.max(localStats.totalPoints ?? 0, cloudStats?.totalPoints ?? 0, minDerivedPoints);
+          const mergedPoints = Math.max(localStats.totalPoints ?? 0, (cloudStats as any)?.totalPoints ?? 0, minDerivedPoints);
 
           // Step 7: Merge streaks
           const mergedCurrentStreak = Math.max(
@@ -172,8 +172,8 @@ export function ClerkSyncBridge() {
               const localTotalActions = localFilled + currentStore.mistakes + currentStore.hintsUsed;
 
               if (cloudTotalActions > localTotalActions || currentStore.cells.length === 0) {
-                const seedStr = activeSession.seed || undefined;
-                const levelNumber = seedStr?.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
+                const seedStr = activeSession.seed || "";
+                const levelNumber = seedStr.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
                 console.log("[SyncBridge] 🎮 Syncing active in-progress game from cloud...");
                 useGameStore.setState({
                   puzzle: {
@@ -270,8 +270,8 @@ export function ClerkSyncBridge() {
 
             // Update if cloud has strictly more moves/actions played on another device (avoids infinite loop)
             if (cloudTotalActions > localTotalActions) {
-              const seedStr = activeSession.seed || undefined;
-              const levelNumber = seedStr?.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
+              const seedStr = activeSession.seed || "";
+              const levelNumber = seedStr.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
               console.log("[SyncBridge] ⚡ Real-time move sync from secondary device!");
               useGameStore.setState({
                 puzzle: {
