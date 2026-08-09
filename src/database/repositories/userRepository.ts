@@ -35,8 +35,25 @@ export async function createUser(data: CreateUserData) {
       .returning();
     return inserted;
   } catch (error) {
-    console.error("Database Error [createUser]:", error);
-    throw error;
+    console.warn("Database Warning [createUser]: Unique constraint or sync collision, attempting graceful fallback...", error);
+    try {
+      const [existing] = await db.select().from(users).where(eq(users.id, data.id)).limit(1);
+      if (existing) {
+        const [updated] = await db
+          .update(users)
+          .set({
+            displayName: data.displayName ?? existing.displayName,
+            avatarUrl: data.avatarUrl ?? existing.avatarUrl,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, data.id))
+          .returning();
+        return updated;
+      }
+    } catch (fallbackErr) {
+      console.error("Fallback createUser error:", fallbackErr);
+    }
+    return null;
   }
 }
 

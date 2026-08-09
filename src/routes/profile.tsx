@@ -145,7 +145,7 @@ export function ProfilePage() {
                 <UserButton userProfileMode="navigation" userProfileUrl="/profile" />
               </SignedIn>
               <SignedOut>
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" forceRedirectUrl="/profile" fallbackRedirectUrl="/profile">
                   <button className="btn-interactive flex items-center gap-1.5 rounded-xl border border-primary bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground shadow-xs transition hover:bg-primary/90">
                     <LogIn className="size-3.5" /> Sign In
                   </button>

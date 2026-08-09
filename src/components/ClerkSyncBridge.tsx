@@ -150,6 +150,10 @@ export function ClerkSyncBridge() {
             isRegistered: true,
           });
 
+          if (typeof window !== "undefined") {
+            localStorage.setItem("zen_sudoku_user_id", user.id);
+          }
+
           useGameStore.setState({ stats: mergedStats });
 
           // Step 11: Sync active in-progress game between devices (iPhone <-> Desktop)
@@ -203,10 +207,10 @@ export function ClerkSyncBridge() {
           // Don't set lastSyncedUserId so it retries on next render
         }
       } else if (!isSignedIn) {
-        // User signed out — revert to guest mode if previously a Clerk user
-        if (userStore.userId && userStore.userId.startsWith("user_")) {
-          console.log("[SyncBridge] User signed out. Reverting to Guest profile.");
-          // Clear the sync tracker so next login triggers fresh sync
+        // Only revert to guest if the user was ALREADY actively signed in during this runtime session
+        // and subsequently signed out (preventing false logouts during initial load or OAuth redirects).
+        if (lastSyncedUserId.current !== null) {
+          console.log("[SyncBridge] User signed out during active session. Reverting to Guest profile.");
           lastSyncedUserId.current = null;
           userStore.deleteProfile();
           const guestId = `guest_${Date.now()}_${Math.random()
