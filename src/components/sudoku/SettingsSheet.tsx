@@ -108,9 +108,15 @@ export function SettingsSheet() {
         >
           <div
             className={cn(
-              "h-full w-full max-w-sm overflow-y-auto border-l bg-surface p-6 shadow-2xl flex flex-col justify-between",
+              "h-full w-full max-w-sm overflow-y-auto border-l bg-surface shadow-2xl flex flex-col justify-between",
               isClosing ? "animate-drawer-slide-out" : "animate-drawer-slide-in",
             )}
+            style={{
+              paddingTop: "max(1.5rem, calc(env(safe-area-inset-top) + 0.75rem))",
+              paddingBottom: "max(1.5rem, calc(env(safe-area-inset-bottom) + 0.75rem))",
+              paddingLeft: "max(1.5rem, env(safe-area-inset-left))",
+              paddingRight: "max(1.5rem, env(safe-area-inset-right))",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
