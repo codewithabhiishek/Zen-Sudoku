@@ -82,7 +82,9 @@ export function WinDialog({ onNewGame }: { onNewGame: () => void }) {
           onClick={onNewGame}
           className="btn-interactive mt-6 w-full rounded-xl bg-primary py-3 font-bold text-primary-foreground shadow-md transition hover:bg-primary/90"
         >
-          Next Puzzle
+          {puzzle.levelNumber === 10 && puzzle.difficulty === "expert"
+            ? "Back to Menu"
+            : "Next Level"}
         </button>
       </div>
     </div>

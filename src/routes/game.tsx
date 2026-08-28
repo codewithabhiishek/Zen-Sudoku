@@ -13,6 +13,7 @@ import { Footer } from "@/components/sudoku/Footer";
 import { useGameStore } from "@/store/gameStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
+import type { Difficulty } from "@/lib/sudoku/types";
 
 export const Route = createFileRoute("/game")({
   component: GamePage,
@@ -27,6 +28,7 @@ function GamePage() {
   const resume = useGameStore((s) => s.resume);
   const reset = useGameStore((s) => s.reset);
   const restart = useGameStore((s) => s.restart);
+  const newGame = useGameStore((s) => s.newGame);
 
   const navigate = useNavigate();
 
@@ -85,10 +87,34 @@ function GamePage() {
     navigate({ to: "/" });
   };
 
-  // After winning: go home so the player can pick the next level there
+  // After winning: start next level directly
   const handleAfterWin = () => {
-    reset();
-    navigate({ to: "/" });
+    if (!puzzle) {
+      reset();
+      navigate({ to: "/" });
+      return;
+    }
+
+    const difficulties: Difficulty[] = ["easy", "medium", "hard", "expert"];
+    const currentDiff = puzzle.difficulty;
+    const currentLvl =
+      puzzle.levelNumber ??
+      (puzzle.seed?.includes("-lvl-")
+        ? parseInt(puzzle.seed.split("-lvl-")[1], 10)
+        : 1);
+
+    if (currentLvl < 10) {
+      newGame(currentDiff, currentLvl + 1);
+    } else {
+      const currentDiffIdx = difficulties.indexOf(currentDiff);
+      if (currentDiffIdx !== -1 && currentDiffIdx < difficulties.length - 1) {
+        const nextDiff = difficulties[currentDiffIdx + 1];
+        newGame(nextDiff, 1);
+      } else {
+        reset();
+        navigate({ to: "/" });
+      }
+    }
   };
 
   return (
