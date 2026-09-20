@@ -3,8 +3,28 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useUserStore } from "@/store/userStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useGameStore } from "@/store/gameStore";
-import { SignInButton, UserButton, SignOutButton, SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
-import { ArrowLeft, User, Copy, Check, Trash2, RotateCcw, ShieldCheck, Cloud, LogIn, LogOut, Sparkles } from "lucide-react";
+import {
+  SignInButton,
+  UserButton,
+  SignOutButton,
+  SignedIn,
+  SignedOut,
+  useUser,
+} from "@clerk/clerk-react";
+import {
+  ArrowLeft,
+  User,
+  Copy,
+  Check,
+  Trash2,
+  RotateCcw,
+  ShieldCheck,
+  Cloud,
+  LogIn,
+  LogOut,
+  Sparkles,
+} from "lucide-react";
+import { isHoneypotTriggered, isSpeedTrapTriggered, sanitizeUsername } from "@/lib/security";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -22,6 +42,7 @@ export function ProfilePage() {
   const [inputName, setInputName] = useState(username);
   const [copied, setCopied] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [mountTime] = useState<number>(() => Date.now());
 
   useEffect(() => {
     if (clerkUser?.username || clerkUser?.firstName) {
@@ -42,16 +63,29 @@ export function ProfilePage() {
       "theme-tokyo",
       "theme-catppuccin",
       "theme-amoled",
-      "theme-chessboard"
+      "theme-chessboard",
     );
     root.classList.add(`theme-${theme}`);
     document.title = "Profile • Zen Sudoku";
   }, [theme]);
 
-  const handleSaveUsername = async (e: React.FormEvent) => {
+  const handleSaveUsername = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!inputName.trim()) return;
-    await updateUsername(inputName.trim());
+    const form = e.currentTarget;
+    const botcheck = (form.elements.namedItem("botcheck") as HTMLInputElement | null)?.checked;
+    const gotcha = (form.elements.namedItem("_gotcha") as HTMLInputElement | null)?.value;
+
+    if (isHoneypotTriggered(botcheck, gotcha)) {
+      return;
+    }
+
+    if (isSpeedTrapTriggered(mountTime)) {
+      return;
+    }
+
+    const clean = sanitizeUsername(inputName, username);
+    if (!clean) return;
+    await updateUsername(clean);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2000);
   };
@@ -65,14 +99,22 @@ export function ProfilePage() {
   };
 
   const handleDeleteProfile = () => {
-    if (confirm("Are you sure you want to delete your local profile? Your saved user ID will be removed from this browser.")) {
+    if (
+      confirm(
+        "Are you sure you want to delete your local profile? Your saved user ID will be removed from this browser.",
+      )
+    ) {
       deleteProfile();
       window.location.href = "/";
     }
   };
 
   const handleResetProgress = () => {
-    if (confirm("Are you sure you want to reset all game stats, streaks, and progress? This action cannot be undone.")) {
+    if (
+      confirm(
+        "Are you sure you want to reset all game stats, streaks, and progress? This action cannot be undone.",
+      )
+    ) {
       useGameStore.setState({
         stats: {
           gamesPlayed: 0,
@@ -107,7 +149,9 @@ export function ProfilePage() {
               <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">
                 {isSignedIn ? "Cloud Profile" : "Guest Profile"}
               </h1>
-              <p className="text-xs text-muted-foreground">Manage your identity and game preferences</p>
+              <p className="text-xs text-muted-foreground">
+                Manage your identity and game preferences
+              </p>
             </div>
           </div>
         </div>
@@ -145,7 +189,11 @@ export function ProfilePage() {
                 <UserButton userProfileMode="navigation" userProfileUrl="/profile" />
               </SignedIn>
               <SignedOut>
-                <SignInButton mode="modal" forceRedirectUrl="/profile" fallbackRedirectUrl="/profile">
+                <SignInButton
+                  mode="modal"
+                  forceRedirectUrl="/profile"
+                  fallbackRedirectUrl="/profile"
+                >
                   <button className="btn-interactive flex items-center gap-1.5 rounded-xl border border-primary bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground shadow-xs transition hover:bg-primary/90">
                     <LogIn className="size-3.5" /> Sign In
                   </button>
@@ -187,6 +235,21 @@ export function ProfilePage() {
 
           {/* Change Username Form */}
           <form onSubmit={handleSaveUsername} className="space-y-3">
+            {/* Strix Dual Honeypot Shield */}
+            <div
+              style={{
+                position: "absolute",
+                left: "-9999px",
+                top: "-9999px",
+                opacity: 0,
+                pointerEvents: "none",
+              }}
+              aria-hidden="true"
+            >
+              <input type="checkbox" name="botcheck" tabIndex={-1} autoComplete="off" />
+              <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" />
+            </div>
+
             <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Change Username
             </label>
@@ -214,12 +277,18 @@ export function ProfilePage() {
               Player Identifier (UUID)
             </label>
             <div className="flex items-center justify-between rounded-xl border bg-surface-2 p-3 font-mono text-xs text-muted-foreground">
-              <span className="truncate max-w-[280px] sm:max-w-md">{userId || "Not generated yet"}</span>
+              <span className="truncate max-w-[280px] sm:max-w-md">
+                {userId || "Not generated yet"}
+              </span>
               <button
                 onClick={handleCopyUUID}
                 className="ml-2 flex items-center gap-1 rounded-lg border bg-surface px-2.5 py-1 text-xs font-sans text-foreground hover:bg-muted transition"
               >
-                {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                {copied ? (
+                  <Check className="size-3.5 text-emerald-500" />
+                ) : (
+                  <Copy className="size-3.5" />
+                )}
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>

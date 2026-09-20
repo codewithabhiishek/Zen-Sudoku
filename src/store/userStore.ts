@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createUser, getUser } from "@/database/api";
+import { sanitizeUsername } from "@/lib/security";
 
 interface UserState {
   userId: string | null;
@@ -25,7 +26,7 @@ export const useUserStore = create<UserState>()(
 
       initUser: async () => {
         if (typeof window === "undefined") return null;
-        let storedId = localStorage.getItem("zen_sudoku_user_id");
+        const storedId = localStorage.getItem("zen_sudoku_user_id");
 
         if (storedId) {
           try {
@@ -55,8 +56,11 @@ export const useUserStore = create<UserState>()(
       },
 
       registerGuest: async (rawUsername: string) => {
-        const username = rawUsername.trim() || `ZenPlayer_${Math.floor(1000 + Math.random() * 9000)}`;
-        const uuid = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `usr_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+        const username = sanitizeUsername(rawUsername);
+        const uuid =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `usr_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
         if (typeof window !== "undefined") {
           localStorage.setItem("zen_sudoku_user_id", uuid);
@@ -85,7 +89,7 @@ export const useUserStore = create<UserState>()(
       updateUsername: async (newUsername: string) => {
         const { userId } = get();
         if (!userId) return;
-        const username = newUsername.trim();
+        const username = sanitizeUsername(newUsername, get().username);
         if (!username) return;
 
         try {
@@ -115,6 +119,6 @@ export const useUserStore = create<UserState>()(
         });
       },
     }),
-    { name: "sudoku-user-v1" }
-  )
+    { name: "sudoku-user-v1" },
+  ),
 );

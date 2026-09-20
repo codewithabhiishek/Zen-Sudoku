@@ -19,7 +19,19 @@ interface SettingsState {
   fontScale: number; // 0.85 - 1.3
   zoomLevel: number; // 0.8 - 1.6
   setTheme: (t: ThemeId) => void;
-  toggle: (key: "sound" | "highlightSame" | "highlightPeers" | "highlightErrors" | "autoRemoveIncorrect" | "reduceAnimations" | "autoSave" | "keyboardShortcuts" | "haptics" | "leftHanded") => void;
+  toggle: (
+    key:
+      | "sound"
+      | "highlightSame"
+      | "highlightPeers"
+      | "highlightErrors"
+      | "autoRemoveIncorrect"
+      | "reduceAnimations"
+      | "autoSave"
+      | "keyboardShortcuts"
+      | "haptics"
+      | "leftHanded",
+  ) => void;
   setFontScale: (v: number) => void;
   zoomIn: () => void;
   zoomOut: () => void;
@@ -57,8 +69,10 @@ export const useSettingsStore = create<SettingsState>()(
       },
       toggle: (key) => set((s) => ({ [key]: !s[key] }) as Partial<SettingsState>),
       setFontScale: (fontScale) => set({ fontScale }),
-      zoomIn: () => set((s) => ({ zoomLevel: Math.min(1.6, Number((s.zoomLevel + 0.1).toFixed(2))) })),
-      zoomOut: () => set((s) => ({ zoomLevel: Math.max(0.8, Number((s.zoomLevel - 0.1).toFixed(2))) })),
+      zoomIn: () =>
+        set((s) => ({ zoomLevel: Math.min(1.6, Number((s.zoomLevel + 0.1).toFixed(2))) })),
+      zoomOut: () =>
+        set((s) => ({ zoomLevel: Math.max(0.8, Number((s.zoomLevel - 0.1).toFixed(2))) })),
       resetZoom: () => set({ zoomLevel: 1 }),
     }),
     { name: "sudoku-settings-v1" },

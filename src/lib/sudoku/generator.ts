@@ -1,12 +1,13 @@
 import type { Difficulty, Grid, Puzzle } from "./types";
-import { BOXES, countSolutions, emptyGrid, PEERS, popcount } from "./solver";
-import { rateDifficulty } from "./techniques";
+import { BOXES, countSolutions, emptyGrid, PEERS, popcount } from "./solver.ts";
+import { rateDifficulty } from "./techniques.ts";
 
 /** Seeded PRNG (mulberry32) so daily challenges / replays are reproducible. */
 export function rng(seed: number) {
   let a = seed >>> 0;
   return () => {
-    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
     let t = a;
     t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
@@ -37,7 +38,11 @@ export function generateSolved(rand: () => number): Grid {
 
 function fill(g: Grid, rand: () => number): boolean {
   let idx = -1;
-  for (let i = 0; i < 81; i++) if (g[i] === 0) { idx = i; break; }
+  for (let i = 0; i < 81; i++)
+    if (g[i] === 0) {
+      idx = i;
+      break;
+    }
   if (idx === -1) return true;
   const used = new Set<number>();
   for (const p of PEERS[idx]) if (g[p]) used.add(g[p]);
@@ -58,7 +63,11 @@ function fill(g: Grid, rand: () => number): boolean {
  * Guarantees a UNIQUE solution — never returns a puzzle with 0 or 2+ solutions.
  * Rates by the hardest logical technique required; re-tries on mismatch.
  */
-export function generatePuzzle(difficulty: Difficulty, seed?: string, levelNumber?: number): Puzzle {
+export function generatePuzzle(
+  difficulty: Difficulty,
+  seed?: string,
+  levelNumber?: number,
+): Puzzle {
   const seedNum = seed ? hashSeed(seed) : Math.floor(Math.random() * 0xffffffff);
   const rand = rng(seedNum);
   const targetClues = clueTargetFor(difficulty, levelNumber);
@@ -83,7 +92,10 @@ export function generatePuzzle(difficulty: Difficulty, seed?: string, levelNumbe
     };
     if (rating.difficulty === difficulty) return p;
     const delta = Math.abs(rankOf(rating.difficulty) - rankOf(difficulty));
-    if (delta < bestDelta) { bestDelta = delta; best = p; }
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      best = p;
+    }
   }
   return best!;
 }
@@ -94,7 +106,8 @@ function rankOf(d: Difficulty): number {
 
 function clueTargetFor(d: Difficulty, level: number = 1): { floor: number } {
   // Progressive difficulty scaling across Levels 1 through 10
-  const step = Math.min(9, Math.max(0, level - 1));
+  const safeLevel = typeof level === "number" && Number.isFinite(level) ? Math.floor(level) : 1;
+  const step = Math.min(9, Math.max(0, safeLevel - 1));
   switch (d) {
     case "easy":
       return { floor: Math.max(34, 42 - Math.floor(step * 0.8)) };
@@ -145,9 +158,10 @@ function digHoles(solution: Grid, rand: () => number, minClues: number): Grid {
 }
 
 function hashSeed(s: string): number {
+  const str = typeof s === "string" ? s : String(s || "");
   let h = 2166136261 >>> 0;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   return h >>> 0;

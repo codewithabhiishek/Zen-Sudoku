@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from "@playwright/test";
 
 export class GamePage {
   readonly page: Page;
@@ -10,11 +10,11 @@ export class GamePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.grid = page.locator('.sudoku-grid');
+    this.grid = page.locator(".sudoku-grid");
     this.timer = page.locator('[aria-label="Timer"], text=Elapsed');
     this.mistakes = page.locator('[aria-label="Mistakes"], text=Mistakes');
-    this.hintBtn = page.getByRole('button', { name: /hint/i });
-    this.notesBtn = page.getByRole('button', { name: /notes/i });
+    this.hintBtn = page.getByRole("button", { name: /hint/i });
+    this.notesBtn = page.getByRole("button", { name: /notes/i });
   }
 
   async selectCell(row: number, col: number) {

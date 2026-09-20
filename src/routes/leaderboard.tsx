@@ -57,7 +57,7 @@ export function LeaderboardPage() {
       "theme-tokyo",
       "theme-catppuccin",
       "theme-amoled",
-      "theme-chessboard"
+      "theme-chessboard",
     );
     root.classList.add(`theme-${theme}`);
     document.title = "Leaderboards • Zen Sudoku";
@@ -82,7 +82,12 @@ export function LeaderboardPage() {
           Object.entries(localStats.bestTimeByDifficulty).forEach(([diff, time]) => {
             if (time != null && time > 0) {
               if (difficulty === "all" || difficulty === diff) {
-                const basePoints: Record<string, number> = { easy: 200, medium: 400, hard: 800, expert: 1500 };
+                const basePoints: Record<string, number> = {
+                  easy: 200,
+                  medium: 400,
+                  hard: 800,
+                  expert: 1500,
+                };
                 const base = basePoints[diff] || 200;
                 const minXP = Math.round(base * 0.5);
                 const score = Math.max(localStats.totalPoints || 0, minXP);
@@ -174,7 +179,9 @@ export function LeaderboardPage() {
               <ArrowLeft className="size-5" />
             </Link>
             <div>
-              <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">Leaderboards</h1>
+              <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">
+                Leaderboards
+              </h1>
               <p className="text-xs text-muted-foreground">Top solvers & solve time records</p>
             </div>
           </div>
@@ -190,7 +197,7 @@ export function LeaderboardPage() {
                 "btn-interactive flex-1 rounded-lg px-3 py-2 text-xs font-semibold capitalize transition",
                 period === tab
                   ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
               {tab.replace("_", " ")}
@@ -200,7 +207,9 @@ export function LeaderboardPage() {
 
         {/* Difficulty Filter Buttons */}
         <div className="mb-6 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Difficulty:</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Difficulty:
+          </span>
           {(["all", "easy", "medium", "hard", "expert"] as const).map((diff) => (
             <button
               key={diff}
@@ -209,7 +218,7 @@ export function LeaderboardPage() {
                 "btn-interactive rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize transition",
                 difficulty === diff
                   ? "border-primary bg-highlight-strong text-foreground ring-1 ring-primary"
-                  : "border-border bg-surface text-muted-foreground hover:bg-muted"
+                  : "border-border bg-surface text-muted-foreground hover:bg-muted",
               )}
             >
               {diff}
@@ -254,7 +263,8 @@ export function LeaderboardPage() {
             <div className="divide-y">
               {entries.map((item, idx) => {
                 const rank = idx + 1;
-                const name = item.displayName || item.username || `Player #${item.userId?.slice(-4) || rank}`;
+                const name =
+                  item.displayName || item.username || `Player #${item.userId?.slice(-4) || rank}`;
 
                 return (
                   <div
@@ -285,13 +295,19 @@ export function LeaderboardPage() {
                     <div className="col-span-5 sm:col-span-5 flex items-center gap-2.5 min-w-0">
                       <div className="grid size-8 shrink-0 place-items-center rounded-full border bg-surface-2 text-muted-foreground">
                         {item.avatarUrl ? (
-                          <img src={item.avatarUrl} alt={name} className="size-full rounded-full object-cover" />
+                          <img
+                            src={item.avatarUrl}
+                            alt={name}
+                            className="size-full rounded-full object-cover"
+                          />
                         ) : (
                           <User className="size-4" />
                         )}
                       </div>
                       <div className="truncate">
-                        <div className="font-semibold truncate text-foreground text-xs sm:text-sm">{name}</div>
+                        <div className="font-semibold truncate text-foreground text-xs sm:text-sm">
+                          {name}
+                        </div>
                         {item.mistakes > 0 && (
                           <div className="text-[10px] text-muted-foreground">
                             {item.mistakes} {item.mistakes === 1 ? "mistake" : "mistakes"}
@@ -305,10 +321,14 @@ export function LeaderboardPage() {
                       <span
                         className={cn(
                           "inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                          item.difficulty === "easy" && "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
-                          item.difficulty === "medium" && "bg-blue-500/10 text-blue-500 border border-blue-500/20",
-                          item.difficulty === "hard" && "bg-amber-500/10 text-amber-500 border border-amber-500/20",
-                          item.difficulty === "expert" && "bg-rose-500/10 text-rose-500 border border-rose-500/20"
+                          item.difficulty === "easy" &&
+                            "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
+                          item.difficulty === "medium" &&
+                            "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+                          item.difficulty === "hard" &&
+                            "bg-amber-500/10 text-amber-500 border border-amber-500/20",
+                          item.difficulty === "expert" &&
+                            "bg-rose-500/10 text-rose-500 border border-rose-500/20",
                         )}
                       >
                         {item.difficulty}

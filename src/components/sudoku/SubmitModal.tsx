@@ -23,7 +23,9 @@ export function SubmitModal() {
               <AlertCircle className="size-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold tracking-tight text-foreground">Submission Results</h3>
+              <h3 className="text-lg font-bold tracking-tight text-foreground">
+                Submission Results
+              </h3>
               <p className="text-xs text-muted-foreground">Puzzle Validation Breakdown</p>
             </div>
           </div>
@@ -43,16 +45,29 @@ export function SubmitModal() {
 
           <div className="grid grid-cols-3 gap-2 text-center pt-2">
             <div className="rounded-2xl border bg-muted/30 p-3">
-              <div className="text-[11px] font-semibold text-muted-foreground uppercase">Filled</div>
-              <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{submitResult.totalFilled}/81</div>
+              <div className="text-[11px] font-semibold text-muted-foreground uppercase">
+                Filled
+              </div>
+              <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">
+                {submitResult.totalFilled}/81
+              </div>
             </div>
             <div className="rounded-2xl border bg-muted/30 p-3">
               <div className="text-[11px] font-semibold text-muted-foreground uppercase">Empty</div>
-              <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{submitResult.emptyCount}</div>
+              <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">
+                {submitResult.emptyCount}
+              </div>
             </div>
             <div className="rounded-2xl border bg-muted/30 p-3">
-              <div className="text-[11px] font-semibold text-muted-foreground uppercase">Errors</div>
-              <div className={cn("text-lg font-bold tabular-nums mt-0.5", submitResult.wrongCount > 0 ? "text-rose-400" : "text-emerald-400")}>
+              <div className="text-[11px] font-semibold text-muted-foreground uppercase">
+                Errors
+              </div>
+              <div
+                className={cn(
+                  "text-lg font-bold tabular-nums mt-0.5",
+                  submitResult.wrongCount > 0 ? "text-rose-400" : "text-emerald-400",
+                )}
+              >
                 {submitResult.wrongCount}
               </div>
             </div>

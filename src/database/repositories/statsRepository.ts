@@ -32,9 +32,7 @@ export interface UpdateStatsData {
 export async function updateStatistics(userId: string, data: UpdateStatsData) {
   try {
     // Build the values to insert/update — always provide safe defaults
-    const completedLevels = Array.isArray(data.completedLevels)
-      ? data.completedLevels
-      : [];
+    const completedLevels = Array.isArray(data.completedLevels) ? data.completedLevels : [];
 
     const values = {
       userId,

@@ -15,7 +15,7 @@ export async function updateGame(
     notesEnabled: boolean;
     boardState: unknown;
     completedAt: Date;
-  }>
+  }>,
 ) {
   return await gameRepo.updateGame(sessionId, data);
 }
@@ -26,7 +26,7 @@ export async function completeGame(
   difficulty: string,
   score: number,
   timeSeconds: number,
-  mistakes: number
+  mistakes: number,
 ) {
   const history = await gameRepo.completeGame(
     sessionId,
@@ -34,7 +34,7 @@ export async function completeGame(
     difficulty,
     score,
     timeSeconds,
-    mistakes
+    mistakes,
   );
 
   // Auto-post to leaderboard upon completion
@@ -64,7 +64,10 @@ export async function completeGame(
     gamesWon,
     [bestKey]: newBest,
     currentStreak: (currentStats?.currentStreak ?? 0) + 1,
-    longestStreak: Math.max((currentStats?.longestStreak ?? 0), (currentStats?.currentStreak ?? 0) + 1),
+    longestStreak: Math.max(
+      currentStats?.longestStreak ?? 0,
+      (currentStats?.currentStreak ?? 0) + 1,
+    ),
   });
 
   return history;

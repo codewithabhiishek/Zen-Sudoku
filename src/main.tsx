@@ -9,8 +9,7 @@ import { getRouter } from "./router";
 import "./styles.css";
 
 const PUBLISHABLE_KEY =
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
-  import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 const router = getRouter();
 const rootElement = document.getElementById("root")!;
@@ -25,7 +24,7 @@ if (PUBLISHABLE_KEY) {
         <Analytics />
         <SpeedInsights />
       </ClerkProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 } else {
   root.render(
@@ -33,6 +32,6 @@ if (PUBLISHABLE_KEY) {
       <RouterProvider router={router} />
       <Analytics />
       <SpeedInsights />
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 }

@@ -48,7 +48,9 @@ export function WinDialog({ onNewGame }: { onNewGame: () => void }) {
           {score.total > 0 ? (
             <span className="display text-2xl font-bold text-primary">+{score.total} XP</span>
           ) : (
-            <span className="display text-base font-semibold text-muted-foreground">0 XP — too many mistakes</span>
+            <span className="display text-base font-semibold text-muted-foreground">
+              0 XP — too many mistakes
+            </span>
           )}
         </div>
 
@@ -60,7 +62,9 @@ export function WinDialog({ onNewGame }: { onNewGame: () => void }) {
 
         <div className="mt-5 rounded-xl border bg-surface-2 p-4">
           <div className="mb-2 flex items-baseline justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Score Breakdown</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Score Breakdown
+            </span>
             <span className="font-mono text-sm font-bold">{score.total} pts</span>
           </div>
           <dl className="space-y-1.5 text-xs">

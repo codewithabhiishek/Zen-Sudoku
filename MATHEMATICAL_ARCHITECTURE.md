@@ -9,16 +9,19 @@ This document details all mathematical logic, bitwise operations, graph structur
 A standard Sudoku board consists of $81$ cells arranged in a $9 \times 9$ matrix.
 
 ### 1.1 Flat Array Indexing (Row-Major Order)
+
 Rather than a 2D matrix (`grid[row][col]`), the board is stored as a 1-dimensional array of 81 elements ($i \in [0, 80]$):
 
 $$\text{index}(r, c) = 9 \cdot r + c$$
 
 Where:
+
 - Row $r = \lfloor i / 9 \rfloor \in \{0, 1, \dots, 8\}$
 - Column $c = i \bmod 9 \in \{0, 1, \dots, 8\}$
 - Box $b = 3 \cdot \lfloor r / 3 \rfloor + \lfloor c / 3 \rfloor \in \{0, 1, \dots, 8\}$
 
 ### 1.2 Constraint Graph & Peer Relations
+
 Sudoku can be modeled as a **Graph Coloring Problem** where each cell is a vertex and edges connect cells in the same row, column, or $3 \times 3$ box unit:
 
 - **Rows ($R_r$)**: $9$ sets of $9$ cells each.
@@ -41,6 +44,7 @@ $$\text{Bitmask for value } v = 1 \ll v$$
 $$\text{Full Candidate Mask (all digits 1..9)} = \sum_{v=1}^{9} 2^v = 0\text{b}1111111110 = 1022_{10}$$
 
 ### 2.1 Bitwise Operations
+
 - **Remove candidate $v$**: $\text{mask} \gets \text{mask} \ \& \ \sim(1 \ll v)$
 - **Check candidate $v$**: $(\text{mask} \ \& \ (1 \ll v)) \neq 0$
 - **Population Count (popcount)**: Number of available candidates for cell $i$:
@@ -59,6 +63,7 @@ $$\text{Full Candidate Mask (all digits 1..9)} = \sum_{v=1}^{9} 2^v = 0\text{b}1
 ## 3. Solver Algorithm & Uniqueness Mathematics
 
 ### 3.1 Backtracking with MRV Heuristic
+
 The solver uses **Minimum Remaining Values (MRV)** heuristic combined with bitmask constraints. At each decision step:
 
 $$\text{Choose empty cell } i^* = \arg\min_{\{i \mid g[i] = 0\}} \text{popcount}(\text{cand}[i])$$
@@ -66,11 +71,13 @@ $$\text{Choose empty cell } i^* = \arg\min_{\{i \mid g[i] = 0\}} \text{popcount}
 If $\text{popcount}(\text{cand}[i^*]) = 0$ for any empty cell, the branch dead-ends immediately and backtracks.
 
 ### 3.2 Unique Solution Verification
+
 A valid Sudoku puzzle **must have exactly one unique solution** ($N_{\text{solutions}} = 1$).
 
 `countSolutions(grid, limit = 2)` stops searching immediately as soon as a 2nd valid solution is found ($N = 2$), operating in $O(1)$ expected time during hole digging.
 
 ### 3.3 Progressive Clue Floor Formula Across 10 Levels
+
 For each difficulty category $d \in \{\text{easy}, \text{medium}, \text{hard}, \text{expert}\}$ and level $L \in \{1, 2, \dots, 10\}$, the minimum clue count (hole digging floor) $C_{\text{floor}}(d, L)$ is calculated by:
 
 $$\text{step}(L) = \min(9, \max(0, L - 1))$$
@@ -91,15 +98,15 @@ Where Level 10 on `expert` targets $17$ clues — the theoretical mathematical m
 
 Puzzles are rated strictly by the **hardest human logical technique** required to solve them without guessing:
 
-| Technique | Rank | Mathematical / Set Condition |
-| :--- | :---: | :--- |
-| **Naked Single** | 1 | $\text{popcount}(\text{cand}[i]) = 1$ |
-| **Hidden Single** | 2 | $\exists v \in \{1..9\}, \text{unit } U : |\{i \in U \mid v \in \text{cand}[i]\}| = 1$ |
-| **Naked Pair** | 3 | $\exists i_1, i_2 \in U : \text{cand}[i_1] = \text{cand}[i_2] \land \text{popcount} = 2$ |
-| **Pointing Pair** | 3 | Candidates for digit $v$ in Box $B$ lie entirely within single Row $R$ |
-| **Box-Line Reduction** | 3 | Candidates for digit $v$ in Row $R$ lie entirely within single Box $B$ |
-| **Hidden Pair** | 4 | 2 digits $v_1, v_2$ in unit $U$ appear only within 2 identical cells |
-| **X-Wing** | 5 | Digit $v$ appears in exactly 2 cols in Row $R_1$ and identical 2 cols in Row $R_2$ |
+| Technique              | Rank | Mathematical / Set Condition                                                             |
+| :--------------------- | :--: | :--------------------------------------------------------------------------------------- |
+| **Naked Single**       |  1   | $\text{popcount}(\text{cand}[i]) = 1$                                                    |
+| **Hidden Single**      |  2   | $\exists v \in \{1..9\}, \text{unit } U :                                                | \{i \in U \mid v \in \text{cand}[i]\} | = 1$ |
+| **Naked Pair**         |  3   | $\exists i_1, i_2 \in U : \text{cand}[i_1] = \text{cand}[i_2] \land \text{popcount} = 2$ |
+| **Pointing Pair**      |  3   | Candidates for digit $v$ in Box $B$ lie entirely within single Row $R$                   |
+| **Box-Line Reduction** |  3   | Candidates for digit $v$ in Row $R$ lie entirely within single Box $B$                   |
+| **Hidden Pair**        |  4   | 2 digits $v_1, v_2$ in unit $U$ appear only within 2 identical cells                     |
+| **X-Wing**             |  5   | Digit $v$ appears in exactly 2 cols in Row $R_1$ and identical 2 cols in Row $R_2$       |
 
 ---
 
@@ -146,6 +153,7 @@ $$S = \max(0,\ 200 + 0 - 450 - 0 + 0 + 40) = \max(0,\ -210) = 0$$
 ## 6. Solution-Aware Conflict Detection
 
 ### 6.1 Old Approach (Peer-Duplicate Scanning)
+
 The naive approach scanned each row/col/box for duplicate values on the live board:
 
 $$\text{conflict}(i) = \exists j \in \mathcal{P}_i : g[j] = g[i] \land g[i] \neq 0$$
@@ -153,11 +161,13 @@ $$\text{conflict}(i) = \exists j \in \mathcal{P}_i : g[j] = g[i] \land g[i] \neq
 **Problem**: If a player left a wrong value $v_w$ at cell $j$ and later entered the correct value $v_c = v_w$ at cell $i$ (same unit), both cells would be flagged as conflicts — including the **correct** cell.
 
 ### 6.2 Current Approach (Solution Comparison)
+
 Each user-entered cell is compared directly against the known solution:
 
 $$\text{conflict}(i) = \neg \text{given}(i) \land g[i] \neq 0 \land g[i] \neq s[i]$$
 
 Where $s[i]$ is the pre-computed solution value at position $i$. This guarantees:
+
 - Correct entries are **never** highlighted red, regardless of what other cells contain.
 - Only genuinely wrong entries are marked as conflicts.
 - The solution array $s$ is **never mutated** after puzzle generation.
@@ -193,11 +203,13 @@ $$\text{rand}() = \frac{(t \oplus (t \gg 14)) \gg 0}{4294967296}$$
 Zen Sudoku uses **Neon PostgreSQL** serverless storage with **Drizzle ORM**.
 
 ### 9.1 Relational Schema
+
 - **`users`**: Stores UUID v4, username, and timestamps. Lookups operate in $O(1)$ via primary key index.
 - **`statistics`**: Stores aggregate user stats ($N_{\text{played}}$, $N_{\text{won}}$, win rate %, streak metrics, best solve times).
 - **`leaderboard`**: Stores period-scoped scores ($S$) and solve times ($t$).
 
 ### 9.2 Leaderboard Ranking Complexity
+
 Global and period rankings use composite B-Tree indexes over `(period, score DESC, solve_time_ms ASC)`:
 
 $$\text{Rank}(u) = 1 + |\{v \in U \mid S_v > S_u \lor (S_v = S_u \land t_v < t_u)\}|$$
@@ -211,14 +223,17 @@ Queries run in $O(\log N + K)$ time where $K$ is the requested page size ($K = 5
 To eliminate scrolling on mobile viewports ($W \le 768\text{px}$), font scaling and cell sizes are calculated dynamically:
 
 ### 10.1 Cell Font Scaling
+
 $$\text{Font Size} = \min(4.5\text{vw}, 26\text{px}) \cdot \text{scale}$$
 
 ### 10.2 Touch Target Constraints
+
 Every interactive button on mobile satisfies the Apple Human Interface Guidelines floor constraint:
 
 $$\text{Touch Target Height} \ge 48\text{px} \quad (3 \text{rem})$$
 
 ### 10.3 Dedicated Mobile Layout Breakpoint
+
 The single-viewport mobile layout activates at:
 
 $$W_{\text{mobile}} \le 768\text{px}$$

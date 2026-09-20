@@ -3,24 +3,57 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useGameStore } from "@/store/gameStore";
 import { trackDifficultySelected } from "@/lib/analytics";
-import { Layers, Sparkles, ChevronRight, Zap, Flame, ShieldAlert, CheckCircle2, Lock } from "lucide-react";
+import {
+  Layers,
+  Sparkles,
+  ChevronRight,
+  Zap,
+  Flame,
+  ShieldAlert,
+  CheckCircle2,
+  Lock,
+} from "lucide-react";
 
 /** Mirrors clueTargetFor() in generator.ts so the UI shows accurate clue counts */
 function getClueCount(d: Difficulty, level: number): number {
   const step = Math.min(9, Math.max(0, level - 1));
   switch (d) {
-    case "easy":   return Math.max(34, 42 - Math.floor(step * 0.8));
-    case "medium": return Math.max(28, 35 - Math.floor(step * 0.8));
-    case "hard":   return Math.max(22, 28 - Math.floor(step * 0.7));
-    case "expert": return Math.max(17, 23 - Math.floor(step * 0.6));
+    case "easy":
+      return Math.max(34, 42 - Math.floor(step * 0.8));
+    case "medium":
+      return Math.max(28, 35 - Math.floor(step * 0.8));
+    case "hard":
+      return Math.max(22, 28 - Math.floor(step * 0.7));
+    case "expert":
+      return Math.max(17, 23 - Math.floor(step * 0.6));
   }
 }
 
 const DIFFICULTIES: { id: Difficulty; label: string; desc: string; color: string }[] = [
-  { id: "easy", label: "Easy", desc: "Naked & Hidden Singles", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
-  { id: "medium", label: "Medium", desc: "Pointing Pairs & Subsets", color: "text-blue-400 border-blue-500/30 bg-blue-500/10" },
-  { id: "hard", label: "Hard", desc: "Box-Line & Hidden Pairs", color: "text-amber-400 border-amber-500/30 bg-amber-500/10" },
-  { id: "expert", label: "Expert", desc: "X-Wing & Advanced Trial", color: "text-rose-400 border-rose-500/30 bg-rose-500/10" },
+  {
+    id: "easy",
+    label: "Easy",
+    desc: "Naked & Hidden Singles",
+    color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+  },
+  {
+    id: "medium",
+    label: "Medium",
+    desc: "Pointing Pairs & Subsets",
+    color: "text-blue-400 border-blue-500/30 bg-blue-500/10",
+  },
+  {
+    id: "hard",
+    label: "Hard",
+    desc: "Box-Line & Hidden Pairs",
+    color: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+  },
+  {
+    id: "expert",
+    label: "Expert",
+    desc: "X-Wing & Advanced Trial",
+    color: "text-rose-400 border-rose-500/30 bg-rose-500/10",
+  },
 ];
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -74,7 +107,9 @@ export function NewGameDialog({
       <div className="animate-modal-pop relative w-full max-w-lg overflow-hidden rounded-3xl border bg-surface/95 p-6 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="display text-2xl font-bold tracking-tight text-foreground">Select Game Level</h2>
+            <h2 className="display text-2xl font-bold tracking-tight text-foreground">
+              Select Game Level
+            </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               10 Levels for each difficulty (Level 1 to Level 10)
             </p>
@@ -118,14 +153,15 @@ export function NewGameDialog({
 
         {/* 10 Levels Scrollable List */}
         <div className="mt-4 max-h-[340px] overflow-y-auto pr-1 space-y-2">
-        {LEVELS.map((lvl) => {
+          {LEVELS.map((lvl) => {
             const key = `${selectedDifficulty}-${lvl}`;
             const isLoadingThis = loading === key;
             const tag = LEVEL_TAGS[lvl];
             const isDone = completedLevels.includes(key);
-            
+
             // Lock logic: Level N > 1 requires Level N-1 to be completed
-            const isLocked = lvl > 1 && !completedLevels.includes(`${selectedDifficulty}-${lvl - 1}`);
+            const isLocked =
+              lvl > 1 && !completedLevels.includes(`${selectedDifficulty}-${lvl - 1}`);
 
             return (
               <button
@@ -134,10 +170,14 @@ export function NewGameDialog({
                 disabled={loading !== null || isLocked}
                 className={cn(
                   "group flex w-full items-center justify-between rounded-2xl border p-3 text-left transition-all disabled:opacity-50",
-                  isLocked ? "bg-surface/50 border-border/30 cursor-not-allowed opacity-50 grayscale" : "active:scale-[0.99]",
+                  isLocked
+                    ? "bg-surface/50 border-border/30 cursor-not-allowed opacity-50 grayscale"
+                    : "active:scale-[0.99]",
                   isDone
                     ? "border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10"
-                    : !isLocked ? "bg-surface-2 hover:border-primary/50 hover:bg-highlight/50" : "",
+                    : !isLocked
+                      ? "bg-surface-2 hover:border-primary/50 hover:bg-highlight/50"
+                      : "",
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -147,11 +187,17 @@ export function NewGameDialog({
                       isDone
                         ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                         : isLocked
-                        ? "bg-muted text-muted-foreground border-border/50"
-                        : activeDiff.color,
+                          ? "bg-muted text-muted-foreground border-border/50"
+                          : activeDiff.color,
                     )}
                   >
-                    {isDone ? <CheckCircle2 className="size-4" /> : isLocked ? <Lock className="size-4" /> : `L${lvl}`}
+                    {isDone ? (
+                      <CheckCircle2 className="size-4" />
+                    ) : isLocked ? (
+                      <Lock className="size-4" />
+                    ) : (
+                      `L${lvl}`
+                    )}
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground flex items-center gap-2">
@@ -165,8 +211,19 @@ export function NewGameDialog({
                           <Lock className="size-2.5" /> Locked
                         </span>
                       ) : (
-                        <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1", tag.tagColor)}>
-                          {lvl >= 9 ? <Flame className="size-2.5" /> : lvl >= 7 ? <ShieldAlert className="size-2.5" /> : <Zap className="size-2.5" />}
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1",
+                            tag.tagColor,
+                          )}
+                        >
+                          {lvl >= 9 ? (
+                            <Flame className="size-2.5" />
+                          ) : lvl >= 7 ? (
+                            <ShieldAlert className="size-2.5" />
+                          ) : (
+                            <Zap className="size-2.5" />
+                          )}
                           {tag.name}
                         </span>
                       )}
@@ -177,11 +234,24 @@ export function NewGameDialog({
                   </div>
                 </div>
 
-                <div className={cn(
-                  "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1",
-                  isDone ? "text-emerald-400" : isLocked ? "text-muted-foreground" : "text-primary",
-                )}>
-                  {isLoadingThis ? "Loading..." : isLocked ? "Locked" : isDone ? "Play Again" : "Play Level"} { !isLocked && <ChevronRight className="size-4" /> }
+                <div
+                  className={cn(
+                    "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1",
+                    isDone
+                      ? "text-emerald-400"
+                      : isLocked
+                        ? "text-muted-foreground"
+                        : "text-primary",
+                  )}
+                >
+                  {isLoadingThis
+                    ? "Loading..."
+                    : isLocked
+                      ? "Locked"
+                      : isDone
+                        ? "Play Again"
+                        : "Play Level"}{" "}
+                  {!isLocked && <ChevronRight className="size-4" />}
                 </div>
               </button>
             );

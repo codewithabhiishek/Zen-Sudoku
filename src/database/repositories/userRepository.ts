@@ -35,7 +35,10 @@ export async function createUser(data: CreateUserData) {
       .returning();
     return inserted;
   } catch (error) {
-    console.warn("Database Warning [createUser]: Unique constraint or sync collision, attempting graceful fallback...", error);
+    console.warn(
+      "Database Warning [createUser]: Unique constraint or sync collision, attempting graceful fallback...",
+      error,
+    );
     try {
       const [existing] = await db.select().from(users).where(eq(users.id, data.id)).limit(1);
       if (existing) {

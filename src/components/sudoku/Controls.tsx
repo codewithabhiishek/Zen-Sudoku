@@ -1,5 +1,19 @@
 import { useGameStore } from "@/store/gameStore";
-import { HelpCircle, Home, Lightbulb, Pause, Play, Redo2, RotateCcw, Search, Send, Undo2, Clock, Eraser, PencilLine } from "lucide-react";
+import {
+  HelpCircle,
+  Home,
+  Lightbulb,
+  Pause,
+  Play,
+  Redo2,
+  RotateCcw,
+  Search,
+  Send,
+  Undo2,
+  Clock,
+  Eraser,
+  PencilLine,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +26,14 @@ function TimerDisplay({ elapsed, hideTimer }: { elapsed: number; hideTimer: bool
   return (
     <span className="font-mono tabular-nums">
       {m}
-      <span className={cn("inline-block transition-opacity duration-200", blink ? "opacity-100" : "opacity-30")}>:</span>
+      <span
+        className={cn(
+          "inline-block transition-opacity duration-200",
+          blink ? "opacity-100" : "opacity-30",
+        )}
+      >
+        :
+      </span>
       {s.toString().padStart(2, "0")}
     </span>
   );
@@ -58,10 +79,16 @@ export function GameHeader({ onRestart }: { onRestart: () => void }) {
         </div>
 
         {/* Mistakes */}
-        <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground sm:text-sm" title="Mistakes made">
+        <div
+          className="flex items-center gap-1 text-xs font-semibold text-muted-foreground sm:text-sm"
+          title="Mistakes made"
+        >
           <span className="text-amber-500">⚠</span>
           <span>Mistakes:</span>
-          <span className="font-semibold text-foreground">{mistakes}{mistakeLimit ? `/${mistakeLimit}` : ""}</span>
+          <span className="font-semibold text-foreground">
+            {mistakes}
+            {mistakeLimit ? `/${mistakeLimit}` : ""}
+          </span>
         </div>
 
         {/* Timer */}
@@ -84,7 +111,11 @@ export function GameHeader({ onRestart }: { onRestart: () => void }) {
           aria-label={paused ? "Resume" : "Pause"}
           title={paused ? "Resume" : "Pause"}
         >
-          {paused ? <Play className="size-3.5 sm:size-4" /> : <Pause className="size-3.5 sm:size-4" />}
+          {paused ? (
+            <Play className="size-3.5 sm:size-4" />
+          ) : (
+            <Pause className="size-3.5 sm:size-4" />
+          )}
         </button>
         <button
           onClick={onRestart}
@@ -127,16 +158,23 @@ export function Controls() {
     <div className="controls-bar mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1 sm:gap-2">
       {/* 1. Undo */}
       <button onClick={undo} disabled={!historyLen} className={btn} title="Undo">
-        <Undo2 className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Undo</span>
+        <Undo2 className="size-3.5 shrink-0" />{" "}
+        <span className="hidden xs:inline sm:inline">Undo</span>
       </button>
       {/* 2. Redo */}
       <button onClick={redo} disabled={!futureLen} className={btn} title="Redo">
-        <Redo2 className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Redo</span>
+        <Redo2 className="size-3.5 shrink-0" />{" "}
+        <span className="hidden xs:inline sm:inline">Redo</span>
       </button>
       {/* 3. Check / Explain */}
       {selectedHasValue ? (
-        <button onClick={explainCurrent} className={cn(btn, "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10")} title="Explain Move">
-          <HelpCircle className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Explain</span>
+        <button
+          onClick={explainCurrent}
+          className={cn(btn, "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10")}
+          title="Explain Move"
+        >
+          <HelpCircle className="size-3.5 shrink-0" />{" "}
+          <span className="hidden xs:inline sm:inline">Explain</span>
         </button>
       ) : (
         <button
@@ -147,12 +185,14 @@ export function Controls() {
           className={btn}
           title="Check Board"
         >
-          <Search className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Check</span>
+          <Search className="size-3.5 shrink-0" />{" "}
+          <span className="hidden xs:inline sm:inline">Check</span>
         </button>
       )}
       {/* 4. Hint */}
       <button onClick={hint} className={btn} title="Get Hint">
-        <Lightbulb className="size-3.5 shrink-0" /> <span className="text-[10px] sm:text-xs">Hint ({hintsUsed})</span>
+        <Lightbulb className="size-3.5 shrink-0" />{" "}
+        <span className="text-[10px] sm:text-xs">Hint ({hintsUsed})</span>
       </button>
       {/* 5. Notes */}
       <button
@@ -161,11 +201,13 @@ export function Controls() {
         aria-pressed={notesMode}
         title="Toggle Pencil Notes"
       >
-        <PencilLine className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Notes</span>
+        <PencilLine className="size-3.5 shrink-0" />{" "}
+        <span className="hidden xs:inline sm:inline">Notes</span>
       </button>
       {/* 6. Erase */}
       <button onClick={() => input(0)} className={btn} title="Erase Cell">
-        <Eraser className="size-3.5 shrink-0" /> <span className="hidden xs:inline sm:inline">Erase</span>
+        <Eraser className="size-3.5 shrink-0" />{" "}
+        <span className="hidden xs:inline sm:inline">Erase</span>
       </button>
       {msg && (
         <div

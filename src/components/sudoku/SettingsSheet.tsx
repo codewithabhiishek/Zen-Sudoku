@@ -122,7 +122,11 @@ export function SettingsSheet() {
             <div>
               <div className="flex items-center justify-between pb-4 border-b">
                 <h2 className="display text-2xl">Settings</h2>
-                <button onClick={handleClose} aria-label="Close" className="grid size-9 place-items-center rounded-md hover:bg-muted">
+                <button
+                  onClick={handleClose}
+                  aria-label="Close"
+                  className="grid size-9 place-items-center rounded-md hover:bg-muted"
+                >
                   <X className="size-4" />
                 </button>
               </div>
@@ -132,7 +136,9 @@ export function SettingsSheet() {
                 <div className="mb-3">
                   <div className="mb-1.5 flex justify-between text-xs font-medium">
                     <span className="text-muted-foreground">Current Theme</span>
-                    <span className="font-semibold text-primary capitalize">{THEMES.find((t) => t.id === s.theme)?.label || s.theme}</span>
+                    <span className="font-semibold text-primary capitalize">
+                      {THEMES.find((t) => t.id === s.theme)?.label || s.theme}
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {THEMES.map((t) => (
@@ -141,7 +147,9 @@ export function SettingsSheet() {
                         onClick={() => s.setTheme(t.id)}
                         className={cn(
                           "flex items-center gap-2 rounded-lg border p-2 text-left transition",
-                          s.theme === t.id ? "border-primary ring-2 ring-primary/40 bg-highlight-strong" : "hover:bg-muted",
+                          s.theme === t.id
+                            ? "border-primary ring-2 ring-primary/40 bg-highlight-strong"
+                            : "hover:bg-muted",
                         )}
                       >
                         <div className="flex overflow-hidden rounded border">
@@ -158,7 +166,9 @@ export function SettingsSheet() {
                 <div className="mb-3">
                   <div className="mb-1 flex justify-between text-xs font-medium">
                     <span className="text-muted-foreground">Font Size</span>
-                    <span className="tabular-nums font-semibold">{Math.round(s.fontScale * 100)}%</span>
+                    <span className="tabular-nums font-semibold">
+                      {Math.round(s.fontScale * 100)}%
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -186,16 +196,42 @@ export function SettingsSheet() {
 
               {/* 2. GAMEPLAY */}
               <Section title="Gameplay">
-                <Toggle label="Auto-check mistakes" checked={s.highlightErrors} onChange={() => s.toggle("highlightErrors")} />
-                <Toggle label="Auto-remove incorrect entries" checked={s.autoRemoveIncorrect} onChange={() => s.toggle("autoRemoveIncorrect")} />
-                <Toggle label="Highlight same number" checked={s.highlightSame} onChange={() => s.toggle("highlightSame")} />
-                <Toggle label="Highlight row / col / box" checked={s.highlightPeers} onChange={() => s.toggle("highlightPeers")} />
-                <Toggle label="Smart notes (auto-remove)" checked={smartNotes} onChange={toggleSmart} />
-                <Toggle label="Auto-save state" checked={s.autoSave} onChange={() => s.toggle("autoSave")} />
+                <Toggle
+                  label="Auto-check mistakes"
+                  checked={s.highlightErrors}
+                  onChange={() => s.toggle("highlightErrors")}
+                />
+                <Toggle
+                  label="Auto-remove incorrect entries"
+                  checked={s.autoRemoveIncorrect}
+                  onChange={() => s.toggle("autoRemoveIncorrect")}
+                />
+                <Toggle
+                  label="Highlight same number"
+                  checked={s.highlightSame}
+                  onChange={() => s.toggle("highlightSame")}
+                />
+                <Toggle
+                  label="Highlight row / col / box"
+                  checked={s.highlightPeers}
+                  onChange={() => s.toggle("highlightPeers")}
+                />
+                <Toggle
+                  label="Smart notes (auto-remove)"
+                  checked={smartNotes}
+                  onChange={toggleSmart}
+                />
+                <Toggle
+                  label="Auto-save state"
+                  checked={s.autoSave}
+                  onChange={() => s.toggle("autoSave")}
+                />
                 <Toggle label="Show timer" checked={!hideTimer} onChange={toggleHideTimer} />
 
                 <div className="mt-3">
-                  <div className="mb-1 text-xs text-muted-foreground font-medium">Mistake limit</div>
+                  <div className="mb-1 text-xs text-muted-foreground font-medium">
+                    Mistake limit
+                  </div>
                   <div className="flex gap-2">
                     {[null, 3, 5].map((n) => (
                       <button
@@ -203,7 +239,9 @@ export function SettingsSheet() {
                         onClick={() => setMistakeLimit(n)}
                         className={cn(
                           "flex-1 rounded-md border px-2 py-1.5 text-xs font-medium transition",
-                          mistakeLimit === n ? "border-primary bg-highlight-strong text-foreground font-bold" : "hover:bg-muted text-muted-foreground",
+                          mistakeLimit === n
+                            ? "border-primary bg-highlight-strong text-foreground font-bold"
+                            : "hover:bg-muted text-muted-foreground",
                         )}
                       >
                         {n == null ? "Off" : `${n} strikes`}
@@ -215,10 +253,26 @@ export function SettingsSheet() {
 
               {/* 3. CONTROLS */}
               <Section title="Controls">
-                <Toggle label="Sound effects" checked={s.sound} onChange={() => s.toggle("sound")} />
-                <Toggle label="Keyboard shortcuts" checked={s.keyboardShortcuts} onChange={() => s.toggle("keyboardShortcuts")} />
-                <Toggle label="Haptic feedback (mobile)" checked={s.haptics} onChange={() => s.toggle("haptics")} />
-                <Toggle label="Left-handed mode (mobile)" checked={s.leftHanded} onChange={() => s.toggle("leftHanded")} />
+                <Toggle
+                  label="Sound effects"
+                  checked={s.sound}
+                  onChange={() => s.toggle("sound")}
+                />
+                <Toggle
+                  label="Keyboard shortcuts"
+                  checked={s.keyboardShortcuts}
+                  onChange={() => s.toggle("keyboardShortcuts")}
+                />
+                <Toggle
+                  label="Haptic feedback (mobile)"
+                  checked={s.haptics}
+                  onChange={() => s.toggle("haptics")}
+                />
+                <Toggle
+                  label="Left-handed mode (mobile)"
+                  checked={s.leftHanded}
+                  onChange={() => s.toggle("leftHanded")}
+                />
               </Section>
 
               {/* 4. DATA */}
@@ -242,7 +296,12 @@ export function SettingsSheet() {
                   </button>
                   <label className="flex items-center justify-center gap-1.5 rounded-lg border bg-surface-2 px-2.5 py-2 text-xs font-medium cursor-pointer transition hover:bg-muted">
                     <Upload className="size-3.5" /> Import Data
-                    <input type="file" accept=".json" onChange={handleImportData} className="hidden" />
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportData}
+                      className="hidden"
+                    />
                   </label>
                 </div>
 
@@ -267,7 +326,9 @@ export function SettingsSheet() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mt-5">
-      <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{title}</h3>
+      <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h3>
       <div className="space-y-1.5">{children}</div>
     </div>
   );

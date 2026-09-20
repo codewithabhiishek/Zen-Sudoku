@@ -50,13 +50,20 @@ function run100PuzzlesTest() {
         report.solutionDisagreements.length > 0
       ) {
         failures++;
-        console.error(`\n❌ ASSERTION FAILED at Puzzle ${i} (${diff}, Level ${((i - 1) % 10) + 1})`);
+        console.error(
+          `\n❌ ASSERTION FAILED at Puzzle ${i} (${diff}, Level ${((i - 1) % 10) + 1})`,
+        );
         console.error(`Puzzle Seed: ${seed}`);
         console.error(`Move Number: ${moveNum} (Cell index ${idx}, Placed ${correctVal})`);
         console.error(`Report:`, JSON.stringify(report, null, 2));
         console.error(`Board State:`);
         for (let r = 0; r < 9; r++) {
-          console.error(cells.slice(r * 9, r * 9 + 9).map((c) => c.value || ".").join(" "));
+          console.error(
+            cells
+              .slice(r * 9, r * 9 + 9)
+              .map((c) => c.value || ".")
+              .join(" "),
+          );
         }
         process.exit(1);
       }
@@ -72,7 +79,9 @@ function run100PuzzlesTest() {
   console.log(`Total Moves Executed: ${totalMovesExecuted}`);
   console.log(`Assertion Failures:   ${failures}`);
   console.log(`Elapsed Time:         ${elapsedSec}s`);
-  console.log(`\n✅ PERFECT SCORE: 100/100 Puzzles passed with ZERO impossible cells or contradictions when playing correct moves!`);
+  console.log(
+    `\n✅ PERFECT SCORE: 100/100 Puzzles passed with ZERO impossible cells or contradictions when playing correct moves!`,
+  );
   console.log("=================================================\n");
 }
 

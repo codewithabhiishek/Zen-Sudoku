@@ -3,9 +3,11 @@
 This directory contains the automated end-to-end testing suite for the Zen Sudoku application. The suite covers critical paths including gameplay, offline progression, multi-device real-time synchronization, statistics aggregation, and authentication flows.
 
 ## Architecture & Design
+
 Due to the dependency on Clerk (Auth) and Vercel KV (DB), the test suite utilizes Playwright Network Interception (`page.route`) and `localStorage` injection. This allows the suite to run completely offline, deterministically, and without requiring valid Clerk testing API keys.
 
 The following helpers facilitate this:
+
 - `/helpers/mockClerk.ts`: Stubs out the Clerk token payloads and Zustand `user-storage`.
 - `/helpers/mockDatabase.ts`: Creates an in-memory Map structure that mocks the `GET/POST` requests normally routed to Vercel Postgres/KV.
 
@@ -13,24 +15,25 @@ The following helpers facilitate this:
 
 Run these commands from the root directory:
 
-- **Run Tests Headless (CI):** 
+- **Run Tests Headless (CI):**
   ```bash
   npm run test:e2e
   ```
-- **Run Tests with Visible UI (Debug mode):** 
+- **Run Tests with Visible UI (Debug mode):**
   ```bash
   npm run test:ui
   ```
-- **Run Tests in Headed Mode:** 
+- **Run Tests in Headed Mode:**
   ```bash
   npm run test:headed
   ```
-- **View HTML Test Report:** 
+- **View HTML Test Report:**
   ```bash
   npm run test:report
   ```
 
 ## Test Suites Breakdown
+
 1. **01-auth.spec.ts:** Validates login, session injection, and persistence across refreshes.
 2. **02-continue-game.spec.ts:** Ensures a game can be started, a cell filled, and seamlessly resumed from the dashboard.
 3. **03-auto-save.spec.ts:** Intercepts the mocked DB to guarantee network requests fire when moves or hints occur.

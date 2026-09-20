@@ -64,6 +64,9 @@ export function trackDailyChallengeStarted(date: string) {
   safeTrack("Daily Challenge Started", { date });
 }
 
-export function trackDailyChallengeCompleted(props: { solveTimeSeconds: number; mistakes: number }) {
+export function trackDailyChallengeCompleted(props: {
+  solveTimeSeconds: number;
+  mistakes: number;
+}) {
   safeTrack("Daily Challenge Completed", props);
 }

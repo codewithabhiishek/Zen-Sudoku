@@ -1,6 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BarChart2, Trophy, User, ChevronRight, CheckCircle2, Flame, ShieldAlert, Zap, Sparkles, Layers, Play, Clock, Flame as StreakIcon, Lock } from "lucide-react";
+import {
+  BarChart2,
+  Trophy,
+  User,
+  ChevronRight,
+  CheckCircle2,
+  Flame,
+  ShieldAlert,
+  Zap,
+  Sparkles,
+  Layers,
+  Play,
+  Clock,
+  Flame as StreakIcon,
+  Lock,
+} from "lucide-react";
 import { SettingsSheet } from "@/components/sudoku/SettingsSheet";
 import { ZoomControls } from "@/components/sudoku/ZoomControls";
 import { Footer } from "@/components/sudoku/Footer";
@@ -21,10 +36,14 @@ type ThemeId = import("@/store/settingsStore").ThemeId;
 function getClueCount(d: Difficulty, level: number): number {
   const step = Math.min(9, Math.max(0, level - 1));
   switch (d) {
-    case "easy":   return Math.max(34, 42 - Math.floor(step * 0.8));
-    case "medium": return Math.max(28, 35 - Math.floor(step * 0.8));
-    case "hard":   return Math.max(22, 28 - Math.floor(step * 0.7));
-    case "expert": return Math.max(17, 23 - Math.floor(step * 0.6));
+    case "easy":
+      return Math.max(34, 42 - Math.floor(step * 0.8));
+    case "medium":
+      return Math.max(28, 35 - Math.floor(step * 0.8));
+    case "hard":
+      return Math.max(22, 28 - Math.floor(step * 0.7));
+    case "expert":
+      return Math.max(17, 23 - Math.floor(step * 0.6));
   }
 }
 
@@ -36,24 +55,44 @@ function fmt(ms: number) {
 }
 
 const DIFFICULTIES: { id: Difficulty; label: string; desc: string; color: string }[] = [
-  { id: "easy",   label: "Easy",   desc: "Naked & Hidden Singles",   color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
-  { id: "medium", label: "Medium", desc: "Pointing Pairs & Subsets", color: "text-blue-400 border-blue-500/30 bg-blue-500/10" },
-  { id: "hard",   label: "Hard",   desc: "Box-Line & Hidden Pairs",  color: "text-amber-400 border-amber-500/30 bg-amber-500/10" },
-  { id: "expert", label: "Expert", desc: "X-Wing & Advanced Trial",  color: "text-rose-400 border-rose-500/30 bg-rose-500/10" },
+  {
+    id: "easy",
+    label: "Easy",
+    desc: "Naked & Hidden Singles",
+    color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+  },
+  {
+    id: "medium",
+    label: "Medium",
+    desc: "Pointing Pairs & Subsets",
+    color: "text-blue-400 border-blue-500/30 bg-blue-500/10",
+  },
+  {
+    id: "hard",
+    label: "Hard",
+    desc: "Box-Line & Hidden Pairs",
+    color: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+  },
+  {
+    id: "expert",
+    label: "Expert",
+    desc: "X-Wing & Advanced Trial",
+    color: "text-rose-400 border-rose-500/30 bg-rose-500/10",
+  },
 ];
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const LEVEL_TAGS: Record<number, { name: string; tagColor: string }> = {
-  1: { name: "Starter",     tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  2: { name: "Rookie",      tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  3: { name: "Novice",      tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-  4: { name: "Skilled",     tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-  5: { name: "Pro",         tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  6: { name: "Advanced",    tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  7: { name: "Hardcore",    tagColor: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
-  8: { name: "Extreme",     tagColor: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
-  9: { name: "Master",      tagColor: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
+  1: { name: "Starter", tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  2: { name: "Rookie", tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  3: { name: "Novice", tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  4: { name: "Skilled", tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  5: { name: "Pro", tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  6: { name: "Advanced", tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  7: { name: "Hardcore", tagColor: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
+  8: { name: "Extreme", tagColor: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
+  9: { name: "Master", tagColor: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
   10: { name: "Grandmaster", tagColor: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
 };
 
@@ -92,7 +131,9 @@ function HomePage() {
     }
   }, [won, isFullyFilled, reset]);
 
-  const savedLevel = puzzle?.levelNumber ?? (puzzle?.seed?.includes("-lvl-") ? parseInt(puzzle.seed.split("-lvl-")[1]) : undefined);
+  const savedLevel =
+    puzzle?.levelNumber ??
+    (puzzle?.seed?.includes("-lvl-") ? parseInt(puzzle.seed.split("-lvl-")[1]) : undefined);
 
   const isLevelUnlocked = (d: Difficulty, lvl: number) => {
     if (lvl === 1) return true;
@@ -101,7 +142,7 @@ function HomePage() {
 
   const pickLevel = async (d: Difficulty, level: number) => {
     if (!isLevelUnlocked(d, level)) return;
-    
+
     const key = `${d}-${level}`;
     setLoading(key);
     await new Promise((r) => setTimeout(r, 20));
@@ -118,7 +159,8 @@ function HomePage() {
   const activeDiff = DIFFICULTIES.find((d) => d.id === selectedDiff)!;
   const completedLevels = Array.from(new Set(stats.completedLevels ?? [])).filter(Boolean);
   const completedCount = completedLevels.length;
-  const completedForDiff = (d: Difficulty) => completedLevels.filter((k) => k.startsWith(`${d}-`)).length;
+  const completedForDiff = (d: Difficulty) =>
+    completedLevels.filter((k) => k.startsWith(`${d}-`)).length;
 
   const totalPoints = completedLevels.reduce((sum, key) => {
     const diff = (key.split("-")[0] || "easy") as Difficulty;
@@ -129,7 +171,10 @@ function HomePage() {
   return (
     <main
       className="flex min-h-dvh flex-col"
-      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
+      style={{
+        paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+        paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+      }}
     >
       {/* ── TOP NAV ─────────────────────────────────────────── */}
       <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 pt-3 sm:pt-5">
@@ -137,10 +182,18 @@ function HomePage() {
           {/* Brand */}
           <div className="flex items-center gap-2.5">
             <div className="grid size-8 shrink-0 grid-cols-2 grid-rows-2 gap-0.5 rounded-lg border bg-surface p-1 shadow-xs">
-              <span className="mini-grid-dot-1 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">9</span>
-              <span className="mini-grid-dot-2 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">4</span>
-              <span className="mini-grid-dot-3 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">2</span>
-              <span className="mini-grid-dot-4 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">7</span>
+              <span className="mini-grid-dot-1 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">
+                9
+              </span>
+              <span className="mini-grid-dot-2 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">
+                4
+              </span>
+              <span className="mini-grid-dot-3 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">
+                2
+              </span>
+              <span className="mini-grid-dot-4 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">
+                7
+              </span>
             </div>
             <h1 className="display text-2xl font-bold tracking-tight text-foreground">
               Zen Sudoku
@@ -149,16 +202,33 @@ function HomePage() {
 
           {/* Nav toolbar */}
           <div className="flex items-center gap-0.5 sm:gap-1 rounded-xl border bg-surface p-1 shadow-sm">
-            <Link to="/profile" className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground" title="Profile" aria-label="Profile">
+            <Link
+              to="/profile"
+              className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              title="Profile"
+              aria-label="Profile"
+            >
               <User className="size-4" />
             </Link>
-            <Link to="/stats" className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground" title="Statistics" aria-label="Statistics">
+            <Link
+              to="/stats"
+              className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              title="Statistics"
+              aria-label="Statistics"
+            >
               <BarChart2 className="size-4" />
             </Link>
-            <Link to="/leaderboard" className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground" title="Leaderboards" aria-label="Leaderboards">
+            <Link
+              to="/leaderboard"
+              className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
+              title="Leaderboards"
+              aria-label="Leaderboards"
+            >
               <Trophy className="size-4" />
             </Link>
-            <div className="hidden sm:block"><ZoomControls /></div>
+            <div className="hidden sm:block">
+              <ZoomControls />
+            </div>
             <SettingsSheet />
           </div>
         </header>
@@ -179,7 +249,8 @@ function HomePage() {
                   <div className="text-sm font-bold text-foreground flex items-center gap-2">
                     Continue Game
                     <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary capitalize">
-                      {puzzle!.difficulty}{savedLevel ? ` • Level ${savedLevel}` : ""}
+                      {puzzle!.difficulty}
+                      {savedLevel ? ` • Level ${savedLevel}` : ""}
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
@@ -218,13 +289,21 @@ function HomePage() {
                 }}
                 className={cn(
                   "rounded-xl border p-3 text-left transition hover:scale-[1.02] active:scale-[0.99]",
-                  selectedDiff === d.id ? "border-primary/50 bg-primary/5" : "bg-surface hover:bg-surface-2",
+                  selectedDiff === d.id
+                    ? "border-primary/50 bg-primary/5"
+                    : "bg-surface hover:bg-surface-2",
                 )}
               >
                 <div className={cn("text-xs font-bold mb-1", d.color.split(" ")[0])}>{d.label}</div>
-                <div className="text-lg font-bold tabular-nums text-foreground">{done}<span className="text-xs font-normal text-muted-foreground">/10</span></div>
+                <div className="text-lg font-bold tabular-nums text-foreground">
+                  {done}
+                  <span className="text-xs font-normal text-muted-foreground">/10</span>
+                </div>
                 <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
                 </div>
               </button>
             );
@@ -298,10 +377,14 @@ function HomePage() {
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "grid size-9 place-items-center rounded-xl font-mono font-bold text-xs border shrink-0",
-                      isDone ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : activeDiff.color,
-                    )}>
+                    <div
+                      className={cn(
+                        "grid size-9 place-items-center rounded-xl font-mono font-bold text-xs border shrink-0",
+                        isDone
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                          : activeDiff.color,
+                      )}
+                    >
                       {isDone ? <CheckCircle2 className="size-4" /> : `L${lvl}`}
                     </div>
                     <div>
@@ -316,8 +399,19 @@ function HomePage() {
                             <Lock className="size-2.5" /> Locked
                           </span>
                         ) : (
-                          <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1", tag.tagColor)}>
-                            {lvl >= 9 ? <Flame className="size-2.5" /> : lvl >= 7 ? <ShieldAlert className="size-2.5" /> : <Zap className="size-2.5" />}
+                          <span
+                            className={cn(
+                              "rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1",
+                              tag.tagColor,
+                            )}
+                          >
+                            {lvl >= 9 ? (
+                              <Flame className="size-2.5" />
+                            ) : lvl >= 7 ? (
+                              <ShieldAlert className="size-2.5" />
+                            ) : (
+                              <Zap className="size-2.5" />
+                            )}
                             {tag.name}
                           </span>
                         )}
@@ -327,11 +421,14 @@ function HomePage() {
                       </div>
                     </div>
                   </div>
-                  <div className={cn(
-                    "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1",
-                    isDone ? "text-emerald-400" : "text-primary",
-                  )}>
-                    {isLoadingThis ? "Loading..." : isDone ? "Play Again" : "Play"} <ChevronRight className="size-4" />
+                  <div
+                    className={cn(
+                      "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1",
+                      isDone ? "text-emerald-400" : "text-primary",
+                    )}
+                  >
+                    {isLoadingThis ? "Loading..." : isDone ? "Play Again" : "Play"}{" "}
+                    <ChevronRight className="size-4" />
                   </div>
                 </button>
               );

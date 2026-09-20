@@ -8,7 +8,12 @@ import { pickHintCell } from "@/lib/sudoku/techniques";
 import { explainMove } from "@/lib/sudoku/explainer";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
-import { addLeaderboardEntry, updateStatistics, upsertActiveGameSession, clearActiveGameSessions } from "@/database/api";
+import {
+  addLeaderboardEntry,
+  updateStatistics,
+  upsertActiveGameSession,
+  clearActiveGameSessions,
+} from "@/database/api";
 import {
   trackGameStarted,
   trackGameCompleted,
@@ -33,26 +38,10 @@ export interface Move {
   next: CellState;
 }
 
-export interface ScoreBreakdown {
-  base: number;
-  timeBonus: number;
-  mistakePenalty: number;
-  hintPenalty: number;
-  noMistakeBonus: number;
-  noHintBonus: number;
-  total: number;
-}
-
-export interface Stats {
-  gamesPlayed: number;
-  gamesWon: number;
-  bestTimeByDifficulty: Partial<Record<Difficulty, number>>;
-  totalPoints: number;
-  currentStreakDays: number;
-  longestStreakDays: number;
-  lastPlayedDate: string | null;
-  completedLevels: string[]; // e.g. ["easy-1", "easy-2", "medium-3"]
-}
+export type { ScoreBreakdown, Stats } from "@/lib/sudoku/scoring";
+import { computeScore, applyWinToStats as calculateNextStats } from "@/lib/sudoku/scoring";
+import type { ScoreBreakdown, Stats } from "@/lib/sudoku/scoring";
+export { computeScore };
 
 export interface SubmitResult {
   isWin: boolean;
@@ -89,7 +78,7 @@ interface GameState {
   explainCurrent: () => void;
   submitGame: () => void;
   clearSubmitResult: () => void;
-  flashIdx: number | null;        // index of cell currently showing error flash
+  flashIdx: number | null; // index of cell currently showing error flash
   clearFlash: () => void;
   move: (dr: number, dc: number) => void;
   input: (value: number) => void;
@@ -126,85 +115,23 @@ function emptyStats(): Stats {
   };
 }
 
-function baseFor(d: Difficulty): number {
-  return { easy: 200, medium: 400, hard: 800, expert: 1500 }[d];
-}
-function targetTimeSec(d: Difficulty): number {
-  return { easy: 300, medium: 600, hard: 1200, expert: 1800 }[d];
-}
-
-function computeScore(puzzle: Puzzle, timeSec: number, mistakes: number, hints: number): ScoreBreakdown {
-  const base = baseFor(puzzle.difficulty);
-  const target = targetTimeSec(puzzle.difficulty);
-  const timeBonus = Math.max(0, Math.round(base * (1 - Math.min(1, timeSec / target)) * 0.6));
-  const mistakePenalty = mistakes * 25;
-  const hintPenalty = hints * 50;
-  const noMistakeBonus = mistakes === 0 ? Math.round(base * 0.25) : 0;
-  const noHintBonus = hints === 0 ? Math.round(base * 0.25) : 0;
-  
-  // Guaranteed minimum XP on level completion (always at least 50% of base XP!)
-  const minGuaranteed = Math.round(base * 0.5);
-  const calculatedTotal = base + timeBonus - mistakePenalty - hintPenalty + noMistakeBonus + noHintBonus;
-  const total = Math.max(minGuaranteed, calculatedTotal);
-
-  return { base, timeBonus, mistakePenalty, hintPenalty, noMistakeBonus, noHintBonus, total };
-}
-
-function todayKey(): string {
-  return new Date().toISOString().slice(0, 10); // "2026-07-04" — always zero-padded
-}
-function yesterdayKey(): string {
-  return new Date(Date.now() - 86400_000).toISOString().slice(0, 10);
-}
-
-/** Update stats after a confirmed win. Pure function — returns updated stats. */
-function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: ScoreBreakdown): Stats {
-  const nextLevels = Array.from(new Set(stats.completedLevels ?? [])).filter(Boolean);
-  const isLevelGame = puzzle.levelNumber != null;
-  const levelKey = isLevelGame ? `${puzzle.difficulty}-${puzzle.levelNumber}` : null;
-
-  if (levelKey && !nextLevels.includes(levelKey)) {
-    nextLevels.push(levelKey);
-  }
-
-  const count = nextLevels.length;
-  const totalPoints = count > 0
-    ? nextLevels.reduce((sum, key) => {
-        const diff = (key.split("-")[0] || "easy") as Difficulty;
-        const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
-        return sum + base;
-      }, 0)
-    : stats.totalPoints + score.total;
-
-  const best = stats.bestTimeByDifficulty[puzzle.difficulty];
-  const newBestTime = best == null ? timeSec : Math.min(best, timeSec);
-  const today = todayKey();
-  let currentStreak = stats.currentStreakDays;
-  if (stats.lastPlayedDate === yesterdayKey()) currentStreak += 1;
-  else if (stats.lastPlayedDate !== today) currentStreak = 1;
-  const longestStreak = Math.max(stats.longestStreakDays, currentStreak);
-
-  const next = {
-    ...stats,
-    completedLevels: nextLevels,
-    gamesWon: count > 0 ? count : stats.gamesWon + 1,
-    gamesPlayed: count > 0 ? count : stats.gamesPlayed + 1,
-    totalPoints,
-    bestTimeByDifficulty: {
-      ...stats.bestTimeByDifficulty,
-      [puzzle.difficulty]: newBestTime,
-    },
-    currentStreakDays: currentStreak,
-    longestStreakDays: longestStreak,
-    lastPlayedDate: today,
-  };
+/** Update stats after a confirmed win. Pure calculation handled by scoring engine, followed by persistence side effects. */
+export function applyWinToStats(
+  stats: Stats,
+  puzzle: Puzzle,
+  timeSec: number,
+  score: ScoreBreakdown,
+): Stats {
+  const next = calculateNextStats(stats, puzzle, timeSec, score);
 
   // Track Game Completed analytics event
   try {
     const currentState = useGameStore.getState();
     const cells = currentState.cells ?? [];
     const history = currentState.history ?? [];
-    const notesUsed = cells.some((c) => c.notes.length > 0) || history.some((m) => m.prev.notes.length > 0 || m.next.notes.length > 0);
+    const notesUsed =
+      cells.some((c) => c.notes.length > 0) ||
+      history.some((m) => m.prev.notes.length > 0 || m.next.notes.length > 0);
     const autoRemoveIncorrect = useSettingsStore.getState().autoRemoveIncorrect;
 
     trackGameCompleted({
@@ -234,11 +161,9 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
     // Save statistics to Neon DB in real-time if signed in (Clerk user ID starts with "user_")
     if (userId && !userId.startsWith("guest_")) {
       const best = next.bestTimeByDifficulty;
-      const safeCompletedLevels = Array.isArray(next.completedLevels)
-        ? next.completedLevels
-        : [];
+      const safeCompletedLevels = Array.isArray(next.completedLevels) ? next.completedLevels : [];
       console.log(
-        `[GameStore] 💾 Saving to cloud for ${userId}: ${safeCompletedLevels.length} levels, ${next.totalPoints} XP`
+        `[GameStore] 💾 Saving to cloud for ${userId}: ${safeCompletedLevels.length} levels, ${next.totalPoints} XP`,
       );
       updateStatistics(userId, {
         gamesPlayed: next.gamesPlayed,
@@ -250,11 +175,13 @@ function applyWinToStats(stats: Stats, puzzle: Puzzle, timeSec: number, score: S
         bestExpert: best.expert ?? null,
         currentStreak: next.currentStreakDays,
         longestStreak: next.longestStreakDays,
-      }).then(() => {
-        console.log("[GameStore] ✅ Cloud stats saved successfully.");
-      }).catch((e) => {
-        console.error("[GameStore] ❌ Cloud stats save FAILED:", e);
-      });
+      })
+        .then(() => {
+          console.log("[GameStore] ✅ Cloud stats saved successfully.");
+        })
+        .catch((e) => {
+          console.error("[GameStore] ❌ Cloud stats save FAILED:", e);
+        });
     }
   } catch (err) {
     console.error("[GameStore] ❌ Unexpected error in win save:", err);
@@ -351,7 +278,10 @@ export const useGameStore = create<GameState>()(
 
       move: (dr, dc) => {
         const { selected } = get();
-        if (selected == null) { set({ selected: 40, explanation: null }); return; }
+        if (selected == null) {
+          set({ selected: 40, explanation: null });
+          return;
+        }
         let r = Math.floor(selected / 9);
         let c = selected % 9;
         r = Math.max(0, Math.min(8, r + dr));
@@ -387,9 +317,15 @@ export const useGameStore = create<GameState>()(
           const r = Math.floor(idx / 9);
           const c = idx % 9;
           const b = Math.floor(r / 3) * 3 + Math.floor(c / 3);
-          const rowVals = ROWS[r].map((i) => (i === idx ? value : cells[i].value)).filter((v) => v !== 0);
-          const colVals = COLS[c].map((i) => (i === idx ? value : cells[i].value)).filter((v) => v !== 0);
-          const boxVals = BOXES[b].map((i) => (i === idx ? value : cells[i].value)).filter((v) => v !== 0);
+          const rowVals = ROWS[r]
+            .map((i) => (i === idx ? value : cells[i].value))
+            .filter((v) => v !== 0);
+          const colVals = COLS[c]
+            .map((i) => (i === idx ? value : cells[i].value))
+            .filter((v) => v !== 0);
+          const boxVals = BOXES[b]
+            .map((i) => (i === idx ? value : cells[i].value))
+            .filter((v) => v !== 0);
 
           const rowDup = rowVals.filter((v) => v === value).length > 1;
           const colDup = colVals.filter((v) => v === value).length > 1;
@@ -521,7 +457,12 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
         let idx = -1;
         // Prioritize currently selected cell if empty or wrong
-        if (s.selected != null && (!s.cells[s.selected].given && (s.cells[s.selected].value === 0 || s.cells[s.selected].value !== s.puzzle.solution[s.selected]))) {
+        if (
+          s.selected != null &&
+          !s.cells[s.selected].given &&
+          (s.cells[s.selected].value === 0 ||
+            s.cells[s.selected].value !== s.puzzle.solution[s.selected])
+        ) {
           idx = s.selected;
         } else {
           idx = pickHintCell(current, s.puzzle.solution);
@@ -850,7 +791,13 @@ export interface BoardValidationReport {
   rowDuplicates: { row: number; value: number; indices: number[] }[];
   colDuplicates: { col: number; value: number; indices: number[] }[];
   boxDuplicates: { box: number; value: number; indices: number[] }[];
-  solutionDisagreements: { idx: number; row: number; col: number; placed: number; expected: number }[];
+  solutionDisagreements: {
+    idx: number;
+    row: number;
+    col: number;
+    placed: number;
+    expected: number;
+  }[];
   impossibleEmptyCells: {
     idx: number;
     row: number;
@@ -954,9 +901,15 @@ export function validateEntireBoard(cells: CellState[], solution?: Grid): BoardV
     const c = i % 9;
     const b = Math.floor(r / 3) * 3 + Math.floor(c / 3);
 
-    const rowVals = Array.from(new Set(ROWS[r].map((idx) => grid[idx]).filter((v) => v !== 0))).sort((a, b) => a - b);
-    const colVals = Array.from(new Set(COLS[c].map((idx) => grid[idx]).filter((v) => v !== 0))).sort((a, b) => a - b);
-    const boxVals = Array.from(new Set(BOXES[b].map((idx) => grid[idx]).filter((v) => v !== 0))).sort((a, b) => a - b);
+    const rowVals = Array.from(
+      new Set(ROWS[r].map((idx) => grid[idx]).filter((v) => v !== 0)),
+    ).sort((a, b) => a - b);
+    const colVals = Array.from(
+      new Set(COLS[c].map((idx) => grid[idx]).filter((v) => v !== 0)),
+    ).sort((a, b) => a - b);
+    const boxVals = Array.from(
+      new Set(BOXES[b].map((idx) => grid[idx]).filter((v) => v !== 0)),
+    ).sort((a, b) => a - b);
 
     const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     const rowAllows = ALL.filter((v) => !rowVals.includes(v));

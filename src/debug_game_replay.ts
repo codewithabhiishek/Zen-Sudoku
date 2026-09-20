@@ -68,7 +68,7 @@ function runKeypadTest() {
   console.log(`Empty cells NOT needing 7: ${emptyNot7.length}`);
 
   // Place wrong '7's in empty cells NOT needing 7 until total count of 7 reaches 9
-  let neededToReach9 = 9 - initial7Count;
+  const neededToReach9 = 9 - initial7Count;
   console.log(`Placing ${neededToReach9} incorrect 7s on the board...`);
 
   for (let k = 0; k < neededToReach9; k++) {
@@ -80,9 +80,13 @@ function runKeypadTest() {
   console.log("\nKeypad Status for Digit 7:", status[7]);
   console.log(`Is Keypad Button '7' DISABLED in UI? -> ${status[7].disabled}`);
 
-  console.log(`\nNow, the player selects cell index ${emptyIs7[0]} (which mathematically NEEDS a 7 to solve the board).`);
+  console.log(
+    `\nNow, the player selects cell index ${emptyIs7[0]} (which mathematically NEEDS a 7 to solve the board).`,
+  );
   console.log(`Can the player click '7' on the Keypad to fill this cell?`);
-  console.log(`Result: YES! The keypad button '7' remains CLICKABLE (disabled = ${status[7].disabled}) because valid count(7) = ${status[7].count} < 9!`);
+  console.log(
+    `Result: YES! The keypad button '7' remains CLICKABLE (disabled = ${status[7].disabled}) because valid count(7) = ${status[7].count} < 9!`,
+  );
   console.log(`Incorrect entries no longer falsely disable the keypad button!`);
 }
 

@@ -47,7 +47,7 @@ export async function updateGame(
     notesEnabled: boolean;
     boardState: unknown;
     completedAt: Date;
-  }>
+  }>,
 ) {
   try {
     const [updated] = await db
@@ -71,7 +71,7 @@ export async function completeGame(
   difficulty: string,
   score: number,
   timeSeconds: number,
-  mistakes: number
+  mistakes: number,
 ) {
   try {
     const now = new Date();

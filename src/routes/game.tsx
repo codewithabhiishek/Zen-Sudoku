@@ -99,9 +99,7 @@ function GamePage() {
     const currentDiff = puzzle.difficulty;
     const currentLvl =
       puzzle.levelNumber ??
-      (puzzle.seed?.includes("-lvl-")
-        ? parseInt(puzzle.seed.split("-lvl-")[1], 10)
-        : 1);
+      (puzzle.seed?.includes("-lvl-") ? parseInt(puzzle.seed.split("-lvl-")[1], 10) : 1);
 
     if (currentLvl < 10) {
       newGame(currentDiff, currentLvl + 1);
@@ -120,7 +118,10 @@ function GamePage() {
   return (
     <main
       className="flex min-h-dvh flex-col justify-between px-3 py-2 sm:py-6"
-      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
+      style={{
+        paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+        paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+      }}
     >
       <div className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-1.5 sm:gap-3 game-gap-compress">
         {/* Single-Row Mobile Header */}
@@ -133,10 +134,18 @@ function GamePage() {
             aria-label="Back to Home"
           >
             <div className="grid size-7 shrink-0 grid-cols-2 grid-rows-2 gap-0.5 rounded-lg border bg-surface p-0.5 shadow-xs sm:size-8 sm:p-1 group-hover:border-primary/50 transition">
-              <span className="mini-grid-dot-1 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">9</span>
-              <span className="mini-grid-dot-2 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">4</span>
-              <span className="mini-grid-dot-3 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">2</span>
-              <span className="mini-grid-dot-4 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">7</span>
+              <span className="mini-grid-dot-1 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">
+                9
+              </span>
+              <span className="mini-grid-dot-2 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">
+                4
+              </span>
+              <span className="mini-grid-dot-3 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">
+                2
+              </span>
+              <span className="mini-grid-dot-4 flex items-center justify-center rounded-[3px] font-mono text-[8px] sm:text-[9px] font-bold">
+                7
+              </span>
             </div>
             <h1 className="display text-xl leading-none sm:text-3xl font-bold tracking-tight text-foreground whitespace-nowrap group-hover:text-primary transition">
               Zen Sudoku

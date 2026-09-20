@@ -6,7 +6,7 @@ export function Footer({ className }: { className?: string }) {
     <footer
       className={cn(
         "group/footer mx-auto hidden sm:flex w-full max-w-[min(92vw,560px)] items-center justify-center gap-4 sm:gap-5 py-4 text-[13px] font-medium text-muted-foreground opacity-60 transition-opacity duration-200 hover:opacity-100",
-        className
+        className,
       )}
     >
       <a

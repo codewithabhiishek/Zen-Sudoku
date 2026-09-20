@@ -2,7 +2,13 @@ import { useEffect, useRef } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useUserStore } from "@/store/userStore";
 import { useGameStore } from "@/store/gameStore";
-import { getStatistics, updateStatistics, createUser, getActiveGameSession, saveGame } from "@/database/api";
+import {
+  getStatistics,
+  updateStatistics,
+  createUser,
+  getActiveGameSession,
+  saveGame,
+} from "@/database/api";
 
 type Difficulty = "easy" | "medium" | "hard" | "expert";
 
@@ -36,21 +42,15 @@ export function ClerkSyncBridge() {
         console.log("[SyncBridge] 🔄 Starting Cloud Sync for user:", user.id);
 
         try {
-          const emailPrefix =
-            user.primaryEmailAddress?.emailAddress?.split("@")[0] || "player";
-          const uniqueUsername =
-            user.username || `${emailPrefix}_${user.id.slice(-6)}`;
+          const emailPrefix = user.primaryEmailAddress?.emailAddress?.split("@")[0] || "player";
+          const uniqueUsername = user.username || `${emailPrefix}_${user.id.slice(-6)}`;
 
           // Step 1: Upsert user profile in Neon DB
           await createUser({
             id: user.id,
             email: user.primaryEmailAddress?.emailAddress || "",
             username: uniqueUsername,
-            displayName:
-              user.fullName ||
-              user.username ||
-              user.firstName ||
-              "ZenPlayer",
+            displayName: user.fullName || user.username || user.firstName || "ZenPlayer",
             avatarUrl: user.imageUrl,
           });
 
@@ -90,8 +90,16 @@ export function ClerkSyncBridge() {
           }
 
           // Step 5: Merge games played/won — accumulate wins and plays, do not hardcode to completedCount
-          const mergedWon = Math.max(localStats.gamesWon ?? 0, cloudStats?.gamesWon ?? 0, mergedLevels.length);
-          const mergedPlayed = Math.max(localStats.gamesPlayed ?? 0, cloudStats?.gamesPlayed ?? 0, mergedWon);
+          const mergedWon = Math.max(
+            localStats.gamesWon ?? 0,
+            cloudStats?.gamesWon ?? 0,
+            mergedLevels.length,
+          );
+          const mergedPlayed = Math.max(
+            localStats.gamesPlayed ?? 0,
+            cloudStats?.gamesPlayed ?? 0,
+            mergedWon,
+          );
 
           // Step 6: Calculate total points — take max of existing points or minimum derived from completed levels
           const minDerivedPoints = mergedLevels.reduce((sum, key) => {
@@ -99,16 +107,20 @@ export function ClerkSyncBridge() {
             const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
             return sum + base;
           }, 0);
-          const mergedPoints = Math.max(localStats.totalPoints ?? 0, (cloudStats as any)?.totalPoints ?? 0, minDerivedPoints);
+          const mergedPoints = Math.max(
+            localStats.totalPoints ?? 0,
+            (cloudStats as any)?.totalPoints ?? 0,
+            minDerivedPoints,
+          );
 
           // Step 7: Merge streaks
           const mergedCurrentStreak = Math.max(
             localStats.currentStreakDays ?? 0,
-            cloudStats?.currentStreak ?? 0
+            cloudStats?.currentStreak ?? 0,
           );
           const mergedLongestStreak = Math.max(
             localStats.longestStreakDays ?? 0,
-            cloudStats?.longestStreak ?? 0
+            cloudStats?.longestStreak ?? 0,
           );
 
           // Step 8: Build the final merged stats object
@@ -139,13 +151,8 @@ export function ClerkSyncBridge() {
           // Step 10: Update Zustand stores with merged data
           useUserStore.setState({
             userId: user.id,
-            username:
-              user.username || user.firstName || "ZenPlayer",
-            displayName:
-              user.fullName ||
-              user.username ||
-              user.firstName ||
-              "ZenPlayer",
+            username: user.username || user.firstName || "ZenPlayer",
+            displayName: user.fullName || user.username || user.firstName || "ZenPlayer",
             avatarUrl: user.imageUrl,
             isRegistered: true,
           });
@@ -159,7 +166,12 @@ export function ClerkSyncBridge() {
           // Step 11: Sync active in-progress game between devices (iPhone <-> Desktop)
           const activeSession = await getActiveGameSession(user.id);
           const currentStore = useGameStore.getState();
-          if (!currentStore.won && activeSession && activeSession.status === "in_progress" && activeSession.boardState) {
+          if (
+            !currentStore.won &&
+            activeSession &&
+            activeSession.status === "in_progress" &&
+            activeSession.boardState
+          ) {
             const cloudCells = (activeSession.boardState as any).cells || [];
             const cloudPuzzle = (activeSession.boardState as any).puzzle || [];
             const cloudSolution = (activeSession.solution as any) || [];
@@ -167,13 +179,19 @@ export function ClerkSyncBridge() {
 
             if (cloudCells.length === 81 && cloudPuzzle.length === 81) {
               const cloudFilled = cloudCells.filter((c: any) => c.value !== 0).length;
-              const localFilled = (currentStore.cells || []).filter((c: any) => c.value !== 0).length;
-              const cloudTotalActions = cloudFilled + (activeSession.mistakes || 0) + cloudHintsUsed;
-              const localTotalActions = localFilled + currentStore.mistakes + currentStore.hintsUsed;
+              const localFilled = (currentStore.cells || []).filter(
+                (c: any) => c.value !== 0,
+              ).length;
+              const cloudTotalActions =
+                cloudFilled + (activeSession.mistakes || 0) + cloudHintsUsed;
+              const localTotalActions =
+                localFilled + currentStore.mistakes + currentStore.hintsUsed;
 
               if (cloudTotalActions > localTotalActions || currentStore.cells.length === 0) {
                 const seedStr = activeSession.seed || "";
-                const levelNumber = seedStr.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
+                const levelNumber = seedStr.includes("-lvl-")
+                  ? parseInt(seedStr.split("-lvl-")[1])
+                  : undefined;
                 console.log("[SyncBridge] 🎮 Syncing active in-progress game from cloud...");
                 useGameStore.setState({
                   puzzle: {
@@ -200,7 +218,7 @@ export function ClerkSyncBridge() {
           lastSyncedUserId.current = user.id;
 
           console.log(
-            `[SyncBridge] ✅ Sync complete! ${mergedLevels.length} levels, ${mergedPoints} XP synced.`
+            `[SyncBridge] ✅ Sync complete! ${mergedLevels.length} levels, ${mergedPoints} XP synced.`,
           );
         } catch (err) {
           console.error("[SyncBridge] ❌ Sync failed:", err);
@@ -210,12 +228,12 @@ export function ClerkSyncBridge() {
         // Only revert to guest if the user was ALREADY actively signed in during this runtime session
         // and subsequently signed out (preventing false logouts during initial load or OAuth redirects).
         if (lastSyncedUserId.current !== null) {
-          console.log("[SyncBridge] User signed out during active session. Reverting to Guest profile.");
+          console.log(
+            "[SyncBridge] User signed out during active session. Reverting to Guest profile.",
+          );
           lastSyncedUserId.current = null;
           userStore.deleteProfile();
-          const guestId = `guest_${Date.now()}_${Math.random()
-            .toString(36)
-            .slice(2, 9)}`;
+          const guestId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
           localStorage.setItem("zen_sudoku_user_id", guestId);
           useUserStore.setState({
             userId: guestId,
@@ -241,7 +259,10 @@ export function ClerkSyncBridge() {
           const localLevels = currentStore.stats.completedLevels ?? [];
           const mergedLevels = Array.from(new Set([...localLevels, ...cloudLevels]));
           if (mergedLevels.length > localLevels.length) {
-            console.log("[SyncBridge] ⚡ Real-time level completion sync from cloud!", mergedLevels);
+            console.log(
+              "[SyncBridge] ⚡ Real-time level completion sync from cloud!",
+              mergedLevels,
+            );
             useGameStore.setState({
               stats: {
                 ...currentStore.stats,
@@ -271,7 +292,9 @@ export function ClerkSyncBridge() {
             // Update if cloud has strictly more moves/actions played on another device (avoids infinite loop)
             if (cloudTotalActions > localTotalActions) {
               const seedStr = activeSession.seed || "";
-              const levelNumber = seedStr.includes("-lvl-") ? parseInt(seedStr.split("-lvl-")[1]) : undefined;
+              const levelNumber = seedStr.includes("-lvl-")
+                ? parseInt(seedStr.split("-lvl-")[1])
+                : undefined;
               console.log("[SyncBridge] ⚡ Real-time move sync from secondary device!");
               useGameStore.setState({
                 puzzle: {

@@ -42,7 +42,9 @@ export function explainMove(
     if (boxConflict != null) {
       const conflictRow = Math.floor(boxConflict / 9) + 1;
       const conflictCol = (boxConflict % 9) + 1;
-      details.push(`Digit ${placedValue} is already in ${boxName} (Row ${conflictRow}, Column ${conflictCol}).`);
+      details.push(
+        `Digit ${placedValue} is already in ${boxName} (Row ${conflictRow}, Column ${conflictCol}).`,
+      );
     }
 
     return {
@@ -56,7 +58,9 @@ export function explainMove(
   // 4. Solution check
   const correctVal = solution[idx];
   if (placedValue !== correctVal) {
-    const existingErrors = cells.filter((c, i) => !c.given && c.value !== 0 && c.value !== solution[i]).length;
+    const existingErrors = cells.filter(
+      (c, i) => !c.given && c.value !== 0 && c.value !== solution[i],
+    ).length;
     const details = [
       `Digit ${placedValue} does not match the unique mathematical solution for this cell.`,
     ];
@@ -68,9 +72,10 @@ export function explainMove(
     return {
       isCorrect: false,
       title: `Incorrect Digit: ${placedValue}`,
-      reason: existingErrors > 0
-        ? `No valid move can be completed here because an earlier incorrect entry is blocking this row, column, or box.`
-        : `Digit ${placedValue} does not lead to a valid solution for this puzzle.`,
+      reason:
+        existingErrors > 0
+          ? `No valid move can be completed here because an earlier incorrect entry is blocking this row, column, or box.`
+          : `Digit ${placedValue} does not lead to a valid solution for this puzzle.`,
       details,
     };
   }
@@ -86,13 +91,19 @@ export function explainMove(
   }
 
   const details: string[] = [
-    `${rowName}, ${colName}, and ${boxName} already contain: [${Array.from(usedNumbers).sort((a, b) => a - b).join(", ")}].`,
+    `${rowName}, ${colName}, and ${boxName} already contain: [${Array.from(usedNumbers)
+      .sort((a, b) => a - b)
+      .join(", ")}].`,
   ];
 
   if (remainingCandidates.length === 1) {
-    details.push(`Naked Single: ${placedValue} is the ONLY number that can mathematically fit in this cell!`);
+    details.push(
+      `Naked Single: ${placedValue} is the ONLY number that can mathematically fit in this cell!`,
+    );
   } else {
-    details.push(`Valid Candidates for this cell: [${remainingCandidates.join(", ")}]. ${placedValue} is the unique true solution!`);
+    details.push(
+      `Valid Candidates for this cell: [${remainingCandidates.join(", ")}]. ${placedValue} is the unique true solution!`,
+    );
   }
 
   return {

@@ -16,7 +16,7 @@ A modern, high-performance, and mathematical Sudoku application built with React
   - Responsive vertical space compression for short-screen mobile devices.
 - 👤 **Guest & Cloud Profile System**: Seamless onboarding with zero passwords required. Generates a persistent UUID stored in `localStorage` and synchronized with Neon PostgreSQL, with Clerk user support.
 - 📈 **Personal Statistics Page (`/stats`)**: Lifetime statistics including Win Rate %, ISO-standardized Current Streak Days with visual progress bars, Longest Streak, Best Solve Times per difficulty, replay-guarded XP calculation, and recent game moves.
-- 🥇 **Global & Daily Leaderboards (`/leaderboard`)**: Real-time rankings filterable by period (*Global, Daily, Weekly, Monthly, All-Time*) and difficulty rating.
+- 🥇 **Global & Daily Leaderboards (`/leaderboard`)**: Real-time rankings filterable by period (_Global, Daily, Weekly, Monthly, All-Time_) and difficulty rating.
 - 🎨 **6 Curated Visual Themes**:
   - ⬛ **Graphite**: Dark slate & soft indigo primary.
   - 🌲 **Forest Zen**: Deep emerald & mint green accents.
@@ -45,6 +45,7 @@ A modern, high-performance, and mathematical Sudoku application built with React
 ## ✅ Testing (E2E Playwright)
 
 The application includes a comprehensive **Playwright End-to-End (E2E) test suite** with 14 automated tests covering core gameplay mechanics and infrastructure, including:
+
 - **Authentication & Sessions**: Integrates official `@clerk/testing` to verify real authentication flows.
 - **Cloud Auto-Save Sync**: Intercepts `neon.tech` SQL queries to prove instantaneous cloud saves.
 - **Multi-Device Synchronization**: Simulates dual-browser tabs (Desktop/Phone) to verify seamless real-time syncing of active game sessions without race conditions.
@@ -52,6 +53,7 @@ The application includes a comprehensive **Playwright End-to-End (E2E) test suit
 - **Logic & Progression**: Tests hints, mistakes, cell notes, progression locking (Level 1 to 10), and statistics accumulation across devices.
 
 Run the test suite locally:
+
 ```bash
 npm run test:e2e
 ```

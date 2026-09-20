@@ -33,7 +33,9 @@ export function MoveExplanationModal() {
               {isSuccess ? <CheckCircle2 className="size-5" /> : <AlertCircle className="size-5" />}
             </div>
             <div>
-              <h3 className="display text-base font-bold tracking-tight text-foreground">{explanation.title}</h3>
+              <h3 className="display text-base font-bold tracking-tight text-foreground">
+                {explanation.title}
+              </h3>
               <p className="text-xs text-muted-foreground mt-0.5">Sudoku Hint & Analysis</p>
             </div>
           </div>

@@ -5,7 +5,16 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useUserStore } from "@/store/userStore";
 import { getStatistics } from "@/database/api";
 import { AnimatedNumber } from "@/components/sudoku/AnimatedNumber";
-import { ArrowLeft, Trophy, Flame, Clock, Target, CheckCircle, BarChart3, AlertCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Trophy,
+  Flame,
+  Clock,
+  Target,
+  CheckCircle,
+  BarChart3,
+  AlertCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { trackStatisticsViewed } from "@/lib/analytics";
@@ -42,7 +51,7 @@ export function StatsPage() {
       "theme-tokyo",
       "theme-catppuccin",
       "theme-amoled",
-      "theme-chessboard"
+      "theme-chessboard",
     );
     root.classList.add(`theme-${theme}`);
     document.title = "Personal Statistics • Zen Sudoku";
@@ -60,10 +69,7 @@ export function StatsPage() {
   }, []);
 
   const completedLevels = Array.from(
-    new Set([
-      ...(localStats.completedLevels ?? []),
-      ...(dbStats?.completedLevels ?? []),
-    ])
+    new Set([...(localStats.completedLevels ?? []), ...(dbStats?.completedLevels ?? [])]),
   ).filter(Boolean);
 
   const completedCount = completedLevels.length;
@@ -98,8 +104,12 @@ export function StatsPage() {
               <ArrowLeft className="size-5" />
             </Link>
             <div>
-              <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">Personal Statistics</h1>
-              <p className="text-xs text-muted-foreground">Detailed breakdown of your Sudoku mastery</p>
+              <h1 className="display text-2xl sm:text-3xl font-bold tracking-tight">
+                Personal Statistics
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Detailed breakdown of your Sudoku mastery
+              </p>
             </div>
           </div>
         </div>
@@ -117,14 +127,22 @@ export function StatsPage() {
             delayIndex={1}
             icon={<Target className="size-4 text-emerald-500" />}
             label="Win Rate"
-            value={<><AnimatedNumber value={winRate} />%</>}
+            value={
+              <>
+                <AnimatedNumber value={winRate} />%
+              </>
+            }
             subtext="Accuracy"
           />
           <StatCard
             delayIndex={2}
             icon={<Flame className="size-4 text-orange-500" />}
             label="Current Streak"
-            value={<><AnimatedNumber value={currentStreak} /> Days</>}
+            value={
+              <>
+                <AnimatedNumber value={currentStreak} /> Days
+              </>
+            }
             visualBar={
               <div className="mt-1 flex gap-1">
                 {Array.from({ length: 7 }).map((_, i) => (
@@ -134,7 +152,7 @@ export function StatsPage() {
                       "h-1.5 flex-1 rounded-full transition-all duration-300",
                       i < (currentStreak % 7 || (currentStreak > 0 ? 7 : 0))
                         ? "bg-orange-500 shadow-xs"
-                        : "bg-muted/40"
+                        : "bg-muted/40",
                     )}
                   />
                 ))}
@@ -157,23 +175,48 @@ export function StatsPage() {
             <Trophy className="size-4 text-amber-500" /> Best Solve Times by Difficulty
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <BestTimeCard delayIndex={4} difficulty="Easy" time={bestEasy} color="border-emerald-500/30 text-emerald-500" />
-            <BestTimeCard delayIndex={5} difficulty="Medium" time={bestMedium} color="border-blue-500/30 text-blue-500" />
-            <BestTimeCard delayIndex={6} difficulty="Hard" time={bestHard} color="border-amber-500/30 text-amber-500" />
-            <BestTimeCard delayIndex={7} difficulty="Expert" time={bestExpert} color="border-rose-500/30 text-rose-500" />
+            <BestTimeCard
+              delayIndex={4}
+              difficulty="Easy"
+              time={bestEasy}
+              color="border-emerald-500/30 text-emerald-500"
+            />
+            <BestTimeCard
+              delayIndex={5}
+              difficulty="Medium"
+              time={bestMedium}
+              color="border-blue-500/30 text-blue-500"
+            />
+            <BestTimeCard
+              delayIndex={6}
+              difficulty="Hard"
+              time={bestHard}
+              color="border-amber-500/30 text-amber-500"
+            />
+            <BestTimeCard
+              delayIndex={7}
+              difficulty="Expert"
+              time={bestExpert}
+              color="border-rose-500/30 text-rose-500"
+            />
           </div>
         </div>
 
         {/* Performance Insights */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <div className="card-interactive animate-card-entry rounded-xl border bg-surface p-5 shadow-sm" style={{ animationDelay: "320ms" }}>
+          <div
+            className="card-interactive animate-card-entry rounded-xl border bg-surface p-5 shadow-sm"
+            style={{ animationDelay: "320ms" }}
+          >
             <h3 className="mb-4 flex items-center gap-2 text-base font-semibold">
               <BarChart3 className="size-4 text-primary" /> Performance Summary
             </h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">Total Moves Tracked</span>
-                <span className="font-semibold tabular-nums"><AnimatedNumber value={history.length} /></span>
+                <span className="font-semibold tabular-nums">
+                  <AnimatedNumber value={history.length} />
+                </span>
               </div>
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">Longest Streak Record</span>
@@ -186,36 +229,56 @@ export function StatsPage() {
             </div>
           </div>
 
-          <div className="card-interactive animate-card-entry rounded-xl border bg-surface p-5 shadow-sm" style={{ animationDelay: "360ms" }}>
+          <div
+            className="card-interactive animate-card-entry rounded-xl border bg-surface p-5 shadow-sm"
+            style={{ animationDelay: "360ms" }}
+          >
             <h3 className="mb-4 flex items-center gap-2 text-base font-semibold">
               <AlertCircle className="size-4 text-amber-500" /> Mastery Insights
             </h3>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              Your win rate is <span className="font-bold text-foreground">{winRate}%</span>. Keep playing daily challenges to increase your streak multiplier and rank higher on the global leaderboard!
+              Your win rate is <span className="font-bold text-foreground">{winRate}%</span>. Keep
+              playing daily challenges to increase your streak multiplier and rank higher on the
+              global leaderboard!
             </p>
           </div>
         </div>
 
         {/* Recent Games List */}
         <div className="mt-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Recent Activity</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Recent Activity
+          </h2>
           {history.length === 0 ? (
             <div className="rounded-xl border border-dashed bg-surface/50 p-8 text-center text-sm text-muted-foreground">
               No recent game moves recorded yet. Start a new puzzle to build your history!
             </div>
           ) : (
-            <div className="card-interactive animate-card-entry rounded-xl border bg-surface overflow-hidden shadow-sm" style={{ animationDelay: "400ms" }}>
+            <div
+              className="card-interactive animate-card-entry rounded-xl border bg-surface overflow-hidden shadow-sm"
+              style={{ animationDelay: "400ms" }}
+            >
               <div className="p-4 border-b bg-surface-2/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground flex justify-between">
                 <span>Recent Moves Tracked</span>
                 <span>{history.length} Moves Recorded</span>
               </div>
               <div className="divide-y max-h-60 overflow-y-auto">
-                {history.slice(-10).reverse().map((move, idx) => (
-                  <div key={idx} className="p-3 text-xs flex justify-between items-center hover:bg-muted/40 transition">
-                    <span className="text-muted-foreground">Cell ({Math.floor(move.idx / 9)}, {move.idx % 9})</span>
-                    <span className="font-semibold text-primary">Digit {move.next.value || "Erased"}</span>
-                  </div>
-                ))}
+                {history
+                  .slice(-10)
+                  .reverse()
+                  .map((move, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 text-xs flex justify-between items-center hover:bg-muted/40 transition"
+                    >
+                      <span className="text-muted-foreground">
+                        Cell ({Math.floor(move.idx / 9)}, {move.idx % 9})
+                      </span>
+                      <span className="font-semibold text-primary">
+                        Digit {move.next.value || "Erased"}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
@@ -256,13 +319,28 @@ function StatCard({
   );
 }
 
-function BestTimeCard({ delayIndex, difficulty, time, color }: { delayIndex: number; difficulty: string; time?: number | null; color: string }) {
+function BestTimeCard({
+  delayIndex,
+  difficulty,
+  time,
+  color,
+}: {
+  delayIndex: number;
+  difficulty: string;
+  time?: number | null;
+  color: string;
+}) {
   return (
     <div
-      className={cn("card-interactive animate-card-entry rounded-xl border bg-surface p-4 shadow-sm", color.split(" ")[0])}
+      className={cn(
+        "card-interactive animate-card-entry rounded-xl border bg-surface p-4 shadow-sm",
+        color.split(" ")[0],
+      )}
       style={{ animationDelay: `${delayIndex * 40}ms` }}
     >
-      <div className={cn("text-xs font-bold uppercase tracking-wider", color.split(" ")[1])}>{difficulty}</div>
+      <div className={cn("text-xs font-bold uppercase tracking-wider", color.split(" ")[1])}>
+        {difficulty}
+      </div>
       <div className="mt-2 display text-xl font-bold tabular-nums">{fmtTime(time)}</div>
     </div>
   );

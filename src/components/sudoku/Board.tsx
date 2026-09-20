@@ -33,7 +33,8 @@ export function Board() {
   }, [flashIdx, clearFlash]);
 
   const conflicts = useMemo(
-    () => (puzzle && highlightErrors ? findSolutionConflicts(cells, puzzle.solution) : new Set<number>()),
+    () =>
+      puzzle && highlightErrors ? findSolutionConflicts(cells, puzzle.solution) : new Set<number>(),
     [cells, puzzle, highlightErrors],
   );
   // For solution-aware conflicts, every highlighted cell is already a wrong user entry
@@ -44,24 +45,48 @@ export function Board() {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const k = e.key;
-      if (k >= "1" && k <= "9") { input(parseInt(k, 10)); e.preventDefault(); return; }
-      if (k === "0" || k === "Backspace" || k === "Delete") { input(0); e.preventDefault(); return; }
-      if (k === "ArrowUp") { move(-1, 0); e.preventDefault(); }
-      else if (k === "ArrowDown") { move(1, 0); e.preventDefault(); }
-      else if (k === "ArrowLeft") { move(0, -1); e.preventDefault(); }
-      else if (k === "ArrowRight") { move(0, 1); e.preventDefault(); }
-      else if (k === "n" || k === "N") { toggleNotes(); e.preventDefault(); }
-      else if (k === "h" || k === "H") { hint(); e.preventDefault(); }
-      else if (k === "f" || k === "F") {
+      if (k >= "1" && k <= "9") {
+        input(parseInt(k, 10));
+        e.preventDefault();
+        return;
+      }
+      if (k === "0" || k === "Backspace" || k === "Delete") {
+        input(0);
+        e.preventDefault();
+        return;
+      }
+      if (k === "ArrowUp") {
+        move(-1, 0);
+        e.preventDefault();
+      } else if (k === "ArrowDown") {
+        move(1, 0);
+        e.preventDefault();
+      } else if (k === "ArrowLeft") {
+        move(0, -1);
+        e.preventDefault();
+      } else if (k === "ArrowRight") {
+        move(0, 1);
+        e.preventDefault();
+      } else if (k === "n" || k === "N") {
+        toggleNotes();
+        e.preventDefault();
+      } else if (k === "h" || k === "H") {
+        hint();
+        e.preventDefault();
+      } else if (k === "f" || k === "F") {
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen?.().catch(() => {});
         } else {
           document.exitFullscreen?.().catch(() => {});
         }
         e.preventDefault();
+      } else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        redo();
+        e.preventDefault();
+      } else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey)) {
+        undo();
+        e.preventDefault();
       }
-      else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey) && e.shiftKey) { redo(); e.preventDefault(); }
-      else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey)) { undo(); e.preventDefault(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -82,7 +107,7 @@ export function Board() {
               className={cn(
                 "flex items-center justify-center border border-border bg-surface-2/40",
                 (c === 2 || c === 5) && "border-r-2 border-r-[color:var(--color-border-strong)]",
-                (r === 2 || r === 5) && "border-b-2 border-b-[color:var(--color-border-strong)]"
+                (r === 2 || r === 5) && "border-b-2 border-b-[color:var(--color-border-strong)]",
               )}
             >
               <div className="size-3.5 rounded-full bg-muted/40" />
@@ -114,7 +139,8 @@ export function Board() {
         const r = Math.floor(i / 9);
         const c = i % 9;
         const isSelected = selected === i;
-        const inPeer = highlightPeers && !isSelected && (rowSet.has(i) || colSet.has(i) || boxSet.has(i));
+        const inPeer =
+          highlightPeers && !isSelected && (rowSet.has(i) || colSet.has(i) || boxSet.has(i));
         const inSame =
           highlightSame && !isSelected && selectedValue !== 0 && cell.value === selectedValue;
         const isConflict = highlightErrors && conflicts.has(i);
@@ -139,7 +165,8 @@ export function Board() {
               inPeer && "bg-highlight",
               inSame && "bg-same",
               isConflict && "bg-red-500/15 border-red-500/40",
-              isSelected && "z-20 bg-primary/20 shadow-[0_0_12px_rgba(59,130,246,0.5)] ring-2 ring-inset ring-primary",
+              isSelected &&
+                "z-20 bg-primary/20 shadow-[0_0_12px_rgba(59,130,246,0.5)] ring-2 ring-inset ring-primary",
               isFlashing && "animate-shake",
               paused && "invisible",
               won && "pointer-events-none",

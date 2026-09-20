@@ -1,5 +1,5 @@
 import type { Difficulty, Grid } from "./types";
-import { BOXES, COLS, PEERS, ROWS, popcount } from "./solver";
+import { BOXES, COLS, PEERS, ROWS, popcount } from "./solver.ts";
 
 /**
  * Logic-solver used to *rate* puzzle difficulty by the hardest technique
@@ -61,26 +61,54 @@ export function rateDifficulty(puzzle: Grid): RateResult {
 
   while (true) {
     let solved = true;
-    for (let i = 0; i < 81; i++) if (g[i] === 0) { solved = false; break; }
+    for (let i = 0; i < 81; i++)
+      if (g[i] === 0) {
+        solved = false;
+        break;
+      }
     if (solved) break;
 
-    if (nakedSingle(g, cand)) { bump("naked_single"); continue; }
-    if (hiddenSingle(g, cand)) { bump("hidden_single"); continue; }
-    if (nakedPair(cand)) { bump("naked_pair"); continue; }
-    if (pointingPair(cand)) { bump("pointing_pair"); continue; }
-    if (boxLine(cand)) { bump("box_line"); continue; }
-    if (hiddenPair(cand)) { bump("hidden_pair"); continue; }
-    if (xWing(cand)) { bump("x_wing"); continue; }
+    if (nakedSingle(g, cand)) {
+      bump("naked_single");
+      continue;
+    }
+    if (hiddenSingle(g, cand)) {
+      bump("hidden_single");
+      continue;
+    }
+    if (nakedPair(cand)) {
+      bump("naked_pair");
+      continue;
+    }
+    if (pointingPair(cand)) {
+      bump("pointing_pair");
+      continue;
+    }
+    if (boxLine(cand)) {
+      bump("box_line");
+      continue;
+    }
+    if (hiddenPair(cand)) {
+      bump("hidden_pair");
+      continue;
+    }
+    if (xWing(cand)) {
+      bump("x_wing");
+      continue;
+    }
 
     return { difficulty: "expert", hardest: "backtrack" };
   }
 
   void hardest;
   const d: Difficulty =
-    hardestId === "naked_single" || hardestId === "hidden_single" ? "easy"
-    : hardestId === "naked_pair" || hardestId === "pointing_pair" || hardestId === "box_line" ? "medium"
-    : hardestId === "hidden_pair" ? "hard"
-    : "expert";
+    hardestId === "naked_single" || hardestId === "hidden_single"
+      ? "easy"
+      : hardestId === "naked_pair" || hardestId === "pointing_pair" || hardestId === "box_line"
+        ? "medium"
+        : hardestId === "hidden_pair"
+          ? "hard"
+          : "expert";
 
   return { difficulty: d, hardest: hardestId };
 }
@@ -109,8 +137,15 @@ function hiddenSingle(g: Grid, cand: Uint16Array): boolean {
       let found = -1;
       let count = 0;
       for (const i of unit) {
-        if (g[i] === v) { count = -1; break; }
-        if (g[i] === 0 && cand[i] & bit) { found = i; count++; if (count > 1) break; }
+        if (g[i] === v) {
+          count = -1;
+          break;
+        }
+        if (g[i] === 0 && cand[i] & bit) {
+          found = i;
+          count++;
+          if (count > 1) break;
+        }
       }
       if (count === 1 && found !== -1) {
         place(g, cand, found, v);
@@ -149,14 +184,18 @@ function hiddenPair(cand: Uint16Array): boolean {
     // for each pair of digits, find cells they can go in
     for (let v1 = 1; v1 <= 9; v1++) {
       for (let v2 = v1 + 1; v2 <= 9; v2++) {
-        const b1 = 1 << v1, b2 = 1 << v2;
+        const b1 = 1 << v1,
+          b2 = 1 << v2;
         const cells: number[] = [];
         let ok = true;
         for (const i of unit) {
           const hasV1 = cand[i] & b1;
           const hasV2 = cand[i] & b2;
           if (hasV1 || hasV2) cells.push(i);
-          if (cells.length > 2) { ok = false; break; }
+          if (cells.length > 2) {
+            ok = false;
+            break;
+          }
         }
         if (!ok || cells.length !== 2) continue;
         // both digits confined to these 2 cells
@@ -190,14 +229,20 @@ function pointingPair(cand: Uint16Array): boolean {
         const r = [...rows][0];
         for (const i of ROWS[r]) {
           if (box.includes(i)) continue;
-          if (cand[i] & bit) { cand[i] &= ~bit; progressed = true; }
+          if (cand[i] & bit) {
+            cand[i] &= ~bit;
+            progressed = true;
+          }
         }
       }
       if (cols.size === 1) {
         const c = [...cols][0];
         for (const i of COLS[c]) {
           if (box.includes(i)) continue;
-          if (cand[i] & bit) { cand[i] &= ~bit; progressed = true; }
+          if (cand[i] & bit) {
+            cand[i] &= ~bit;
+            progressed = true;
+          }
         }
       }
     }
@@ -220,7 +265,10 @@ function boxLine(cand: Uint16Array): boolean {
         const b = [...boxes][0];
         for (const i of BOXES[b]) {
           if (line.includes(i)) continue;
-          if (cand[i] & bit) { cand[i] &= ~bit; progressed = true; }
+          if (cand[i] & bit) {
+            cand[i] &= ~bit;
+            progressed = true;
+          }
         }
       }
     }
@@ -249,7 +297,10 @@ function xWing(cand: Uint16Array): boolean {
             if (r === r1 || r === r2) continue;
             for (const c of [c1, c2]) {
               const i = r * 9 + c;
-              if (cand[i] & bit) { cand[i] &= ~bit; progressed = true; }
+              if (cand[i] & bit) {
+                cand[i] &= ~bit;
+                progressed = true;
+              }
             }
           }
         }
@@ -272,7 +323,10 @@ function xWing(cand: Uint16Array): boolean {
             if (c === c1 || c === c2) continue;
             for (const r of [r1, r2]) {
               const i = r * 9 + c;
-              if (cand[i] & bit) { cand[i] &= ~bit; progressed = true; }
+              if (cand[i] & bit) {
+                cand[i] &= ~bit;
+                progressed = true;
+              }
             }
           }
         }
@@ -308,18 +362,28 @@ export function pickHintCell(puzzle: Grid, solution: Grid): number {
       let found = -1;
       let count = 0;
       for (const i of unit) {
-        if (puzzle[i] === v) { count = -1; break; }
-        if (puzzle[i] === 0 && cand[i] & bit) { found = i; count++; }
+        if (puzzle[i] === v) {
+          count = -1;
+          break;
+        }
+        if (puzzle[i] === 0 && cand[i] & bit) {
+          found = i;
+          count++;
+        }
       }
       if (count === 1) return found;
     }
   }
   // fallback: cell with fewest candidates
-  let best = -1, bestCount = 10;
+  let best = -1,
+    bestCount = 10;
   for (let i = 0; i < 81; i++) {
     if (puzzle[i] !== 0) continue;
     const c = popcount(cand[i]);
-    if (c < bestCount) { bestCount = c; best = i; }
+    if (c < bestCount) {
+      bestCount = c;
+      best = i;
+    }
   }
   if (best === -1) {
     for (let i = 0; i < 81; i++) if (puzzle[i] === 0) return i;

@@ -49,7 +49,9 @@ export const gameSessions = pgTable("game_sessions", {
 export const gameHistory = pgTable("game_history", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
-  gameSessionId: uuid("game_session_id").references(() => gameSessions.id, { onDelete: "set null" }),
+  gameSessionId: uuid("game_session_id").references(() => gameSessions.id, {
+    onDelete: "set null",
+  }),
   score: integer("score").default(0).notNull(),
   difficulty: varchar("difficulty", { length: 20 }).notNull(),
   timeSeconds: integer("time_seconds").notNull(),
@@ -103,7 +105,7 @@ export const userAchievements = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.achievementId] }),
-  })
+  }),
 );
 
 // ==================================================
@@ -133,7 +135,7 @@ export const dailyResults = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.challengeDate] }),
-  })
+  }),
 );
 
 // ==================================================

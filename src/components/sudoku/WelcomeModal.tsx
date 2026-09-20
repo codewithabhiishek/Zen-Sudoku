@@ -1,21 +1,37 @@
 import { useState } from "react";
 import { useUserStore } from "@/store/userStore";
 import { User, Sparkles, ArrowRight } from "lucide-react";
+import { isHoneypotTriggered, isSpeedTrapTriggered, sanitizeUsername } from "@/lib/security";
 
 export function WelcomeModal() {
   const isRegistered = useUserStore((s) => s.isRegistered);
   const registerGuest = useUserStore((s) => s.registerGuest);
   const [usernameInput, setUsernameInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mountTime] = useState<number>(() => Date.now());
 
   if (isRegistered) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loading) return;
+
+    const form = e.currentTarget;
+    const botcheck = (form.elements.namedItem("botcheck") as HTMLInputElement | null)?.checked;
+    const gotcha = (form.elements.namedItem("_gotcha") as HTMLInputElement | null)?.value;
+
+    if (isHoneypotTriggered(botcheck, gotcha)) {
+      return;
+    }
+
+    if (isSpeedTrapTriggered(mountTime)) {
+      return;
+    }
+
+    const cleanName = sanitizeUsername(usernameInput);
     setLoading(true);
     try {
-      await registerGuest(usernameInput);
+      await registerGuest(cleanName);
     } finally {
       setLoading(false);
     }
@@ -28,12 +44,29 @@ export function WelcomeModal() {
           <Sparkles className="size-6 text-primary" />
         </div>
 
-        <h2 className="display text-center text-2xl font-bold tracking-tight">Welcome to Zen Sudoku</h2>
+        <h2 className="display text-center text-2xl font-bold tracking-tight">
+          Welcome to Zen Sudoku
+        </h2>
         <p className="mt-1 text-center text-xs text-muted-foreground">
           Enter a username to track your progress, stats, and climb global leaderboards.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          {/* Strix Dual Honeypot Shield */}
+          <div
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              top: "-9999px",
+              opacity: 0,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          >
+            <input type="checkbox" name="botcheck" tabIndex={-1} autoComplete="off" />
+            <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" />
+          </div>
+
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Username

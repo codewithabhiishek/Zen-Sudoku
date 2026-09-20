@@ -115,12 +115,8 @@
           "name": "daily_results_user_id_users_id_fk",
           "tableFrom": "daily_results",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -128,12 +124,8 @@
           "name": "daily_results_challenge_date_daily_challenge_date_fk",
           "tableFrom": "daily_results",
           "tableTo": "daily_challenge",
-          "columnsFrom": [
-            "challenge_date"
-          ],
-          "columnsTo": [
-            "date"
-          ],
+          "columnsFrom": ["challenge_date"],
+          "columnsTo": ["date"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -141,10 +133,7 @@
       "compositePrimaryKeys": {
         "daily_results_user_id_challenge_date_pk": {
           "name": "daily_results_user_id_challenge_date_pk",
-          "columns": [
-            "user_id",
-            "challenge_date"
-          ]
+          "columns": ["user_id", "challenge_date"]
         }
       },
       "uniqueConstraints": {},
@@ -215,12 +204,8 @@
           "name": "game_history_user_id_users_id_fk",
           "tableFrom": "game_history",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -228,12 +213,8 @@
           "name": "game_history_game_session_id_game_sessions_id_fk",
           "tableFrom": "game_history",
           "tableTo": "game_sessions",
-          "columnsFrom": [
-            "game_session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["game_session_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -340,12 +321,8 @@
           "name": "game_sessions_user_id_users_id_fk",
           "tableFrom": "game_sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -411,12 +388,8 @@
           "name": "leaderboard_user_id_users_id_fk",
           "tableFrom": "leaderboard",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -510,12 +483,8 @@
           "name": "statistics_user_id_users_id_fk",
           "tableFrom": "statistics",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -556,12 +525,8 @@
           "name": "user_achievements_user_id_users_id_fk",
           "tableFrom": "user_achievements",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -569,12 +534,8 @@
           "name": "user_achievements_achievement_id_achievements_id_fk",
           "tableFrom": "user_achievements",
           "tableTo": "achievements",
-          "columnsFrom": [
-            "achievement_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["achievement_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -582,10 +543,7 @@
       "compositePrimaryKeys": {
         "user_achievements_user_id_achievement_id_pk": {
           "name": "user_achievements_user_id_achievement_id_pk",
-          "columns": [
-            "user_id",
-            "achievement_id"
-          ]
+          "columns": ["user_id", "achievement_id"]
         }
       },
       "uniqueConstraints": {},
@@ -649,16 +607,12 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},

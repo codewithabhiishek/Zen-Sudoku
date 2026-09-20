@@ -1,10 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-} from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useSettingsStore } from "@/store/settingsStore";
 
@@ -135,7 +130,7 @@ function RootComponent() {
         "theme-tokyo",
         "theme-catppuccin",
         "theme-amoled",
-        "theme-chessboard"
+        "theme-chessboard",
       );
       root.classList.add(`theme-${t}`);
     };

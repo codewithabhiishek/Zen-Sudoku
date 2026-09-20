@@ -35,3 +35,7 @@ dist-ssr
 # Playwright
 playwright-report/
 test-results/
+
+# Temporary / Scratch scripts
+*.cjs
+test.js
