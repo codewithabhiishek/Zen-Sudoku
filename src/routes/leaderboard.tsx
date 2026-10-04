@@ -170,8 +170,16 @@ export function LeaderboardPage() {
   }, [period, difficulty]);
 
   return (
-    <div className="min-h-dvh bg-background text-foreground transition-colors animate-page-enter">
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <div
+      className="min-h-dvh bg-background text-foreground transition-colors animate-page-enter"
+      style={{
+        paddingTop: "max(1.25rem, env(safe-area-inset-top))",
+        paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
+        paddingLeft: "max(1rem, env(safe-area-inset-left))",
+        paddingRight: "max(1rem, env(safe-area-inset-right))",
+      }}
+    >
+      <div className="mx-auto max-w-4xl px-2 sm:px-4 py-3 sm:py-6">
         {/* Top Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">

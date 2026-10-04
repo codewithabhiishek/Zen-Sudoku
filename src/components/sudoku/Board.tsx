@@ -99,7 +99,7 @@ export function Board() {
   if (cells.length !== 81) {
     return (
       <div
-        className="relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)] animate-pulse"
+        className="board-container relative mx-auto grid aspect-square w-full grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)] animate-pulse"
         style={{ borderColor: "var(--color-border-strong)" }}
       >
         {Array.from({ length: 81 }).map((_, i) => {
@@ -134,7 +134,7 @@ export function Board() {
 
   return (
     <div
-      className="board-container relative mx-auto grid aspect-square w-full max-w-[min(92vw,560px)] grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
+      className="board-container relative mx-auto grid aspect-square w-full grid-cols-9 grid-rows-9 overflow-hidden rounded-xl border-2 bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
       style={{ borderColor: "var(--color-border-strong)" }}
       role="grid"
       aria-label="Sudoku board"

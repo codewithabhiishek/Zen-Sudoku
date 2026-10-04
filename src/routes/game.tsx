@@ -121,7 +121,9 @@ function GamePage() {
       className="flex min-h-dvh flex-col justify-between px-3 py-2 sm:py-6"
       style={{
         paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
-        paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+        paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+        paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+        paddingRight: "max(0.75rem, env(safe-area-inset-right))",
       }}
     >
       <div className="mx-auto flex w-full max-w-[min(92vw,560px)] flex-col gap-1.5 sm:gap-3 game-gap-compress">

@@ -172,8 +172,10 @@ function HomePage() {
     <main
       className="flex min-h-dvh flex-col"
       style={{
-        paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
-        paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+        paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+        paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+        paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+        paddingRight: "max(0.75rem, env(safe-area-inset-right))",
       }}
     >
       {/* ── TOP NAV ─────────────────────────────────────────── */}
