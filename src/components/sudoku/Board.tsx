@@ -43,6 +43,7 @@ export function Board() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (paused || won) return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const k = e.key;
       if (k >= "1" && k <= "9") {
@@ -80,7 +81,10 @@ export function Board() {
           document.exitFullscreen?.().catch(() => {});
         }
         e.preventDefault();
-      } else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+      } else if (
+        ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey) && e.shiftKey) ||
+        ((k === "y" || k === "Y") && (e.metaKey || e.ctrlKey))
+      ) {
         redo();
         e.preventDefault();
       } else if ((k === "z" || k === "Z") && (e.metaKey || e.ctrlKey)) {
@@ -90,7 +94,7 @@ export function Board() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [input, move, toggleNotes, hint, undo, redo]);
+  }, [input, move, toggleNotes, hint, undo, redo, paused, won]);
 
   if (cells.length !== 81) {
     return (
@@ -200,8 +204,8 @@ export function Board() {
         );
       })}
       {paused && (
-        <div className="absolute inset-0 flex items-center justify-center bg-surface/95">
-          <p className="display text-2xl">Paused</p>
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-surface/95 pointer-events-auto backdrop-blur-xs select-none">
+          <p className="display text-2xl font-bold tracking-wide">Paused</p>
         </div>
       )}
     </div>

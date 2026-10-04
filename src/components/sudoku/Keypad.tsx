@@ -8,6 +8,9 @@ export function Keypad() {
   const cells = useGameStore((s) => s.cells);
   const puzzle = useGameStore((s) => s.puzzle);
   const notesMode = useGameStore((s) => s.notesMode);
+  const paused = useGameStore((s) => s.paused);
+  const won = useGameStore((s) => s.won);
+  const running = useGameStore((s) => s.running);
 
   const remaining = useMemo(() => {
     const counts = new Array(10).fill(0);
@@ -32,7 +35,7 @@ export function Keypad() {
             <button
               key={n}
               onClick={() => input(n)}
-              disabled={done && !notesMode}
+              disabled={paused || won || !running || (done && !notesMode)}
               data-testid={`numpad-${n}`}
               aria-label={`Enter ${n}${done ? " (complete)" : ""}`}
               className={cn(

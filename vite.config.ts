@@ -14,4 +14,26 @@ export default defineConfig({
     viteReact(),
     tsconfigPaths(),
   ],
+  build: {
+    target: "es2022",
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
+            return "vendor-react";
+          }
+          if (id.includes("node_modules/@clerk/")) {
+            return "vendor-clerk";
+          }
+          if (id.includes("node_modules/@tanstack/")) {
+            return "vendor-tanstack";
+          }
+          if (id.includes("node_modules/recharts/")) {
+            return "vendor-charts";
+          }
+        },
+      },
+    },
+  },
 });

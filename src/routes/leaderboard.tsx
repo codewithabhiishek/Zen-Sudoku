@@ -79,8 +79,10 @@ export function LeaderboardPage() {
 
         const synthEntries: LeaderboardItem[] = [];
         if (localStats.completedLevels && localStats.completedLevels.length > 0) {
-          Object.entries(localStats.bestTimeByDifficulty).forEach(([diff, time]) => {
-            if (time != null && time > 0) {
+          const bestTimes = (localStats.bestTimeByDifficulty ?? {}) as Record<string, number | undefined>;
+          Object.entries(bestTimes).forEach(([diff, rawTime]) => {
+            const time = typeof rawTime === "number" ? rawTime : 0;
+            if (time > 0) {
               if (difficulty === "all" || difficulty === diff) {
                 const basePoints: Record<string, number> = {
                   easy: 200,
@@ -139,8 +141,10 @@ export function LeaderboardPage() {
 
         const synthEntries: LeaderboardItem[] = [];
         if (localStats.completedLevels && localStats.completedLevels.length > 0) {
-          Object.entries(localStats.bestTimeByDifficulty).forEach(([diff, time]) => {
-            if (time != null && time > 0) {
+          const bestTimes = (localStats.bestTimeByDifficulty ?? {}) as Record<string, number | undefined>;
+          Object.entries(bestTimes).forEach(([diff, rawTime]) => {
+            const time = typeof rawTime === "number" ? rawTime : 0;
+            if (time > 0) {
               if (difficulty === "all" || difficulty === diff) {
                 synthEntries.push({
                   id: `local-${diff}`,

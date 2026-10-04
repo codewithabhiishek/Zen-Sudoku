@@ -157,12 +157,12 @@ function HomePage() {
   };
 
   const activeDiff = DIFFICULTIES.find((d) => d.id === selectedDiff)!;
-  const completedLevels = Array.from(new Set(stats.completedLevels ?? [])).filter(Boolean);
+  const completedLevels: string[] = Array.from(new Set(stats.completedLevels ?? [])).filter(Boolean);
   const completedCount = completedLevels.length;
   const completedForDiff = (d: Difficulty) =>
-    completedLevels.filter((k) => k.startsWith(`${d}-`)).length;
+    completedLevels.filter((k: string) => k.startsWith(`${d}-`)).length;
 
-  const totalPoints = completedLevels.reduce((sum, key) => {
+  const totalPoints = completedLevels.reduce((sum: number, key: string) => {
     const diff = (key.split("-")[0] || "easy") as Difficulty;
     const base = { easy: 100, medium: 200, hard: 400, expert: 800 }[diff] || 100;
     return sum + base;

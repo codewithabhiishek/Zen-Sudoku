@@ -97,9 +97,10 @@ function GamePage() {
 
     const difficulties: Difficulty[] = ["easy", "medium", "hard", "expert"];
     const currentDiff = puzzle.difficulty;
-    const currentLvl =
+    const parsedLvl =
       puzzle.levelNumber ??
       (puzzle.seed?.includes("-lvl-") ? parseInt(puzzle.seed.split("-lvl-")[1], 10) : 1);
+    const currentLvl = Number.isFinite(parsedLvl) && parsedLvl > 0 ? parsedLvl : 1;
 
     if (currentLvl < 10) {
       newGame(currentDiff, currentLvl + 1);

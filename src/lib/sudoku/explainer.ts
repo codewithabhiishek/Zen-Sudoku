@@ -14,6 +14,15 @@ export function explainMove(
   idx: number,
   placedValue: number,
 ): MoveExplanation {
+  if (idx < 0 || idx >= 81 || !cells || !cells[idx] || !solution || solution.length < 81) {
+    return {
+      isCorrect: false,
+      title: "Invalid Cell",
+      reason: "The requested cell coordinates are outside the board boundaries.",
+      details: [],
+    };
+  }
+
   const r = Math.floor(idx / 9);
   const c = idx % 9;
   const b = Math.floor(r / 3) * 3 + Math.floor(c / 3);

@@ -38,9 +38,9 @@ export interface Move {
   next: CellState;
 }
 
-export type { ScoreBreakdown, Stats } from "@/lib/sudoku/scoring";
-import { computeScore, applyWinToStats as calculateNextStats } from "@/lib/sudoku/scoring";
+import { computeScore, baseFor, applyWinToStats as calculateNextStats } from "@/lib/sudoku/scoring";
 import type { ScoreBreakdown, Stats } from "@/lib/sudoku/scoring";
+export type { ScoreBreakdown, Stats };
 export { computeScore };
 
 export interface SubmitResult {
@@ -272,12 +272,16 @@ export const useGameStore = create<GameState>()(
       },
 
       select: (idx) => {
+        const s = get();
+        if (s.paused || s.won) return;
         playSelectSound();
         set({ selected: idx, explanation: null });
       },
 
       move: (dr, dc) => {
-        const { selected } = get();
+        const s = get();
+        if (!s.running || s.paused || s.won) return;
+        const { selected } = s;
         if (selected == null) {
           set({ selected: 40, explanation: null });
           return;
@@ -292,8 +296,8 @@ export const useGameStore = create<GameState>()(
 
       input: (value) => {
         const s = get();
-        // BUG FIX: Don't accept input if already won
-        if (!s.puzzle || s.won || s.paused) return;
+        // Guard: Don't accept input if already won, paused, or not running
+        if (!s.puzzle || s.won || s.paused || !s.running) return;
         const idx = s.selected;
         if (idx == null) return;
         const cell = s.cells[idx];
@@ -334,9 +338,8 @@ export const useGameStore = create<GameState>()(
           const isRowValid = !rowDup;
           const isColValid = !colDup;
           const isBoxValid = !boxDup;
-          const accepted = true; // State is updated regardless of correctness
-
-          if (import.meta.env.DEV) {
+          const accepted = true;
+          if (typeof import.meta !== "undefined" && import.meta.env?.DEV) {
             console.log(`
 --------------------------------
 Cell: (${r}, ${c}) [index ${idx}]
@@ -452,7 +455,7 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
       hint: () => {
         const s = get();
-        if (!s.puzzle || s.won || s.paused) return;
+        if (!s.puzzle || s.won || s.paused || !s.running) return;
         const current: Grid = s.cells.map((c) => c.value);
 
         let idx = -1;
@@ -552,8 +555,8 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
       submitGame: () => {
         const s = get();
-        // BUG FIX: Guard — if already won (auto-win), don't double-count stats
-        if (!s.puzzle || s.won) return;
+        // Guard — if not running, paused, or already won, ignore submission
+        if (!s.puzzle || s.won || s.paused || !s.running) return;
 
         const puzzle = s.puzzle;
         let emptyCount = 0;
@@ -605,7 +608,7 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
       undo: () => {
         const s = get();
-        if (!s.history.length) return;
+        if (!s.history.length || s.paused || s.won || !s.running) return;
         const last = s.history[s.history.length - 1];
         const cells = s.cells.slice();
         cells[last.idx] = last.prev;
@@ -623,7 +626,7 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
       redo: () => {
         const s = get();
-        if (!s.future.length) return;
+        if (!s.future.length || s.paused || s.won || !s.running) return;
         const last = s.future[s.future.length - 1];
         const cells = s.cells.slice();
         cells[last.idx] = last.next;
@@ -658,6 +661,7 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
           paused: false,
           won: false,
           score: null,
+          mistakeLimit: null,
         }),
 
       restart: () => {
@@ -731,7 +735,7 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
         // Auto-heal XP: guarantee every completed level has contributed at least 50% base XP to totalPoints
         if (completedCount > 0) {
-          const minExpectedPoints = completedLevels.reduce((sum, key) => {
+          const minExpectedPoints = (completedLevels as string[]).reduce((sum: number, key: string) => {
             const diff = (key.split("-")[0] || "easy") as Difficulty;
             const base = baseFor(diff);
             return sum + Math.round(base * 0.5);
@@ -752,7 +756,8 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 );
 
 export function findGridConflicts(cells: CellState[]): Set<number> {
-  return findConflicts(cells.map((c) => c.value));
+  if (!cells || !Array.isArray(cells)) return new Set<number>();
+  return findConflicts(cells.map((c) => c?.value ?? 0));
 }
 
 /**
@@ -763,9 +768,10 @@ export function findGridConflicts(cells: CellState[]): Set<number> {
  */
 export function findSolutionConflicts(cells: CellState[], solution: Grid): Set<number> {
   const out = new Set<number>();
+  if (!cells || !solution || cells.length < 81 || solution.length < 81) return out;
   for (let i = 0; i < 81; i++) {
     const c = cells[i];
-    if (c.value === 0 || c.given) continue;
+    if (!c || c.value === 0 || c.given) continue;
     if (c.value !== solution[i]) out.add(i);
   }
   return out;
@@ -773,12 +779,13 @@ export function findSolutionConflicts(cells: CellState[], solution: Grid): Set<n
 
 export function conflictsWithGiven(cells: CellState[], conflicts: Set<number>): Set<number> {
   const out = new Set<number>();
+  if (!cells || !conflicts) return out;
   for (const idx of conflicts) {
-    if (cells[idx].given) continue;
+    if (!cells[idx] || cells[idx].given) continue;
     // check any peer with same value is a given
     const v = cells[idx].value;
     for (const p of PEERS[idx]) {
-      if (cells[p].value === v && cells[p].given) {
+      if (cells[p] && cells[p].value === v && cells[p].given) {
         out.add(idx);
         break;
       }

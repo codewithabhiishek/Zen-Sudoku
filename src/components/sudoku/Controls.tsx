@@ -144,8 +144,12 @@ export function Controls() {
   const hintsUsed = useGameStore((s) => s.hintsUsed);
   const historyLen = useGameStore((s) => s.history.length);
   const futureLen = useGameStore((s) => s.future.length);
+  const paused = useGameStore((s) => s.paused);
+  const won = useGameStore((s) => s.won);
+  const running = useGameStore((s) => s.running);
   const [msg, setMsg] = useState<string | null>(null);
 
+  const isInteractive = running && !paused && !won;
   const selectedHasValue = selected != null && cells[selected]?.value !== 0;
 
   useEffect(() => {
@@ -157,12 +161,12 @@ export function Controls() {
   return (
     <div className="controls-bar mx-auto flex w-full max-w-[min(92vw,560px)] items-center justify-between gap-1 sm:gap-2">
       {/* 1. Undo */}
-      <button onClick={undo} disabled={!historyLen} className={btn} title="Undo">
+      <button onClick={undo} disabled={!historyLen || !isInteractive} className={btn} title="Undo">
         <Undo2 className="size-3.5 shrink-0" />{" "}
         <span className="hidden xs:inline sm:inline">Undo</span>
       </button>
       {/* 2. Redo */}
-      <button onClick={redo} disabled={!futureLen} className={btn} title="Redo">
+      <button onClick={redo} disabled={!futureLen || !isInteractive} className={btn} title="Redo">
         <Redo2 className="size-3.5 shrink-0" />{" "}
         <span className="hidden xs:inline sm:inline">Redo</span>
       </button>
@@ -170,6 +174,7 @@ export function Controls() {
       {selectedHasValue ? (
         <button
           onClick={explainCurrent}
+          disabled={!isInteractive}
           className={cn(btn, "border-primary/50 text-primary bg-primary/5 hover:bg-primary/10")}
           title="Explain Move"
         >
@@ -182,6 +187,7 @@ export function Controls() {
             const wrong = check();
             setMsg(wrong === 0 ? "Looking good so far" : `${wrong} wrong so far`);
           }}
+          disabled={!isInteractive}
           className={btn}
           title="Check Board"
         >
@@ -190,13 +196,14 @@ export function Controls() {
         </button>
       )}
       {/* 4. Hint */}
-      <button onClick={hint} className={btn} title="Get Hint">
+      <button onClick={hint} disabled={!isInteractive} className={btn} title="Get Hint">
         <Lightbulb className="size-3.5 shrink-0" />{" "}
         <span className="text-[10px] sm:text-xs">Hint ({hintsUsed})</span>
       </button>
       {/* 5. Notes */}
       <button
         onClick={toggleNotes}
+        disabled={!isInteractive}
         className={cn(btn, notesMode && "bg-primary/10 text-primary border-primary/50")}
         aria-pressed={notesMode}
         title="Toggle Pencil Notes"
@@ -205,7 +212,7 @@ export function Controls() {
         <span className="hidden xs:inline sm:inline">Notes</span>
       </button>
       {/* 6. Erase */}
-      <button onClick={() => input(0)} className={btn} title="Erase Cell">
+      <button onClick={() => input(0)} disabled={!isInteractive} className={btn} title="Erase Cell">
         <Eraser className="size-3.5 shrink-0" />{" "}
         <span className="hidden xs:inline sm:inline">Erase</span>
       </button>
@@ -223,10 +230,12 @@ export function Controls() {
 
 export function PrimarySubmitButton() {
   const submitGame = useGameStore((s) => s.submitGame);
+  const isInteractive = useGameStore((s) => s.running && !s.paused && !s.won);
   return (
     <button
       onClick={submitGame}
-      className="btn-interactive flex h-12 w-full max-w-[min(92vw,560px)] items-center justify-center gap-2 rounded-xl border border-primary bg-primary px-4 font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.98]"
+      disabled={!isInteractive}
+      className="btn-interactive flex h-12 w-full max-w-[min(92vw,560px)] items-center justify-center gap-2 rounded-xl border border-primary bg-primary px-4 font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
     >
       <Send className="size-4" /> Submit Puzzle
     </button>
