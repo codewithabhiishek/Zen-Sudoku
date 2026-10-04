@@ -105,7 +105,7 @@ npm run preview
 
 ## 👨‍💻 Author
 
-Created with ❤️ by **[Abhishek](https://abhiishek-dev.vercel.app/)**  
+Created with ❤️ by **[Abhishek](https://abhiishek.is-a.dev/)**  
 Repository: **[Zen-Sudoku on GitHub](https://github.com/codewithabhiishek/Zen-Sudoku)**
 
 ---
