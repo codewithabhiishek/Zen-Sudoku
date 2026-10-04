@@ -23,11 +23,23 @@ export async function getLeaderboard(difficulty?: string, limit = 50) {
     if (difficulty) {
       return await query
         .where(eq(leaderboard.difficulty, difficulty))
-        .orderBy(desc(leaderboard.score), asc(leaderboard.time))
+        .orderBy(
+          desc(leaderboard.score),
+          asc(leaderboard.mistakes),
+          asc(leaderboard.time),
+          asc(leaderboard.createdAt),
+        )
         .limit(limit);
     }
 
-    return await query.orderBy(desc(leaderboard.score), asc(leaderboard.time)).limit(limit);
+    return await query
+      .orderBy(
+        desc(leaderboard.score),
+        asc(leaderboard.mistakes),
+        asc(leaderboard.time),
+        asc(leaderboard.createdAt),
+      )
+      .limit(limit);
   } catch (error) {
     console.error("Database Error [getLeaderboard]:", error);
     return [];

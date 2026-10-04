@@ -8,6 +8,7 @@ import { ArrowLeft, Trophy, Medal, User, Clock, AlertTriangle, ShieldCheck } fro
 import { cn } from "@/lib/utils";
 
 import { trackLeaderboardViewed } from "@/lib/analytics";
+import { processLeaderboardEntries } from "@/lib/sudoku/leaderboardUtils";
 
 export const Route = createFileRoute("/leaderboard")({
   component: LeaderboardPage,
@@ -111,24 +112,7 @@ export function LeaderboardPage() {
           });
         }
 
-        // Deduplicate entries by unique (userId, difficulty) or id
-        const combinedMap = new Map<string, LeaderboardItem>();
-        fetched.forEach((item) => {
-          const key = `${item.userId || item.username || item.id}-${item.difficulty}`;
-          if (!combinedMap.has(key)) {
-            combinedMap.set(key, item);
-          }
-        });
-
-        synthEntries.forEach((s) => {
-          const key = `${s.userId || s.username || s.id}-${s.difficulty}`;
-          if (!combinedMap.has(key)) {
-            combinedMap.set(key, s);
-          }
-        });
-
-        const combined = Array.from(combinedMap.values());
-        combined.sort((a, b) => b.score - a.score || a.time - b.time);
+        const combined = processLeaderboardEntries(fetched, synthEntries, period);
         setEntries(combined);
       })
       .catch((err) => {
@@ -162,7 +146,8 @@ export function LeaderboardPage() {
             }
           });
         }
-        setEntries(synthEntries);
+        const combined = processLeaderboardEntries([], synthEntries, period);
+        setEntries(combined);
       })
       .finally(() => {
         setLoading(false);
