@@ -1,21 +1,27 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { useGameStore, findSolutionConflicts, findGridConflicts, conflictsWithGiven, validateEntireBoard } from "../../src/store/gameStore.ts";
+import {
+  useGameStore,
+  findSolutionConflicts,
+  findGridConflicts,
+  conflictsWithGiven,
+  validateEntireBoard,
+} from "../../src/store/gameStore.ts";
 import { explainMove } from "../../src/lib/sudoku/explainer.ts";
-import { computeScore, applyWinToStats, type Stats, todayKey, yesterdayKey } from "../../src/lib/sudoku/scoring.ts";
+import {
+  computeScore,
+  applyWinToStats,
+  type Stats,
+  todayKey,
+  yesterdayKey,
+} from "../../src/lib/sudoku/scoring.ts";
 import type { CellState, Grid, Puzzle } from "../../src/lib/sudoku/types.ts";
 
 describe("Zen Sudoku Comprehensive Edge Cases", () => {
   const dummySolution: Grid = [
-    5, 3, 4, 6, 7, 8, 9, 1, 2,
-    6, 7, 2, 1, 9, 5, 3, 4, 8,
-    1, 9, 8, 3, 4, 2, 5, 6, 7,
-    8, 5, 9, 7, 6, 1, 4, 2, 3,
-    4, 2, 6, 8, 5, 3, 7, 9, 1,
-    7, 1, 3, 9, 2, 4, 8, 5, 6,
-    9, 6, 1, 5, 3, 7, 2, 8, 4,
-    2, 8, 7, 4, 1, 9, 6, 3, 5,
-    3, 4, 5, 2, 8, 6, 1, 7, 9,
+    5, 3, 4, 6, 7, 8, 9, 1, 2, 6, 7, 2, 1, 9, 5, 3, 4, 8, 1, 9, 8, 3, 4, 2, 5, 6, 7, 8, 5, 9, 7, 6,
+    1, 4, 2, 3, 4, 2, 6, 8, 5, 3, 7, 9, 1, 7, 1, 3, 9, 2, 4, 8, 5, 6, 9, 6, 1, 5, 3, 7, 2, 8, 4, 2,
+    8, 7, 4, 1, 9, 6, 3, 5, 3, 4, 5, 2, 8, 6, 1, 7, 9,
   ];
 
   const dummyPuzzle: Puzzle = {
@@ -34,7 +40,7 @@ describe("Zen Sudoku Comprehensive Edge Cases", () => {
   describe("Explainer Edge Cases", () => {
     it("should handle out-of-bounds indices gracefully without throwing", () => {
       const emptyCells = dummySolution.map((val) => ({ value: val, given: true, notes: [] }));
-      
+
       const outBelow = explainMove(emptyCells, dummySolution, -1, 5);
       assert.equal(outBelow.isCorrect, false);
       assert.equal(outBelow.title, "Invalid Cell");
@@ -77,7 +83,10 @@ describe("Zen Sudoku Comprehensive Edge Cases", () => {
     it("should safely handle malformed or short arrays in findSolutionConflicts", () => {
       assert.equal(findSolutionConflicts([] as unknown as CellState[], dummySolution).size, 0);
       assert.equal(findSolutionConflicts(null as unknown as CellState[], dummySolution).size, 0);
-      assert.equal(findSolutionConflicts(new Array(40) as unknown as CellState[], dummySolution).size, 0);
+      assert.equal(
+        findSolutionConflicts(new Array(40) as unknown as CellState[], dummySolution).size,
+        0,
+      );
     });
 
     it("should safely handle null or non-array inputs in findGridConflicts and conflictsWithGiven", () => {
@@ -87,7 +96,11 @@ describe("Zen Sudoku Comprehensive Edge Cases", () => {
     });
 
     it("should run validateEntireBoard on clean solved board with 0 errors", () => {
-      const solvedCells: CellState[] = dummySolution.map((v) => ({ value: v, given: true, notes: [] }));
+      const solvedCells: CellState[] = dummySolution.map((v) => ({
+        value: v,
+        given: true,
+        notes: [],
+      }));
       const report = validateEntireBoard(solvedCells, dummySolution);
       assert.equal(report.rowDuplicates.length, 0);
       assert.equal(report.colDuplicates.length, 0);

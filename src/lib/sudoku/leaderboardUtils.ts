@@ -80,8 +80,7 @@ export function filterByPeriod(
   }
 
   const DAY_MS = 24 * 60 * 60 * 1000;
-  const cutoffMs =
-    period === "daily" ? DAY_MS : period === "weekly" ? 7 * DAY_MS : 30 * DAY_MS;
+  const cutoffMs = period === "daily" ? DAY_MS : period === "weekly" ? 7 * DAY_MS : 30 * DAY_MS;
 
   return entries.filter((item) => {
     const time = new Date(item.createdAt).getTime();

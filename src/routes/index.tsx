@@ -157,7 +157,9 @@ function HomePage() {
   };
 
   const activeDiff = DIFFICULTIES.find((d) => d.id === selectedDiff)!;
-  const completedLevels: string[] = Array.from(new Set(stats.completedLevels ?? [])).filter(Boolean);
+  const completedLevels: string[] = Array.from(new Set(stats.completedLevels ?? [])).filter(
+    Boolean,
+  );
   const completedCount = completedLevels.length;
   const completedForDiff = (d: Difficulty) =>
     completedLevels.filter((k: string) => k.startsWith(`${d}-`)).length;

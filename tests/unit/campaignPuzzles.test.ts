@@ -1,11 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { generatePuzzle } from "../../src/lib/sudoku/generator.ts";
-import {
-  findConflicts,
-  countSolutions,
-  isComplete,
-} from "../../src/lib/sudoku/solver.ts";
+import { findConflicts, countSolutions, isComplete } from "../../src/lib/sudoku/solver.ts";
 import { rateDifficulty } from "../../src/lib/sudoku/techniques.ts";
 import type { Difficulty } from "../../src/lib/sudoku/types.ts";
 

@@ -735,11 +735,14 @@ Reason: Move stored to board state. ${matchesSolution ? "Matches solution." : "M
 
         // Auto-heal XP: guarantee every completed level has contributed at least 50% base XP to totalPoints
         if (completedCount > 0) {
-          const minExpectedPoints = (completedLevels as string[]).reduce((sum: number, key: string) => {
-            const diff = (key.split("-")[0] || "easy") as Difficulty;
-            const base = baseFor(diff);
-            return sum + Math.round(base * 0.5);
-          }, 0);
+          const minExpectedPoints = (completedLevels as string[]).reduce(
+            (sum: number, key: string) => {
+              const diff = (key.split("-")[0] || "easy") as Difficulty;
+              const base = baseFor(diff);
+              return sum + Math.round(base * 0.5);
+            },
+            0,
+          );
           if (rawStats.totalPoints < minExpectedPoints) {
             rawStats.totalPoints = minExpectedPoints;
           }
