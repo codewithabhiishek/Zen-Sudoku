@@ -301,7 +301,9 @@ function HomePage() {
                     : "bg-surface hover:bg-surface-2",
                 )}
               >
-                <div className={cn("text-xs font-bold mb-0.5 sm:mb-1", d.color.split(" ")[0])}>{d.label}</div>
+                <div className={cn("text-xs font-bold mb-0.5 sm:mb-1", d.color.split(" ")[0])}>
+                  {d.label}
+                </div>
                 <div className="text-base sm:text-lg font-bold tabular-nums text-foreground">
                   {done}
                   <span className="text-xs font-normal text-muted-foreground">/10</span>
@@ -358,7 +360,9 @@ function HomePage() {
             <span className="font-semibold text-foreground flex items-center gap-1.5 shrink-0">
               <Sparkles className="size-3.5 text-primary" /> {activeDiff.label} Tier
             </span>
-            <span className="text-muted-foreground text-right truncate text-[11px] sm:text-xs">{activeDiff.desc}</span>
+            <span className="text-muted-foreground text-right truncate text-[11px] sm:text-xs">
+              {activeDiff.desc}
+            </span>
           </div>
 
           {/* Level List */}

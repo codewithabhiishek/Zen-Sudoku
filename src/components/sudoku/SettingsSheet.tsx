@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Settings, X, Download, Upload, Trash2, RotateCcw, Cloud, Check } from "lucide-react";
 import { THEMES, useSettingsStore } from "@/store/settingsStore";
 import { useGameStore } from "@/store/gameStore";
-import { getFullscreenElement, checkFullscreenSupport } from "@/components/sudoku/ZoomControls";
+import { getFullscreenElement, checkFullscreenSupport } from "@/lib/fullscreen";
 import { Footer } from "@/components/sudoku/Footer";
 import { cn } from "@/lib/utils";
 

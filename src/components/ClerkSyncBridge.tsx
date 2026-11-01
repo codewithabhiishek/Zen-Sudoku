@@ -332,6 +332,7 @@ export function ClerkSyncBridge() {
       clearInterval(activePollInterval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, isSignedIn, user?.id]); // Depend on user.id specifically, not entire user object
 
   return null;

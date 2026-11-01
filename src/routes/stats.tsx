@@ -34,7 +34,7 @@ export function StatsPage() {
   const theme = useSettingsStore((s) => s.theme);
   const localStats = useGameStore((s) => s.stats);
   const history = useGameStore((s) => s.history);
-  const [dbStats, setDbStats] = useState<any>(null);
+  const [dbStats, setDbStats] = useState<Awaited<ReturnType<typeof getStatistics>> | null>(null);
 
   // Track Statistics Viewed event on mount
   useEffect(() => {

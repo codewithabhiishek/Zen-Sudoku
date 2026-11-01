@@ -283,7 +283,9 @@ textarea {
   }
 
   /* Minimum 44px tap targets on interactive elements (WCAG), without breaking compact icons/keypads */
-  button:not(.btn-compact):not([class*="size-"]):not([class*="h-"]):not(.keypad-btn):not(.controls-bar button) {
+  button:not(.btn-compact):not([class*="size-"]):not([class*="h-"]):not(.keypad-btn):not(
+      .controls-bar button
+    ) {
     min-height: 44px;
   }
 
@@ -784,8 +786,6 @@ button {
     display: none;
   }
 }
-
-
 
 /* Minimalist Footer Link Center-Outward Underline & Lift */
 .footer-link {

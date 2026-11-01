@@ -1,49 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface VendorDocument extends Document {
-  webkitFullscreenElement?: Element;
-  mozFullScreenElement?: Element;
-  msFullscreenElement?: Element;
-  webkitExitFullscreen?: () => Promise<void>;
-  webkitCancelFullScreen?: () => Promise<void>;
-  mozCancelFullScreen?: () => Promise<void>;
-  msExitFullscreen?: () => Promise<void>;
-}
-
-interface VendorElement extends HTMLElement {
-  webkitRequestFullscreen?: () => Promise<void>;
-  webkitRequestFullScreen?: () => Promise<void>;
-  mozRequestFullScreen?: () => Promise<void>;
-  msRequestFullscreen?: () => Promise<void>;
-}
-
-export function getFullscreenElement(): Element | null {
-  if (typeof document === "undefined") return null;
-  const doc = document as VendorDocument;
-  return (
-    doc.fullscreenElement ||
-    doc.webkitFullscreenElement ||
-    doc.mozFullScreenElement ||
-    doc.msFullscreenElement ||
-    null
-  );
-}
-
-export function checkFullscreenSupport(): boolean {
-  if (typeof window === "undefined" || typeof document === "undefined") return false;
-  const doc = document as VendorDocument;
-  const el = document.documentElement as VendorElement;
-  return !!(
-    doc.fullscreenEnabled ||
-    el.requestFullscreen ||
-    el.webkitRequestFullscreen ||
-    el.webkitRequestFullScreen ||
-    el.mozRequestFullScreen ||
-    el.msRequestFullscreen
-  );
-}
+import {
+  getFullscreenElement,
+  checkFullscreenSupport,
+  requestFullscreenElement,
+  exitFullscreenElement,
+} from "@/lib/fullscreen";
 
 export function ZoomControls() {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -63,8 +26,6 @@ export function ZoomControls() {
       "webkitfullscreenchange",
       "mozfullscreenchange",
       "MSFullscreenChange",
-      "orientationchange",
-      "resize",
     ];
 
     events.forEach((evt) => document.addEventListener(evt, handleFullscreenChange));
@@ -78,42 +39,20 @@ export function ZoomControls() {
     };
   }, []);
 
-  const toggleFullscreen = async () => {
+  const toggleFullscreen = useCallback(async () => {
     if (!supported) return;
 
     try {
       const current = getFullscreenElement();
       if (!current) {
-        const el = document.documentElement as VendorElement;
-        if (el.requestFullscreen) {
-          await el.requestFullscreen();
-        } else if (el.webkitRequestFullscreen) {
-          await el.webkitRequestFullscreen();
-        } else if (el.webkitRequestFullScreen) {
-          await el.webkitRequestFullScreen();
-        } else if (el.mozRequestFullScreen) {
-          await el.mozRequestFullScreen();
-        } else if (el.msRequestFullscreen) {
-          await el.msRequestFullscreen();
-        }
+        await requestFullscreenElement();
       } else {
-        const doc = document as VendorDocument;
-        if (doc.exitFullscreen) {
-          await doc.exitFullscreen();
-        } else if (doc.webkitExitFullscreen) {
-          await doc.webkitExitFullscreen();
-        } else if (doc.webkitCancelFullScreen) {
-          await doc.webkitCancelFullScreen();
-        } else if (doc.mozCancelFullScreen) {
-          await doc.mozCancelFullScreen();
-        } else if (doc.msExitFullscreen) {
-          await doc.msExitFullscreen();
-        }
+        await exitFullscreenElement();
       }
     } catch {
       // Gracefully handle browser errors/permission rejections without throwing
     }
-  };
+  }, [supported]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -138,7 +77,7 @@ export function ZoomControls() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [supported, isFullscreen]);
+  }, [toggleFullscreen]);
 
   if (!supported) {
     return (

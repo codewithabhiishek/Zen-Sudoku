@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useGameStore } from "@/store/gameStore";
 
 function NotFoundComponent() {
   return (
@@ -83,8 +84,13 @@ function RootComponent() {
 
         if (etag) {
           if (initialETag && initialETag !== etag) {
-            console.log("[PWA Auto-Update] New version detected! Auto-reloading web app...");
-            window.location.reload();
+            // Guard: Never reload abruptly while the user is actively solving a game
+            const game = useGameStore.getState();
+            const isActivelyPlaying = game.running && !game.paused && !game.won;
+            if (!isActivelyPlaying) {
+              console.log("[PWA Auto-Update] New version detected! Auto-reloading web app...");
+              window.location.reload();
+            }
           } else {
             initialETag = etag;
           }
