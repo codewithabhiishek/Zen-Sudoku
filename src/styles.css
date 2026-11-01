@@ -726,7 +726,7 @@ button {
 
 /* Board: dynamic height containment so it never causes vertical scrolling on iPhone */
 .board-container {
-  max-width: min(92vw, calc(100dvh - 310px), 540px);
+  max-width: min(92vw, calc(100dvh - 325px), 540px);
 }
 
 /* Controls bar: 6 buttons in a row — allow elegant shrinking on mobile */
@@ -752,14 +752,14 @@ button {
     font-size: 0.95rem;
   }
   .board-container {
-    max-width: min(94vw, calc(100dvh - 290px), 330px);
+    max-width: min(94vw, calc(100dvh - 305px), 330px);
   }
 }
 
 /* iPhone / Short Screen Vertical Gap Compression (e.g. iPhone SE) */
 @media (max-height: 740px) and (max-width: 480px) {
   .board-container {
-    max-width: min(90vw, calc(100dvh - 280px), 360px);
+    max-width: min(90vw, calc(100dvh - 295px), 360px);
   }
   .game-gap-compress {
     gap: 0.2rem !important;

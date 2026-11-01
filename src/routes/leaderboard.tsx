@@ -130,7 +130,7 @@ export function LeaderboardPage() {
     <div
       className="min-h-dvh bg-background text-foreground transition-colors animate-page-enter"
       style={{
-        paddingTop: "max(1.25rem, env(safe-area-inset-top))",
+        paddingTop: "max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.875rem))",
         paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
         paddingLeft: "max(1rem, env(safe-area-inset-left))",
         paddingRight: "max(1rem, env(safe-area-inset-right))",

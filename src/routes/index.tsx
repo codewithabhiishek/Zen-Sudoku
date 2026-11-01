@@ -175,7 +175,7 @@ function HomePage() {
       className="flex min-h-dvh flex-col"
       style={{
         paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))",
-        paddingTop: "max(1.25rem, env(safe-area-inset-top, 1.25rem))",
+        paddingTop: "max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.875rem))",
         paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0.75rem))",
         paddingRight: "max(0.75rem, env(safe-area-inset-right, 0.75rem))",
       }}
