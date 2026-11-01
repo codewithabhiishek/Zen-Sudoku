@@ -174,17 +174,17 @@ function HomePage() {
     <main
       className="flex min-h-dvh flex-col"
       style={{
-        paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
-        paddingTop: "max(0.75rem, env(safe-area-inset-top))",
-        paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
-        paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+        paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))",
+        paddingTop: "max(1.25rem, env(safe-area-inset-top, 1.25rem))",
+        paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0.75rem))",
+        paddingRight: "max(0.75rem, env(safe-area-inset-right, 0.75rem))",
       }}
     >
       {/* ── TOP NAV ─────────────────────────────────────────── */}
-      <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 pt-3 sm:pt-5">
-        <header className="flex w-full items-center justify-between pb-4 sm:pb-6">
+      <div className="mx-auto w-full max-w-2xl px-2 sm:px-4 pt-1 sm:pt-4">
+        <header className="flex w-full items-center justify-between pb-3.5 sm:pb-6">
           {/* Brand */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div className="grid size-8 shrink-0 grid-cols-2 grid-rows-2 gap-0.5 rounded-lg border bg-surface p-1 shadow-xs">
               <span className="mini-grid-dot-1 flex items-center justify-center rounded-[3px] font-mono text-[9px] font-bold">
                 9
@@ -199,13 +199,13 @@ function HomePage() {
                 7
               </span>
             </div>
-            <h1 className="display text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="display text-xl sm:text-2xl font-bold tracking-tight text-foreground whitespace-nowrap">
               Zen Sudoku
             </h1>
           </div>
 
           {/* Nav toolbar */}
-          <div className="flex items-center gap-0.5 sm:gap-1 rounded-xl border bg-surface p-1 shadow-sm">
+          <div className="flex items-center gap-0.5 sm:gap-1 rounded-xl border bg-surface p-1 shadow-sm shrink-0">
             <Link
               to="/profile"
               className="btn-interactive grid size-8 sm:size-9 place-items-center rounded-lg transition hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -242,37 +242,40 @@ function HomePage() {
           <button
             onClick={handleResume}
             data-testid="continue-game-btn"
-            className="group mb-5 w-full rounded-2xl border border-primary/30 bg-primary/5 p-4 text-left transition hover:bg-primary/10 hover:border-primary/50 active:scale-[0.99]"
+            className="group mb-4 sm:mb-5 w-full rounded-2xl border border-primary/30 bg-primary/5 p-3.5 sm:p-4 text-left transition hover:bg-primary/10 hover:border-primary/50 active:scale-[0.99]"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="grid size-10 place-items-center rounded-xl bg-primary/15 text-primary">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
                   <Play className="size-5 fill-current" />
                 </div>
-                <div>
-                  <div className="text-sm font-bold text-foreground flex items-center gap-2">
-                    Continue Game
-                    <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary capitalize">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                      Continue Game
+                    </span>
+                    <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-primary capitalize shrink-0">
                       {puzzle!.difficulty}
                       {savedLevel ? ` • Level ${savedLevel}` : ""}
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
+                  <div className="mt-1 flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1 shrink-0">
                       <Clock className="size-3" /> {fmt(elapsedMs)}
                     </span>
-                    <span>{progressPct}% complete</span>
+                    <span>•</span>
+                    <span className="shrink-0">{progressPct}% complete</span>
                   </div>
                   {/* Progress bar */}
-                  <div className="mt-2 h-1.5 w-48 max-w-full overflow-hidden rounded-full bg-muted">
+                  <div className="mt-2 h-1.5 w-full max-w-[200px] sm:w-48 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-primary transition-all"
+                      className="h-full rounded-full bg-primary transition-all duration-300"
                       style={{ width: `${progressPct}%` }}
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-sm font-semibold text-primary transition group-hover:translate-x-1">
+              <div className="flex shrink-0 items-center gap-1 text-xs sm:text-sm font-semibold text-primary transition group-hover:translate-x-1">
                 Resume <ChevronRight className="size-4" />
               </div>
             </div>
@@ -280,7 +283,7 @@ function HomePage() {
         )}
 
         {/* ── PROGRESS OVERVIEW ───────────────────────────────── */}
-        <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="mb-4 sm:mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {DIFFICULTIES.map((d) => {
             const done = completedForDiff(d.id);
             const pct = Math.round((done / 10) * 100);
@@ -292,14 +295,14 @@ function HomePage() {
                   trackDifficultySelected(d.id);
                 }}
                 className={cn(
-                  "rounded-xl border p-3 text-left transition hover:scale-[1.02] active:scale-[0.99]",
+                  "rounded-xl border p-2.5 sm:p-3 text-left transition hover:scale-[1.02] active:scale-[0.99]",
                   selectedDiff === d.id
-                    ? "border-primary/50 bg-primary/5"
+                    ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
                     : "bg-surface hover:bg-surface-2",
                 )}
               >
-                <div className={cn("text-xs font-bold mb-1", d.color.split(" ")[0])}>{d.label}</div>
-                <div className="text-lg font-bold tabular-nums text-foreground">
+                <div className={cn("text-xs font-bold mb-0.5 sm:mb-1", d.color.split(" ")[0])}>{d.label}</div>
+                <div className="text-base sm:text-lg font-bold tabular-nums text-foreground">
                   {done}
                   <span className="text-xs font-normal text-muted-foreground">/10</span>
                 </div>
@@ -315,22 +318,22 @@ function HomePage() {
         </div>
 
         {/* ── LEVEL SELECTOR ──────────────────────────────────── */}
-        <div className="rounded-2xl border bg-surface p-4 shadow-sm">
+        <div className="rounded-2xl border bg-surface p-3.5 sm:p-4 shadow-sm">
           {/* Header */}
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3.5 sm:mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary">
+              <div className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary shrink-0">
                 <Layers className="size-4" />
               </div>
               <div>
-                <h2 className="display text-base font-bold">Select Level</h2>
+                <h2 className="display text-sm sm:text-base font-bold">Select Level</h2>
                 <p className="text-[11px] text-muted-foreground">10 levels per difficulty</p>
               </div>
             </div>
           </div>
 
           {/* Difficulty Tabs */}
-          <div className="mb-4 grid grid-cols-4 gap-1.5 rounded-xl bg-muted/40 p-1.5 border">
+          <div className="mb-3 sm:mb-4 grid grid-cols-4 gap-1 sm:gap-1.5 rounded-xl bg-muted/40 p-1 sm:p-1.5 border">
             {DIFFICULTIES.map((d) => (
               <button
                 key={d.id}
@@ -339,7 +342,7 @@ function HomePage() {
                   trackDifficultySelected(d.id);
                 }}
                 className={cn(
-                  "rounded-lg py-2 text-xs font-bold transition-all text-center",
+                  "rounded-lg py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold transition-all text-center",
                   selectedDiff === d.id
                     ? "bg-surface text-foreground shadow-sm ring-1 ring-border"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
@@ -351,15 +354,15 @@ function HomePage() {
           </div>
 
           {/* Sub-header */}
-          <div className="mb-3 flex items-center justify-between rounded-xl border bg-muted/20 px-3.5 py-2 text-xs">
-            <span className="font-semibold text-foreground flex items-center gap-1.5">
+          <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border bg-muted/20 px-3 py-2 text-xs">
+            <span className="font-semibold text-foreground flex items-center gap-1.5 shrink-0">
               <Sparkles className="size-3.5 text-primary" /> {activeDiff.label} Tier
             </span>
-            <span className="text-muted-foreground">{activeDiff.desc}</span>
+            <span className="text-muted-foreground text-right truncate text-[11px] sm:text-xs">{activeDiff.desc}</span>
           </div>
 
           {/* Level List */}
-          <div className="level-list-container space-y-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="level-list-container space-y-2 sm:max-h-[480px] sm:overflow-y-auto pr-0 sm:pr-1">
             {LEVELS.map((lvl) => {
               const key = `${selectedDiff}-${lvl}`;
               const isLoadingThis = loading === key;
@@ -374,16 +377,16 @@ function HomePage() {
                   disabled={loading !== null || !unlocked}
                   data-testid={`level-btn-${lvl}`}
                   className={cn(
-                    "group flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all disabled:opacity-50 active:scale-[0.99]",
+                    "group flex w-full items-center justify-between gap-2 rounded-xl border p-2.5 sm:p-3 text-left transition-all disabled:opacity-50 active:scale-[0.99]",
                     isDone
                       ? "border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10"
                       : "bg-surface-2 hover:border-primary/50 hover:bg-highlight/50",
                   )}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                     <div
                       className={cn(
-                        "grid size-9 place-items-center rounded-xl font-mono font-bold text-xs border shrink-0",
+                        "grid size-8 sm:size-9 place-items-center rounded-xl font-mono font-bold text-xs border shrink-0",
                         isDone
                           ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                           : activeDiff.color,
@@ -391,21 +394,21 @@ function HomePage() {
                     >
                       {isDone ? <CheckCircle2 className="size-4" /> : `L${lvl}`}
                     </div>
-                    <div>
-                      <div className="font-bold text-sm text-foreground flex items-center gap-2">
-                        Level {lvl}
+                    <div className="min-w-0">
+                      <div className="font-bold text-xs sm:text-sm text-foreground flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <span className="whitespace-nowrap">Level {lvl}</span>
                         {isDone ? (
-                          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shrink-0">
                             <CheckCircle2 className="size-2.5" /> Complete
                           </span>
                         ) : !unlocked ? (
-                          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-muted/50 text-muted-foreground border-border/50">
+                          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 bg-muted/50 text-muted-foreground border-border/50 shrink-0">
                             <Lock className="size-2.5" /> Locked
                           </span>
                         ) : (
                           <span
                             className={cn(
-                              "rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1",
+                              "rounded-full px-2 py-0.5 text-[10px] font-bold border flex items-center gap-1 shrink-0",
                               tag.tagColor,
                             )}
                           >
@@ -420,19 +423,19 @@ function HomePage() {
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
                         {activeDiff.label} • {getClueCount(selectedDiff, lvl)} Clues
                       </div>
                     </div>
                   </div>
                   <div
                     className={cn(
-                      "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1",
+                      "flex items-center gap-1 text-xs font-semibold transition group-hover:translate-x-1 shrink-0",
                       isDone ? "text-emerald-400" : "text-primary",
                     )}
                   >
                     {isLoadingThis ? "Loading..." : isDone ? "Play Again" : "Play"}{" "}
-                    <ChevronRight className="size-4" />
+                    <ChevronRight className="size-3.5 sm:size-4" />
                   </div>
                 </button>
               );
@@ -441,16 +444,16 @@ function HomePage() {
         </div>
 
         {/* ── QUICK STATS ─────────────────────────────────────── */}
-        <div className="mt-4 flex items-center justify-center gap-6 rounded-xl border bg-surface px-4 py-3 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:gap-6 rounded-xl border bg-surface px-3 py-2.5 sm:px-4 sm:py-3 text-[11px] sm:text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5 font-semibold">
-            <StreakIcon className="size-3.5 text-orange-400" />
+            <StreakIcon className="size-3.5 text-orange-400 shrink-0" />
             <span className="text-foreground">{stats.currentStreakDays}</span>-day streak
           </span>
-          <span className="text-border">•</span>
+          <span className="text-border hidden xs:inline sm:inline">•</span>
           <span className="flex items-center gap-1.5 font-semibold">
             ★ <span className="text-foreground">{totalPoints.toLocaleString()}</span> pts
           </span>
-          <span className="text-border">•</span>
+          <span className="text-border hidden xs:inline sm:inline">•</span>
           <span className="flex items-center gap-1.5 font-semibold">
             <span className="text-foreground">{completedCount}</span> won
           </span>
